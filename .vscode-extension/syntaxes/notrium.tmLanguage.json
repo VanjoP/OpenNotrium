@@ -1,0 +1,87 @@
+{
+  "scopeName": "source.notrium",
+  "patterns": [
+    { "include": "#file_paths" },
+    {
+      "name": "meta.item.notrium",
+      "begin": "^([^;]+)(;//name)",
+      "beginCaptures": {
+        "1": { "name": "entity.name.class.notrium" },
+        "2": { "name": "comment.line.semicolon.notrium" }
+      },
+      "end": "^\\s*(end_effects_block;)",
+      "endCaptures": {
+        "1": { "name": "keyword.control.notrium" }
+      },
+      "patterns": [{ "include": "$self" }]
+    },
+    { "include": "#comments_with_labels" },
+    { "include": "#structural_blocks" },
+    { "include": "#base_elements" },
+    {
+      "name": "meta.block.notrium",
+      "begin": "^\\s*(begin_[a-z_]+)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.notrium" }
+      },
+      "end": "^\\s*(end_[a-z_]+)",
+      "endCaptures": {
+        "1": { "name": "keyword.control.notrium" }
+      },
+      "patterns": [{ "include": "$self" }]
+    }
+  ],
+  "repository": {
+    "file_paths": {
+      "patterns": [
+        {
+          "name": "string.other.link.notrium",
+          "match": "\\b[\\w\\d_-]+\\.(jpg|bmp|png|wav|mp3|ogg)\\b",
+          "comment": "Matches filenames with common game extensions"
+        }
+      ]
+    },
+    "comments_with_labels": {
+      "patterns": [
+        {
+          "match": "^([^;]+)(;//(name|tooltip|description|title))",
+          "captures": {
+            "1": { "name": "entity.name.section.notrium" },
+            "2": { "name": "comment.line.semicolon.notrium" }
+          }
+        },
+        {
+          "match": "^([^;]+)(;//(identifier|id|number|type|index))",
+          "captures": {
+            "1": { "name": "constant.numeric.notrium" },
+            "2": { "name": "comment.line.semicolon.notrium" }
+          }
+        }
+      ]
+    },
+    "structural_blocks": {
+      "patterns": [
+        {
+          "match": "\\b(begin_|end_)[a-z_]+\\b",
+          "name": "keyword.control.notrium"
+        },
+        {
+          "match": "end_of_file",
+          "name": "keyword.control.notrium"
+        }
+      ]
+    },
+    "base_elements": {
+      "patterns": [
+        {
+          "match": ";.*$",
+          "name": "comment.line.semicolon.notrium"
+        },
+        {
+          "match": "\\b[0-9.-]+\\b",
+          "name": "constant.numeric.notrium"
+        }
+      ]
+    }
+  }
+}

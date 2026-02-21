@@ -4,7 +4,7 @@
 *.h text
 *.html text
 *.css text
-*.dat text
+*.dat text eol=lf
 *.cfg text
 
 *.bmp binary

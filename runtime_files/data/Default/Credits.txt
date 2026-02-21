@@ -1,0 +1,70 @@
+The following sounds and music has been used:
+
+
+Sounds:
+
+Freesound (www.freesound.org)
+
+
+wood_hit_0.wav (https://freesound.org/people/PNMCarrieRailfan/sounds/682376) CC BY-NC 4.0 DEED
+water_cooler_hit.wav (https://freesound.org/people/Department64/sounds/607778/) Attribution 4.0
+drink.wav (https://freesound.org/people/SilverIllusionist/sounds/411172/) Attribution 4.0
+fill_water.wav (https://freesound.org/people/M-RED/sounds/41176/) Attribution 4.0
+wood_smash.wav (https://freesound.org/people/FunWithSound/sounds/390723/) Attribution 4.0
+bush_hit_0.wav (https://freesound.org/people/duckduckpony/sounds/204028/) Attribution 4.0
+bush_hit_1.wav (https://freesound.org/people/duckduckpony/sounds/204029/) Attribution 4.0
+bush_hit_2.wav (https://freesound.org/people/duckduckpony/sounds/204031/) Attribution 4.0
+metal_hit_0.wav (https://freesound.org/people/Artninja/sounds/717721/) Attribution 4.0
+metal_hit_1.wav (https://freesound.org/people/Artninja/sounds/717721/) Attribution 4.0
+metal_hit_2.wav (https://freesound.org/people/Artninja/sounds/717721/) Attribution 4.0
+metal_hit_3.wav (https://freesound.org/people/Artninja/sounds/717721/) Attribution 4.0
+metal_destroy_0.wav (https://freesound.org/people/PNMCarrieRailfan/sounds/682438/) Attribution NonCommercial 4.0
+can_open_drink.wav (https://freesound.org/people/SilverIllusionist/sounds/411172/) Attribution 4.0
+glass_hit_1.wav (https://freesound.org/people/wertstahl/sounds/409266/) Attribution 4.0
+eat_chips.wav (https://freesound.org/people/fresco/sounds/48933/) Attribution 4.0
+wake_up_yawn.wav (https://freesound.org/people/Larakaa/sounds/503483/) Attribution 4.0
+snore.wav (https://freesound.org/people/passAirmangrace/sounds/340876/) Attribution 3.0
+announcement.wav (https://freesound.org/people/chimerical/sounds/105228/) Attribution NonCommercial 4.0
+
+inventory.wav?
+
+//OLD
+
+airlock_extended.wav (http://www.freesound.org/people/primeval_polypod/) Attribution Noncommercial
+sewer_soundscape.wav (http://www.freesound.org/people/InspectorJ/) Attribution
+squelch_blood_stab.wav (http://www.freesound.org/people/alexbird/)
+molotow.wav (http://www.freesound.org/people/Benboncan/)
+rural_scenes.wav (http://www.freesound.org/people/Rock%20Savage/)
+vg_99.wav (http://www.freesound.org/people/dobroide/)
+creature.wav (http://www.freesound.org/people/t000lish/)
+flare.wav (http://www.freesound.org/people/jameswrowles/)
+releasing_pressure.wav (http://www.freesound.org/people/soundslikewillem/)
+stickly_sounds.wav (http://www.freesound.org/people/oddmonolithsound/)
+polyester_rustle.wav (http://www.freesound.org/people/mwmarsh/)
+nail_gun.wav (http://www.freesound.org/people/natemarler/)
+grunts.wav (http://www.freesound.org/people/bennychico11/)
+sas_ouverture.wav (http://www.freesound.org/people/Velvorn/)
+thriller_ambient.wav (http://www.freesound.org/people/unfa/)
+horror_soundscape.wav (http://www.freesound.org/people/Headphaze/)
+breathe.wav (http://www.freesound.org/people/Erdie/)
+horror_ambience_10.wav (http://www.freesound.org/people/klankbeeld/)
+slurping_then_an_ah.wav (http://www.freesound.org/people/morgantj/)
+eating_chips.wav (http://www.freesound.org/people/DeadAge/)
+
+Music:
+
+Incompetech: (http://incompetech.com/music/royalty-free/)
+
+()
+()
+()
+()
+()
+()
+()
+()
+()
+()
+
+
+Textures:

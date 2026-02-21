@@ -2243,6 +2243,8 @@ void Mod::load_terrain_types(const string& filename){
         terrain_type_base temp_terrain;
         while(strcmp(stripped_fgets(rivi,sizeof(rivi),fil),"end_of_file")!=0){//name
             temp_terrain.name=rivi;
+            stripped_fgets(rivi, sizeof(rivi), fil); 
+            temp_terrain.tooltip = rivi;
             debug->debug_output("Load "+temp_terrain.name,Action::START,Logfile::STARTUP);
 
             temp_terrain.identifier=atoi(stripped_fgets(rivi,sizeof(rivi),fil));

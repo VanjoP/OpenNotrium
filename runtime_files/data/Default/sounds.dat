@@ -1,4 +1,19 @@
-test;//name
+None;//name------------
   0;//identifier
-  voices.wav;//filename
+  none;//filename
+Drink;//name------------
+  1;//identifier
+  drink.wav;//filename 
+Drink;//name------------
+  2;//identifier
+  fill_bottle.wav;//filename 
+Water splash;//name------------
+  3;//identifier
+  water_splash.wav;//filename 
+Snore;//name------------
+  4;//identifier
+  snore.wav;//filename 
+Light switch;//name------------
+  5;//identifier
+  light_switch.wav;//filename 
 end_of_file;

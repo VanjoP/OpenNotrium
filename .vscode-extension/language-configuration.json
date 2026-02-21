@@ -1,0 +1,8 @@
+{
+  "folding": {
+    "markers": {
+      "start": "^.*;//name|^\\s*begin_[a-z_]+",
+      "end": "^\\s*end_effects_block;|^\\s*end_[a-z_]+"
+    }
+  }
+}

@@ -50,7 +50,7 @@ protected:
     void map_add_row(Mod::terrain_map_base *temp_map, bool remove);
     void map_add_column(Mod::terrain_map_base *temp_map, bool remove);
     void draw_brush(mouse_control_base mouse_controls, float elapsed);
-    void find_object_type(int type, int number, bool *dead, std::string *name, int *texture, float *size);
+    void find_object_type(int type, int number, bool *dead, std::string *name, std::string *tooltip, int *texture, float *size);
     void object_draw(Mod::terrain_map_base::editor_object_base *object, float elapsed, bool text_info);
     void paint(int x_grid, int y_grid, int terrain_type, int flood_fill);
     void center_map(void);

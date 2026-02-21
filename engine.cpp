@@ -27,7 +27,7 @@ Engine::Engine()
 }
 
 void Engine::startFrame(){
-    //printf("%d\n",SDL_GetTicks());
+    // printf("%d\n",SDL_GetTicks());
     glClear(GL_COLOR_BUFFER_BIT);
     glBindTexture(GL_TEXTURE_2D,0);
     render_target = mainTarget;
@@ -38,9 +38,23 @@ void Engine::startFrame(){
 void Engine::System_Start(){
     SDL_Event event;
     bool running = true;
+
+    uint32_t last_fps_update = SDL_GetTicks();
+    int frames_counted = 0;
+    int current_fps = 0;
+
     while(running) {
         startFrame();
         running = (*framefunc)();
+        frames_counted++;
+        uint32_t now = SDL_GetTicks();
+        if (now - last_fps_update >= 500) { // Update twice a second
+            current_fps = frames_counted * 2; // (frames / 0.5 seconds)
+            frames_counted = 0;
+            last_fps_update = now;
+        }
+
+
         glFlush();
         SDL_GL_SwapWindow(window);
 
@@ -174,6 +188,7 @@ void Engine::setup_opengl()
     glEnable(GL_CULL_FACE);
     //glDisable(GL_CULL_FACE);
     glEnable(GL_TEXTURE_2D);
+    // SDL_GL_SetSwapInterval(1); //Vsync
 
     //TODO: probably need to recreate textures here and do other context recreation stuff
 

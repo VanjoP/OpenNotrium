@@ -499,6 +499,7 @@ public:
     //terrain type
     struct terrain_type_base{
         std::string name;
+        std::string tooltip;
         bool dead;
         int identifier;
 

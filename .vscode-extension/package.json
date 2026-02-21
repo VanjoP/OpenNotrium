@@ -1,0 +1,30 @@
+{
+  "name": "notrium-data-syntax",
+  "displayName": "Notrium Data Highlighter",
+  "version": "1.0.0",
+  "publisher": "vanjo",
+  "engines": {
+    "vscode": "^1.50.0"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "notrium",
+        "aliases": [
+          "Notrium Data"
+        ],
+        "extensions": [
+          ".dat"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "notrium",
+        "scopeName": "source.notrium",
+        "path": "./syntaxes/notrium.tmLanguage.json"
+      }
+    ]
+  }
+}

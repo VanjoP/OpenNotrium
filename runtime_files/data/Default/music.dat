@@ -1,10 +1,4 @@
-0;//identifier
-  ingame0.mp3
-  1;//can be randomly selected
-1;//identifier
-  ingame1.mp3
-  1;//can be randomly selected
-2;//identifier
-  ingame2.mp3
-  1;//can be randomly selected
+0;//identifier-----------------------------------------
+  scary_music.mp3
+  0;//can be randomly selected
 end_of_file;

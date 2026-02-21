@@ -2,11 +2,17 @@
 #define __SOUNDMANAGER_H__
 
 #include <SDL_mixer.h>
+#include <string>
 
 class SoundSample
 {
     Mix_Chunk* chunk;
     int samplefreq, bytespersample; //TODO: this does not quite belong here, I think
+
+    // Tracking for the limiter
+    int active_instances;
+    unsigned int last_played_tick;
+
 public:
     SoundSample(const char *filename, int samplefreq, int bytespersample);
     
@@ -26,7 +32,9 @@ public:
     /**
     * volume clipped between 0 and 1, pan between -1 (left) and 1 (right) (TODO: is that right?)
     */
-    void Play(float volume, float pan);
+    void Play(float volume, float pan, int limit = 3);
+
+    void OnChannelFinished() { if (active_instances > 0) active_instances--; }
 };
 
 class SoundManager
@@ -50,5 +58,6 @@ public:
     * Sets the volume of the music. Value between 0 and 1.
     */
     void setMusicVolume(float volume);
+    static void SetupCallbacks();
 };
 #endif

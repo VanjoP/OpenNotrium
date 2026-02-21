@@ -448,7 +448,38 @@ bool game_engine::Frame(void)
 
 bool FrameFunc()
 {
-    return engine->Frame();
+// 1. Run the actual game frame
+uint32_t frame_start = SDL_GetTicks();
+
+    static uint32_t last_fps_update = 0;
+    static int frames_counted = 0;
+    static int current_fps = 0;
+
+    // 2. Run the actual game logic
+    bool running = engine->Frame();
+
+    // 3. FPS Counter Logic (stays the same)
+    frames_counted++;
+    uint32_t now = SDL_GetTicks();
+    if (now - last_fps_update >= 500) {
+        current_fps = frames_counted * 2; 
+        frames_counted = 0;
+        last_fps_update = now;
+    }
+    
+    std::string fps_text = "FPS: " + std::to_string(current_fps);
+    engine->text_manager.write(-1, fps_text, 1.0f, 10, 10, engine->screen_width, engine->screen_height, 1, 1, 0, 1);
+
+    // 4. THE MANUAL CAP
+    // Calculate how long the frame actually took
+    uint32_t frame_time = SDL_GetTicks() - frame_start;
+    const uint32_t target_frame_time = 1000 / 60; // ~16ms
+
+    if (frame_time < target_frame_time) {
+        SDL_Delay(target_frame_time - frame_time);
+    }
+
+    return running;
 }
 
 bool focuslost()
@@ -11705,20 +11736,20 @@ void game_engine::render_menu(void){
                         create_menu_items();
                         break;
                     //play tutorial
-                    case 20:
-                        for(b=0;b<mods;b++)
-                            if(mod_names[b]=="Tutorial"){
-                                selected_mod=b;
-                                break;
-                            }
-                        //map_size_setting=1;
-                        game_difficulty_level=1;
-                        proposed_player_race=0;
-                        draw_loading_screen();
-                        text_manager.write(font,"Loading tutorial...",1.7f,20, 20,0,0,1,1,1,1);
-                        game_state=7;
-                        return;
-                        break;
+                    // case 20:
+                    //     for(b=0;b<mods;b++)
+                    //         if(mod_names[b]=="Tutorial"){
+                    //             selected_mod=b;
+                    //             break;
+                    //         }
+                    //     //map_size_setting=1;
+                    //     game_difficulty_level=1;
+                    //     proposed_player_race=0;
+                    //     draw_loading_screen();
+                    //     text_manager.write(font,"Loading tutorial...",1.7f,20, 20,0,0,1,1,1,1);
+                    //     game_state=7;
+                    //     return;
+                    //     break;
                     //credits
                     case 21:
                         credits_texture=resources.load_texture("moss_back.jpg","");
@@ -11955,12 +11986,12 @@ void game_engine::create_menu_items(void){
         menu_system[0].item[d].text_size=2.5f;
         menu_system[0].item[d].height=50.0f;
         d++;
-        menu_system[0].item[d].text="Tutorial";
-        menu_system[0].item[d].help=" ";
-        menu_system[0].item[d].effect=20;
-        menu_system[0].item[d].text_size=2.5f;
-        menu_system[0].item[d].height=50.0f;
-        d++;
+        // menu_system[0].item[d].text="Tutorial";
+        // menu_system[0].item[d].help=" ";
+        // menu_system[0].item[d].effect=20;
+        // menu_system[0].item[d].text_size=2.5f;
+        // menu_system[0].item[d].height=50.0f;
+        // d++;
         menu_system[0].item[d].text="Load Game";
         menu_system[0].item[d].help=" ";
         menu_system[0].item[d].effect=1;

@@ -16,7 +16,7 @@ void text_output::initialize_text_output(Engine *grim, resource_handler *resourc
 
 
 //renders text
-void text_output::write(int font, const string& text, float size, float x0,float y0, float x1, float y1, float r, float g, float b, float alpha){
+int text_output::write(int font, const string& text, float size, float x0,float y0, float x1, float y1, float r, float g, float b, float alpha){
 
     float letter_width=16;
     float letter_height=16;
@@ -38,7 +38,7 @@ void text_output::write(int font, const string& text, float size, float x0,float
     //no lining
     if((x1<=x0)||(y1<=y0)){
         write_line(font, x0, y0, text,size);
-        return;
+        return 1;
     }
 
     //grim->Quads_SetRotation(0);
@@ -56,7 +56,7 @@ void text_output::write(int font, const string& text, float size, float x0,float
     while(true){
         if(a>=teksti_pituus)break;
             if((text[a]==' ')||(a==teksti_pituus-1)){
-                if(rivi*rivi_korkeus>y1-y0)return;//lower edge, stop
+                if(rivi*rivi_korkeus>y1-y0)return rivi;//lower edge, stop
 
                 if(x_cursor>rivin_pituus){//gone over end of line, change line
                     x_cursor=0;
@@ -88,6 +88,7 @@ void text_output::write(int font, const string& text, float size, float x0,float
     }
 
     grim->Quads_End();
+    return rivi + 1;
 }
 
 

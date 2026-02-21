@@ -359,7 +359,8 @@ void Editor::draw_map_grid(float elapsed, mouse_control_base mouse_controls){//r
         float size=grid_size_zoom;
         bool dead;
         string name;
-        find_object_type(temp_object.type,temp_object.number,&dead,&name,&texture,&size);
+        string tooltip;
+        find_object_type(temp_object.type,temp_object.number,&dead,&name,&tooltip,&texture,&size);
         if((temp_object.type==3)||(temp_object.type==5))size=size*temp_object.size;
         if(size<16)size=16;
         //float x=temp_object.x*zoom-camera_x-0.5f*size;
@@ -444,9 +445,20 @@ void Editor::draw_map_grid(float elapsed, mouse_control_base mouse_controls){//r
         select_end_y=(mouse_controls.mousey+camera_y)/zoom;
         float moved_x=select_end_x-select_start_x;
         float moved_y=select_end_y-select_start_y;
-        for(unsigned int k=0;k<selected_objects.size();k++){
-            mod_to_edit->terrain_maps[edited_area].map_objects[selected_objects[k]].x+=moved_x;
-            mod_to_edit->terrain_maps[edited_area].map_objects[selected_objects[k]].y+=moved_y;
+        for(unsigned int k = 0; k < selected_objects.size(); k++){
+            int idx = selected_objects[k];
+            auto& obj = mod_to_edit->terrain_maps[edited_area].map_objects[idx];
+            
+            // Apply the movement
+            obj.x += moved_x;
+            obj.y += moved_y;
+
+            // If Control is held, force the final position to the snap grid
+            if (grim->Key_Down(KEY_LCONTROL)) {
+                float snap_value = 32.0f;
+                obj.x = floor(obj.x / snap_value + 0.5f) * snap_value;
+                obj.y = floor(obj.y / snap_value + 0.5f) * snap_value;
+            }
         }
         select_start_x=select_end_x;
         select_start_y=select_end_y;
@@ -568,6 +580,7 @@ void Editor::draw_selector(float elapsed, mouse_control_base mouse_controls){//r
 
     int texture;
     string name;
+    string tooltip;
 
     grim->Quads_SetRotation(0);
     grim->Quads_SetSubset(0,0,1,1);
@@ -608,10 +621,11 @@ void Editor::draw_selector(float elapsed, mouse_control_base mouse_controls){//r
 
     int slot=0;
     string name_info="";
+    string tooltip_info="";
     for(int a=0;a<items_amount;a++){
         float size=0;
         bool dead;
-        find_object_type(selector_active,a,&dead,&name,&texture,&size);
+        find_object_type(selector_active,a,&dead,&name,&tooltip,&texture,&size);
         if(dead)continue;
 
         int x=slot%fit_width;
@@ -621,6 +635,7 @@ void Editor::draw_selector(float elapsed, mouse_control_base mouse_controls){//r
         //mouse on
         if((mouse_controls.mousex>x*128)&&(mouse_controls.mousex<x*128+128)&&(mouse_controls.mousey>y*128-selector_spot)&&(mouse_controls.mousey<y*128-selector_spot+128)){
             name_info=name;
+            tooltip_info = tooltip; // Store the description
             grim->Quads_SetColor(1,1,1,1);
             if(!mouse_controls.mouse_left&&mouse_controls.mouse_left2){
                 select_type=0;
@@ -645,7 +660,14 @@ void Editor::draw_selector(float elapsed, mouse_control_base mouse_controls){//r
     if(name_info!=""){
         float x=mouse_controls.mousex+20;
         if(x>screen_width-256)x=screen_width-256;
-        text_manager->write(-1,name_info,1,x,mouse_controls.mousey,screen_width,screen_height,1,1,1,1);
+
+        float size = 1.0f;
+        float line_height = 20.0f * size;
+        int name_lines = text_manager->write(-1,name_info,size,x,mouse_controls.mousey,screen_width,screen_height,1,1,1,1);
+        if(tooltip_info != "") {
+            float tooltip_y = mouse_controls.mousey + (name_lines * line_height);
+            text_manager->write(-1, tooltip_info, 0.8f, x, tooltip_y, screen_width, screen_height, 0.7f, 0.7f, 0.7f, 1);
+        }
     }
 
     if(grim->Key_Down(KEY_UP)||(mouse_controls.mousey<=1)||(mouse_controls.mouse_wheel>0)){
@@ -720,8 +742,9 @@ void Editor::draw_brush(mouse_control_base mouse_controls, float elapsed){
     float size=0;
     bool dead;
     string name;
+    string tooltip;
 
-    find_object_type(paint_tool_object.type,paint_tool_object.number,&dead,&name,&texture,&size);
+    find_object_type(paint_tool_object.type,paint_tool_object.number,&dead,&name,&tooltip,&texture,&size);
     switch(paint_tool_object.type){
         //terrain
         case 1:
@@ -774,8 +797,19 @@ void Editor::draw_brush(mouse_control_base mouse_controls, float elapsed){
         case 6:
             //if(paint_tool_object.number<mod_to_edit->general_items.size())
             {
-                paint_tool_object.x=(mouse_controls.mousex+camera_x)/zoom;
-                paint_tool_object.y=(mouse_controls.mousey+camera_y)/zoom;
+               float raw_x = (mouse_controls.mousex + camera_x) / zoom;
+                float raw_y = (mouse_controls.mousey + camera_y) / zoom;
+
+                if (grim->Key_Down(KEY_LCONTROL)) {
+                    float snap = 32.0f; // You can adjust this value
+                    paint_tool_object.x = floor(raw_x / snap + 0.5f) * snap;
+                    paint_tool_object.y = floor(raw_y / snap + 0.5f) * snap;
+                } else {
+                    paint_tool_object.x = raw_x;
+                    paint_tool_object.y = raw_y;
+                }
+
+
                 //painting
                 if(!mouse_controls.mouse_left&&mouse_controls.mouse_left2){
                     if((paint_tool_object.y*zoom<mod_to_edit->terrain_maps[edited_area].terrain_grid.size()*grid_size_zoom)&&(paint_tool_object.y>=0)&&(paint_tool_object.x*zoom<mod_to_edit->terrain_maps[edited_area].terrain_grid[0].terrain_blocks.size()*grid_size_zoom)&&(paint_tool_object.x>=0)){
@@ -803,8 +837,8 @@ void Editor::draw_brush(mouse_control_base mouse_controls, float elapsed){
 }
 
 
-void Editor::find_object_type(int type, int number, bool *dead, string *name, int *texture, float *size){
-
+void Editor::find_object_type(int type, int number, bool *dead, string *name, string *tooltip, int *texture, float *size){
+    *tooltip = "";
     *dead=false;
     switch(type){
         //terrain
@@ -815,6 +849,7 @@ void Editor::find_object_type(int type, int number, bool *dead, string *name, in
             }
             *texture=mod_to_edit->terrain_types[number].terrain_frames[0].texture;
             *name=mod_to_edit->terrain_types[number].name;
+            *tooltip = mod_to_edit->terrain_types[number].tooltip;
             *size=grid_size_zoom;
             break;
         //items
@@ -883,8 +918,8 @@ void Editor::object_draw(Mod::terrain_map_base::editor_object_base *object, floa
     int texture;
     bool dead;
     float size;
-    string name;
-    find_object_type(object->type,object->number,&dead,&name,&texture,&size);
+    string name, tooltip;
+    find_object_type(object->type,object->number,&dead,&name,&tooltip,&texture,&size);
     grim->Quads_SetRotation(object->rotation);
     //grim->Quads_SetColor(1,1,1,1);
 
