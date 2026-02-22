@@ -45,6 +45,12 @@ Player;//name---------------------------------------
 	begin_timed_block
 	end_timed_block
 	begin_specialties
+	Light;//name-------------------
+		2;//number
+		4.000000;//parameter0
+		2.000000;//parameter1
+		0.050000;//parameter2
+		0.000000;//parameter3
 	end_specialties
 Toilet;//name--------------------------------------- **BATHROOM**
 	100;//identifier//{

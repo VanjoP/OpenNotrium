@@ -520,6 +520,7 @@ public:
 
     void load_particles(const std::string& filename);
     void load_sounds(const std::string& filename);
+    void apply_smooth_lighting(float px, float py, float size, float alpha, int creature);
 
     bool cfg_load(void);
     void initialize_game(void);//initialize game variables

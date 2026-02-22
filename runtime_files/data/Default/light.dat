@@ -50,6 +50,19 @@ Ceeling light low;//name-------
 	-1;//flash particle (-1=nothing)
 		0;//flashing speed
 		0;//particle life time   
+Flashlight;//name-------
+	4;//identifier
+	light0.png;//texture
+	0;//type, 0=flashlight, 1=omni
+	1;//pulse speed
+	0.8;//red color component
+	0.8;//green color component
+	1;//blue color component
+	0.15;//alpha color component
+	1.0;//light intensity
+	-1;//flash particle (-1=nothing)
+		0;//flashing speed
+		0;//particle life time    
 Taser;//name-------
 	10;//identifier
 	light1.png;//texture

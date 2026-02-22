@@ -1027,8 +1027,8 @@ void game_engine::render_map(void){//renders game map
     //flash_light();
 
     //which parts to draw
-    int draw_size_x=(int)(screen_width/grid_size)+2;
-    int draw_size_y=(int)(screen_height/grid_size)+2;
+    int draw_size_x=(int)(screen_width/grid_size)+4;
+    int draw_size_y=(int)(screen_height/grid_size)+4;
     int alku_x=(int)(camera_x/grid_size)-1;
     int alku_y=(int)(camera_y/grid_size)-1;
     int loppu_x=alku_x+draw_size_x;
@@ -1392,7 +1392,7 @@ void game_engine::draw_map_grid(void){//renders map grid
     grim->Quads_SetColor(1,1,1,1);
     grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
     grim->System_SetState_BlendDst(grBLEND_INVSRCALPHA);
-
+    
     /*border_visible=false;
     if((screen_start_x<0)||(screen_start_y<0)||(screen_end_x>map_main->sizex-1)||(screen_end_y>map_main->sizey-1))border_visible=true;
 */
@@ -1439,11 +1439,17 @@ void game_engine::draw_map_grid(void){//renders map grid
 
                 //draw
                 grim->Quads_SetColorVertex(0, map_main->at(i,j).light_rgb[0], map_main->at(i,j).light_rgb[1], map_main->at(i,j).light_rgb[2], 1);
+
+                // Vertex 1: Top-Right (i+1, j)
                 grim->Quads_SetColorVertex(1, map_main->at(i+1,j).light_rgb[0], map_main->at(i+1,j).light_rgb[1], map_main->at(i+1,j).light_rgb[2], 1);
+
+                // Vertex 2: Bottom-Right (i+1, j+1)
                 grim->Quads_SetColorVertex(2, map_main->at(i+1,j+1).light_rgb[0], map_main->at(i+1,j+1).light_rgb[1], map_main->at(i+1,j+1).light_rgb[2], 1);
+
+                // Vertex 3: Bottom-Left (i, j+1)
                 grim->Quads_SetColorVertex(3, map_main->at(i,j+1).light_rgb[0], map_main->at(i,j+1).light_rgb[1], map_main->at(i,j+1).light_rgb[2], 1);
 
-                grim->Quads_Draw(-camera_x+i*128, -camera_y+j*128, 128, 128);
+                grim->Quads_Draw(-camera_x + i * 128, -camera_y + j * 128, 128, 128);
 
                 //}
                 grim->Quads_End();
@@ -1454,89 +1460,89 @@ void game_engine::draw_map_grid(void){//renders map grid
 
 
     //smooth slides in map grid
-    grim->System_SetState_Blending(true);
-    int alku_x=screen_start_x-1;
-    int alku_y=screen_start_y-1;
-    int loppu_x=screen_end_x+1;
-    int loppu_y=screen_end_y+2;
+    // grim->System_SetState_Blending(true);
+    // int alku_x=screen_start_x-1;
+    // int alku_y=screen_start_y-1;
+    // int loppu_x=screen_end_x+1;
+    // int loppu_y=screen_end_y+2;
 
 
-    if(alku_x<1)alku_x=1;
-    if(alku_y<1)alku_y=1;
-    if(loppu_x>map_main->sizex-2)loppu_x=map_main->sizex-2;
-    if(loppu_y>map_main->sizey-2)loppu_y=map_main->sizey-2;
+    // if(alku_x<1)alku_x=1;
+    // if(alku_y<1)alku_y=1;
+    // if(loppu_x>map_main->sizex-2)loppu_x=map_main->sizex-2;
+    // if(loppu_y>map_main->sizey-2)loppu_y=map_main->sizey-2;
 
-    /*for(k=0;k<mod.terrain_types.size();k++){
-        texture=mod.terrain_types[k].texture;
-        resources.Texture_Set(texture);
-        grim->Quads_Begin();*/
-        for(int i=alku_x;i<loppu_x;i++){
-            for(int j=alku_y;j<loppu_y;j++){
-                k=map_main->at(i,j).terrain_type;
-                texture=mod.terrain_types[map_main->at(i,j).terrain_type].terrain_frames[map_main->at(i,j).current_frame].texture;
-                resources.Texture_Set(texture);
-                grim->Quads_Begin();
-                //if(map_main->at(i,j).terrain_type==k){
+    // /*for(k=0;k<mod.terrain_types.size();k++){
+    //     texture=mod.terrain_types[k].texture;
+    //     resources.Texture_Set(texture);
+    //     grim->Quads_Begin();*/
+    //     for(int i=alku_x;i<loppu_x;i++){
+    //         for(int j=alku_y;j<loppu_y;j++){
+    //             k=map_main->at(i,j).terrain_type;
+    //             texture=mod.terrain_types[map_main->at(i,j).terrain_type].terrain_frames[map_main->at(i,j).current_frame].texture;
+    //             resources.Texture_Set(texture);
+    //             grim->Quads_Begin();
+    //             //if(map_main->at(i,j).terrain_type==k){
 
-                    //lower square is not same
-                    if(map_main->at(i,j+1).terrain_type!=k){
-                        if((map_main->at(i,j+1).light_rgb[0]>0)||(map_main->at(i,j+1).light_rgb[1]>0)||(map_main->at(i,j+1).light_rgb[2]>0)
-                         ||(map_main->at(i+1,j+1).light_rgb[0]>0)||(map_main->at(i+1,j+1).light_rgb[1]>0)||(map_main->at(i+1,j+1).light_rgb[2]>0)
-                            ){
-                            grim->Quads_SetColorVertex(0, map_main->at(i,j+1).light_rgb[0], map_main->at(i,j+1).light_rgb[1], map_main->at(i,j+1).light_rgb[2], 0.5f);
-                            grim->Quads_SetColorVertex(1, map_main->at(i+1,j+1).light_rgb[0], map_main->at(i+1,j+1).light_rgb[1], map_main->at(i+1,j+1).light_rgb[2], 0.5f);
-                            grim->Quads_SetColorVertex(2, map_main->at(i+1,j+2).light_rgb[0], map_main->at(i+1,j+2).light_rgb[1], map_main->at(i+1,j+2).light_rgb[2], 0);
-                            grim->Quads_SetColorVertex(3, map_main->at(i,j+2).light_rgb[0], map_main->at(i,j+2).light_rgb[1], map_main->at(i,j+2).light_rgb[2], 0);
-                            grim->Quads_SetSubset(0,0,1,0.5f);
-                            grim->Quads_Draw(-camera_x+i*128, -camera_y+(j+1)*128, 128, 64);
-                        }
-                    }
-                    //upper square is not same
-                    if(map_main->at(i,j-1).terrain_type!=k){
-                        if((map_main->at(i,j).light_rgb[0]>0)||(map_main->at(i,j).light_rgb[1]>0)||(map_main->at(i,j).light_rgb[2]>0)
-                         ||(map_main->at(i+1,j).light_rgb[0]>0)||(map_main->at(i+1,j).light_rgb[1]>0)||(map_main->at(i+1,j).light_rgb[2]>0)
-                            ){
-                            grim->Quads_SetColorVertex(0, map_main->at(i,j-1).light_rgb[0], map_main->at(i,j-1).light_rgb[1], map_main->at(i,j-1).light_rgb[2], 0);
-                            grim->Quads_SetColorVertex(1, map_main->at(i+1,j-1).light_rgb[0], map_main->at(i+1,j-1).light_rgb[1], map_main->at(i+1,j-1).light_rgb[2], 0);
-                            grim->Quads_SetColorVertex(2, map_main->at(i+1,j).light_rgb[0], map_main->at(i+1,j).light_rgb[1], map_main->at(i+1,j).light_rgb[2], 0.5f);
-                            grim->Quads_SetColorVertex(3, map_main->at(i,j).light_rgb[0], map_main->at(i,j).light_rgb[1], map_main->at(i,j).light_rgb[2], 0.5f);
-                            grim->Quads_SetSubset(0,0.5f,1,1);
-                            grim->Quads_Draw(-camera_x+i*128, -camera_y+(j-1)*128+64, 128, 64);
-                        }
-                    }
-                    //left square is not same
-                    if(map_main->at(i-1,j).terrain_type!=k){
-                        if((map_main->at(i,j).light_rgb[0]>0)||(map_main->at(i,j).light_rgb[1]>0)||(map_main->at(i,j).light_rgb[2]>0)
-                         ||(map_main->at(i,j+1).light_rgb[0]>0)||(map_main->at(i,j+1).light_rgb[1]>0)||(map_main->at(i,j+1).light_rgb[2]>0)
-                            ){
-                            grim->Quads_SetColorVertex(0, map_main->at(i-1,j).light_rgb[0], map_main->at(i-1,j).light_rgb[1], map_main->at(i-1,j).light_rgb[2], 0);
-                            grim->Quads_SetColorVertex(1, map_main->at(i,j).light_rgb[0], map_main->at(i,j).light_rgb[1], map_main->at(i,j).light_rgb[2], 0.5f);
-                            grim->Quads_SetColorVertex(2, map_main->at(i,j+1).light_rgb[0], map_main->at(i,j+1).light_rgb[1], map_main->at(i,j+1).light_rgb[2], 0.5f);
-                            grim->Quads_SetColorVertex(3, map_main->at(i-1,j+1).light_rgb[0], map_main->at(i-1,j+1).light_rgb[1], map_main->at(i-1,j+1).light_rgb[2], 0);
-                            grim->Quads_SetSubset(0.5f,0,1,1);
-                            grim->Quads_Draw(-camera_x+(i-1)*128+64, -camera_y+j*128, 64, 128);
-                        }
-                    }
-                    //right square is not same
-                    if(map_main->at(i+1,j).terrain_type!=k){
-                        if((map_main->at(i+1,j).light_rgb[0]>0)||(map_main->at(i+1,j).light_rgb[1]>0)||(map_main->at(i+1,j).light_rgb[2]>0)
-                         ||(map_main->at(i+1,j+1).light_rgb[0]>0)||(map_main->at(i+1,j+1).light_rgb[1]>0)||(map_main->at(i+1,j+1).light_rgb[2]>0)
-                            ){
-                            grim->Quads_SetColorVertex(0, map_main->at(i+1,j).light_rgb[0], map_main->at(i+1,j).light_rgb[1], map_main->at(i+1,j).light_rgb[2], 0.5f);
-                            grim->Quads_SetColorVertex(1, map_main->at(i+2,j).light_rgb[0], map_main->at(i+2,j).light_rgb[1], map_main->at(i+2,j).light_rgb[2], 0);
-                            grim->Quads_SetColorVertex(2, map_main->at(i+2,j+1).light_rgb[0], map_main->at(i+2,j+1).light_rgb[1], map_main->at(i+2,j+1).light_rgb[2], 0);
-                            grim->Quads_SetColorVertex(3, map_main->at(i+1,j+1).light_rgb[0], map_main->at(i+1,j+1).light_rgb[1], map_main->at(i+1,j+1).light_rgb[2], 0.5f);
-                            grim->Quads_SetSubset(0,0,0.5f,1);
-                            grim->Quads_Draw(-camera_x+(i+1)*128, -camera_y+j*128, 64, 128);
-                        }
-                    }
-                //}
-                    grim->Quads_End();
+    //                 //lower square is not same
+    //                 if(map_main->at(i,j+1).terrain_type!=k){
+    //                     if((map_main->at(i,j+1).light_rgb[0]>0)||(map_main->at(i,j+1).light_rgb[1]>0)||(map_main->at(i,j+1).light_rgb[2]>0)
+    //                      ||(map_main->at(i+1,j+1).light_rgb[0]>0)||(map_main->at(i+1,j+1).light_rgb[1]>0)||(map_main->at(i+1,j+1).light_rgb[2]>0)
+    //                         ){
+    //                         grim->Quads_SetColorVertex(0, map_main->at(i,j+1).light_rgb[0], map_main->at(i,j+1).light_rgb[1], map_main->at(i,j+1).light_rgb[2], 0.5f);
+    //                         grim->Quads_SetColorVertex(1, map_main->at(i+1,j+1).light_rgb[0], map_main->at(i+1,j+1).light_rgb[1], map_main->at(i+1,j+1).light_rgb[2], 0.5f);
+    //                         grim->Quads_SetColorVertex(2, map_main->at(i+1,j+2).light_rgb[0], map_main->at(i+1,j+2).light_rgb[1], map_main->at(i+1,j+2).light_rgb[2], 0);
+    //                         grim->Quads_SetColorVertex(3, map_main->at(i,j+2).light_rgb[0], map_main->at(i,j+2).light_rgb[1], map_main->at(i,j+2).light_rgb[2], 0);
+    //                         grim->Quads_SetSubset(0,0,1,0.5f);
+    //                         grim->Quads_Draw(-camera_x+i*128, -camera_y+(j+1)*128, 128, 64);
+    //                     }
+    //                 }
+    //                 //upper square is not same
+    //                 if(map_main->at(i,j-1).terrain_type!=k){
+    //                     if((map_main->at(i,j).light_rgb[0]>0)||(map_main->at(i,j).light_rgb[1]>0)||(map_main->at(i,j).light_rgb[2]>0)
+    //                      ||(map_main->at(i+1,j).light_rgb[0]>0)||(map_main->at(i+1,j).light_rgb[1]>0)||(map_main->at(i+1,j).light_rgb[2]>0)
+    //                         ){
+    //                         grim->Quads_SetColorVertex(0, map_main->at(i,j-1).light_rgb[0], map_main->at(i,j-1).light_rgb[1], map_main->at(i,j-1).light_rgb[2], 0);
+    //                         grim->Quads_SetColorVertex(1, map_main->at(i+1,j-1).light_rgb[0], map_main->at(i+1,j-1).light_rgb[1], map_main->at(i+1,j-1).light_rgb[2], 0);
+    //                         grim->Quads_SetColorVertex(2, map_main->at(i+1,j).light_rgb[0], map_main->at(i+1,j).light_rgb[1], map_main->at(i+1,j).light_rgb[2], 0.5f);
+    //                         grim->Quads_SetColorVertex(3, map_main->at(i,j).light_rgb[0], map_main->at(i,j).light_rgb[1], map_main->at(i,j).light_rgb[2], 0.5f);
+    //                         grim->Quads_SetSubset(0,0.5f,1,1);
+    //                         grim->Quads_Draw(-camera_x+i*128, -camera_y+(j-1)*128+64, 128, 64);
+    //                     }
+    //                 }
+    //                 //left square is not same
+    //                 if(map_main->at(i-1,j).terrain_type!=k){
+    //                     if((map_main->at(i,j).light_rgb[0]>0)||(map_main->at(i,j).light_rgb[1]>0)||(map_main->at(i,j).light_rgb[2]>0)
+    //                      ||(map_main->at(i,j+1).light_rgb[0]>0)||(map_main->at(i,j+1).light_rgb[1]>0)||(map_main->at(i,j+1).light_rgb[2]>0)
+    //                         ){
+    //                         grim->Quads_SetColorVertex(0, map_main->at(i-1,j).light_rgb[0], map_main->at(i-1,j).light_rgb[1], map_main->at(i-1,j).light_rgb[2], 0);
+    //                         grim->Quads_SetColorVertex(1, map_main->at(i,j).light_rgb[0], map_main->at(i,j).light_rgb[1], map_main->at(i,j).light_rgb[2], 0.5f);
+    //                         grim->Quads_SetColorVertex(2, map_main->at(i,j+1).light_rgb[0], map_main->at(i,j+1).light_rgb[1], map_main->at(i,j+1).light_rgb[2], 0.5f);
+    //                         grim->Quads_SetColorVertex(3, map_main->at(i-1,j+1).light_rgb[0], map_main->at(i-1,j+1).light_rgb[1], map_main->at(i-1,j+1).light_rgb[2], 0);
+    //                         grim->Quads_SetSubset(0.5f,0,1,1);
+    //                         grim->Quads_Draw(-camera_x+(i-1)*128+64, -camera_y+j*128, 64, 128);
+    //                     }
+    //                 }
+    //                 //right square is not same
+    //                 if(map_main->at(i+1,j).terrain_type!=k){
+    //                     if((map_main->at(i+1,j).light_rgb[0]>0)||(map_main->at(i+1,j).light_rgb[1]>0)||(map_main->at(i+1,j).light_rgb[2]>0)
+    //                      ||(map_main->at(i+1,j+1).light_rgb[0]>0)||(map_main->at(i+1,j+1).light_rgb[1]>0)||(map_main->at(i+1,j+1).light_rgb[2]>0)
+    //                         ){
+    //                         grim->Quads_SetColorVertex(0, map_main->at(i+1,j).light_rgb[0], map_main->at(i+1,j).light_rgb[1], map_main->at(i+1,j).light_rgb[2], 0.5f);
+    //                         grim->Quads_SetColorVertex(1, map_main->at(i+2,j).light_rgb[0], map_main->at(i+2,j).light_rgb[1], map_main->at(i+2,j).light_rgb[2], 0);
+    //                         grim->Quads_SetColorVertex(2, map_main->at(i+2,j+1).light_rgb[0], map_main->at(i+2,j+1).light_rgb[1], map_main->at(i+2,j+1).light_rgb[2], 0);
+    //                         grim->Quads_SetColorVertex(3, map_main->at(i+1,j+1).light_rgb[0], map_main->at(i+1,j+1).light_rgb[1], map_main->at(i+1,j+1).light_rgb[2], 0.5f);
+    //                         grim->Quads_SetSubset(0,0,0.5f,1);
+    //                         grim->Quads_Draw(-camera_x+(i+1)*128, -camera_y+j*128, 64, 128);
+    //                     }
+    //                 }
+    //             //}
+    //                 grim->Quads_End();
 
-            }
-        }
-    /*	grim->Quads_End();
-    }*/
+    //         }
+    //     }
+    // /*	grim->Quads_End();
+    // }*/
 }
 
 
@@ -1560,9 +1566,9 @@ void game_engine::draw_map_objects(int layer){//renders map grid
     int loppu_y=alku_y+(int)(screen_height/grid_size)+6;
 
     if(alku_x<0)alku_x=0;
-    if(loppu_x>map_main->sizex-1)loppu_x=map_main->sizex-1;
+    if(loppu_x>map_main->sizex-1)loppu_x=map_main->sizex;
     if(alku_y<0)alku_y=0;
-    if(loppu_y>map_main->sizey-1)loppu_y=map_main->sizey-1;
+    if(loppu_y>map_main->sizey-1)loppu_y=map_main->sizey;
 
 
     wind_direction_cos=sincos.table_cos(map_main->wind_direction);
@@ -1650,15 +1656,52 @@ bool game_engine::draw_object(map_object *object, int layer,float object_x, floa
                     in_shade=true;
                 }
 
-                grim->Quads_SetColor(object->light_level[0],object->light_level[1],object->light_level[2],transparency);
-                if(mod.general_objects[object->type].transparent==1)grim->System_SetState_Blending(true);
-                else grim->System_SetState_Blending(false);
-                int frame=object->current_animation_frame;
-                resources.Texture_Set(mod.general_objects[object->type].animation_frames[frame].texture);
-                grim->Quads_Begin();
-                grim->Quads_SetRotation(object->rotation);
-                grim->Quads_Draw(-camera_x+x, -camera_y+y, size, size);
-                grim->Quads_End();
+                // grim->Quads_SetColor(object->light_level[0],object->light_level[1],object->light_level[2],transparency);
+                // grim->Quads_SetColor(daylight[0], daylight[1], daylight[2], transparency);
+                float s = size * 0.5f;
+                float cosR = sincos.table_cos(object->rotation);
+                float sinR = sincos.table_sin(object->rotation);
+
+                // Define corner offsets relative to the center
+                // vertex order: 0=TL, 1=TR, 2=BR, 3=BL
+                float cornersX[4] = { -s,  s,  s, -s };
+                float cornersY[4] = { -s, -s,  s,  s };
+
+                // Set up blending for the texture
+if(mod.general_objects[object->type].transparent == 1) 
+    grim->System_SetState_Blending(true);
+else 
+    grim->System_SetState_Blending(false);
+
+resources.Texture_Set(mod.general_objects[object->type].animation_frames[object->current_animation_frame].texture);
+grim->Quads_Begin();
+
+// 1. Calculate World Light for each corner independently
+for (int v = 0; v < 4; v++) {
+    // Determine where this specific corner is on the map right now
+    float worldX = (object_x + size * 0.5f) + (cornersX[v] * cosR - cornersY[v] * sinR);
+    float worldY = (object_y + size * 0.5f) + (cornersX[v] * sinR + cornersY[v] * cosR);
+
+    // Sample grid indices
+    int gi = static_cast<int>(worldX / 128.0f);
+    int gj = static_cast<int>(worldY / 128.0f);
+
+    // Clamp indices to prevent crashes
+    if (gi < 0) gi = 0; if (gi > map_main->sizex - 1) gi = map_main->sizex - 1;
+    if (gj < 0) gj = 0; if (gj > map_main->sizey - 1) gj = map_main->sizey - 1;
+
+    // Apply the floor light from this corner's location to the vertex
+    grim->Quads_SetColorVertex(v, 
+        map_main->at(gi, gj).light_rgb[0], 
+        map_main->at(gi, gj).light_rgb[1], 
+        map_main->at(gi, gj).light_rgb[2], 
+        transparency);
+}
+
+// 2. Draw using standard rotation so the facing is correct
+grim->Quads_SetRotation(object->rotation);
+grim->Quads_Draw(-camera_x + object_x, -camera_y + object_y, size, size);
+grim->Quads_End();
 
 
 
@@ -1702,29 +1745,46 @@ bool game_engine::draw_object(map_object *object, int layer,float object_x, floa
 
 bool game_engine::draw_item(map_object *object, int layer,float object_x, float object_y){
 
-                //if on different layer, continue
-                if(0!=layer)return false;
-                //dead
-                if(object->dead)return false;
+    //if on different layer, continue
+    if(0!=layer)return false;
+    //dead
+    if(object->dead)return false;
 
-                float size=object->size*general_object_size;
+    float size=object->size*general_object_size;
+    float s = size * 0.5f;
 
-                //check if it's visible
-                if(-camera_x+object_x<-size*1.415f){return false;}
-                if(-camera_x+object_x>screen_width+size*0.415f){return false;}
-                if(-camera_y+object_y<-size*1.415f){return false;}
-                if(-camera_y+object_y>screen_height+size*0.415f){return false;}
+    //check if it's visible
+    if(-camera_x+object_x<-size*1.415f){return false;}
+    if(-camera_x+object_x>screen_width+size*0.415f){return false;}
+    if(-camera_y+object_y<-size*1.415f){return false;}
+    if(-camera_y+object_y>screen_height+size*0.415f){return false;}
 
-                grim->Quads_SetColor(object->light_level[0],object->light_level[1],object->light_level[2],1);
-                grim->System_SetState_Blending(true);
-                resources.Texture_Set(mod.general_items[object->type].texture);
-                grim->Quads_Begin();
-                grim->Quads_SetRotation(object->rotation);
-                grim->Quads_Draw(-camera_x+object_x, -camera_y+object_y, size, size);
-                grim->Quads_End();
+    float x_end = object_x + size;
+    float y_end = object_y + size;
+
+    int gi[4] = {(int)(object_x/128), (int)(x_end/128), (int)(x_end/128), (int)(object_x/128)};
+    int gj[4] = {(int)(object_y/128), (int)(object_y/128), (int)(y_end/128), (int)(y_end/128)};
+
+    grim->System_SetState_Blending(true);
+    resources.Texture_Set(mod.general_items[object->type].texture);
+    grim->Quads_Begin();
+    
+    for(int v = 0; v < 4; v++) {
+        // Clamp to map boundaries
+        int fi = std::max(0, std::min(gi[v], map_main->sizex - 1));
+        int fj = std::max(0, std::min(gj[v], map_main->sizey - 1));
+        
+        grim->Quads_SetColorVertex(v, 
+            map_main->at(fi, fj).light_rgb[0], 
+            map_main->at(fi, fj).light_rgb[1], 
+            map_main->at(fi, fj).light_rgb[2], 1.0f);
+    }
+
+    grim->Quads_SetRotation(object->rotation);
+    grim->Quads_Draw(-camera_x + object_x, -camera_y + object_y, size, size);
+    grim->Quads_End();
 
     return true;
-
 }
 
 void game_engine::load_particles(const string& filename){
@@ -1817,101 +1877,105 @@ void game_engine::load_sounds(const string& filename){
     debug.debug_output("Load file "+filename,Action::END,Logfile::STARTUP);
 }
 
+void game_engine::apply_smooth_lighting(float px, float py, float size, float alpha, int creature_idx) {
+    // 1. Get the creature's status color (red/green/blue)
+    float sr = map_main->creature[creature_idx].light[0];
+    float sg = map_main->creature[creature_idx].light[1];
+    float sb = map_main->creature[creature_idx].light[2];
 
-void game_engine::draw_map_creatures(int layer){//draws the creatures
+    for (int v = 0; v < 4; v++) {
+        // v order: 0=TL, 1=TR, 2=BR, 3=BL
+        float worldX = (px + (v == 1 || v == 2 ? size : 0));
+        float worldY = (py + (v == 2 || v == 3 ? size : 0));
 
-    unsigned int i,j,k;
+        // Sample indices
+        int x1 = (int)(worldX / 128.0f);
+        int y1 = (int)(worldY / 128.0f);
+        
+        // Clamp and interpolate
+        x1 = std::max(0, std::min(x1, map_main->sizex - 1));
+        y1 = std::max(0, std::min(y1, map_main->sizey - 1));
+        int x2 = std::min(x1 + 1, map_main->sizex - 1);
+        int y2 = std::min(y1 + 1, map_main->sizey - 1);
 
+        float fx = (worldX / 128.0f) - floor(worldX / 128.0f);
+        float fy = (worldY / 128.0f) - floor(worldY / 128.0f);
+
+        float final_rgb[3];
+        for (int c = 0; c < 3; c++) {
+            float top = map_main->at(x1, y1).light_rgb[c] * (1.0f - fx) + map_main->at(x2, y1).light_rgb[c] * fx;
+            float bottom = map_main->at(x1, y2).light_rgb[c] * (1.0f - fx) + map_main->at(x2, y2).light_rgb[c] * fx;
+            final_rgb[c] = top * (1.0f - fy) + bottom * fy;
+        }
+
+        // Apply max between ambient floor light and status effect light
+        float r = std::max(final_rgb[0], sr);
+        float g = std::max(final_rgb[1], sg);
+        float b = std::max(final_rgb[2], sb);
+
+        grim->Quads_SetColorVertex(v, r, g, b, alpha);
+    }
+}
+
+void game_engine::draw_map_creatures(int layer) { // draws the creatures
+    unsigned int i, j, k;
     int creature;
-    float x0,y0,x1,y1;
-    float creature_x,creature_y;
+    float x0, y0, x1, y1;
+    float creature_x, creature_y;
 
-    grim->Quads_SetColor(1,1,1,1);
+    grim->Quads_SetColor(1, 1, 1, 1);
     grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
     grim->System_SetState_BlendDst(grBLEND_INVSRCALPHA);
 
-    //minimum light for player
-    float minimum_light=0.5f;
-    if(map_main->creature[0].light[0]<minimum_light)map_main->creature[0].light[0]=minimum_light;
-    if(map_main->creature[0].light[1]<minimum_light)map_main->creature[0].light[1]=minimum_light;
-    if(map_main->creature[0].light[2]<minimum_light)map_main->creature[0].light[2]=minimum_light;
+    // Minimum light for player
+    float minimum_light = 0.5f;
+    if (map_main->creature[0].light[0] < minimum_light) map_main->creature[0].light[0] = minimum_light;
+    if (map_main->creature[0].light[1] < minimum_light) map_main->creature[0].light[1] = minimum_light;
+    if (map_main->creature[0].light[2] < minimum_light) map_main->creature[0].light[2] = minimum_light;
 
     grim->System_SetState_Blending(true);
-    //find correct map squares of the objects
-    int alku_x=(int)(camera_x/grid_size)-1;
-    int alku_y=(int)(camera_y/grid_size)-1;
-    int loppu_x=alku_x+(int)(screen_width/grid_size)+2;
-    int loppu_y=alku_y+(int)(screen_height/grid_size)+2;
 
-    if(alku_x<0)alku_x=0;
-    if(loppu_x>map_main->sizex-1)loppu_x=map_main->sizex-1;
-    if(alku_y<0)alku_y=0;
-    if(loppu_y>map_main->sizey-1)loppu_y=map_main->sizey-1;
+    // Calculate visible area for drawing
+    int alku_x = (int)(camera_x / grid_size) - 3;
+    int alku_y = (int)(camera_y / grid_size) - 3;
+    int loppu_x = alku_x + (int)(screen_width / grid_size) + 6;
+    int loppu_y = alku_y + (int)(screen_height / grid_size) + 6;
 
-    //go through all generic creature types
-    /*for(a=0;a<total_mod.general_creatures;a++){
-        resources.Texture_Set(mod.general_creatures[a].texture);
-        grim->Quads_Begin();
-*/
-        for(i=alku_x;i<loppu_x;i++){
-            for(j=alku_y;j<loppu_y;j++){
+    if (alku_x < 0) alku_x = 0;
+    if (loppu_x > map_main->sizex - 1) loppu_x = map_main->sizex - 1;
+    if (alku_y < 0) alku_y = 0;
+    if (loppu_y > map_main->sizey - 1) loppu_y = map_main->sizey - 1;
 
-                //if(map_main->at(i,j).total_creatures>0)
-                for(k=0;k<map_main->at(i,j).total_creatures;k++){
+    for (i = alku_x; i < loppu_x; i++) {
+        for (j = alku_y; j < loppu_y; j++) {
+            for (k = 0; k < map_main->at(i, j).total_creatures; k++) {
+                creature = map_main->at(i, j).creatures[k];
+                if (map_main->creature[creature].dead) continue;
 
-                    creature=map_main->at(i,j).creatures[k];
-                    if(map_main->creature[creature].dead)continue;
+                int creature_layer = mod.general_creatures[map_main->creature[creature].type].layer;
+                if (map_main->creature[creature].killed) creature_layer = 0;
+                if (layer != creature_layer) continue;
 
-                    //check layer
-                    int creature_layer=mod.general_creatures[map_main->creature[creature].type].layer;
-                    if(map_main->creature[creature].killed)creature_layer=0;
-                    if(layer!=creature_layer)continue;
+                creature_x = map_main->creature[creature].x;
+                creature_y = map_main->creature[creature].y;
+                float size = mod.general_creatures[map_main->creature[creature].type].size * map_main->creature[creature].size * general_creature_size;
 
-                    //if((layer==0)&&(!map_main->creature[creature].killed))continue;
-                    //if((layer==1)&&(map_main->creature[creature].killed))continue;
-                    //if(map_main->creature[creature].type!=a)continue;
-
-                    float distance=sqr(map_main->creature[creature].x-map_main->creature[0].x)+sqr(map_main->creature[creature].y-map_main->creature[0].y);
-                    if(creature!=0)
-                    if(distance<sqr(300)){
-                        creature_base temp_creature=map_main->creature[creature];
+                // Handle visibility and alpha transitions
+                if (!mod.general_creatures[map_main->creature[creature].type].hide_behind_walls) {
+                    map_main->creature[creature].alpha = 1;
+                } else if (creature != 0) {
+                    if (map_main->creature[creature].wall_between_creature_and_player == -1) {
+                        map_main->creature[creature].wall_between_creature_and_player = 0;
+                        vector<point2d> collisions = line_will_collide(creature_x + size * 0.5f, creature_y + size * 0.5f, player_middle_x, player_middle_y, false, false, true, false, 1, true, true);
+                        if (collisions.size() > 1) map_main->creature[creature].wall_between_creature_and_player = 1;
                     }
-
-                    //coordinates
-                    creature_x=map_main->creature[creature].x;
-                    creature_y=map_main->creature[creature].y;
-
-                    float size=mod.general_creatures[map_main->creature[creature].type].size*map_main->creature[creature].size*general_creature_size;
-
-                    //find if the creature is visible from the player's point of view
-                    if(!mod.general_creatures[map_main->creature[creature].type].hide_behind_walls){
-                        map_main->creature[creature].alpha=1;
+                    if (map_main->creature[creature].wall_between_creature_and_player == 0) {
+                        map_main->creature[creature].alpha += elapsed * game_speed * CREATURE_FADE_OUT_SPEED * 3;
+                        if (map_main->creature[creature].alpha > 1) map_main->creature[creature].alpha = 1;
                     }
-                    else{
-                        if(creature!=0){
-                            bool visible_to_player=false;
-                            //obstacles
-                            //not calculated yet, find it
-                            if(map_main->creature[creature].wall_between_creature_and_player==-1){
-                                map_main->creature[creature].wall_between_creature_and_player=0;
-                                vector <point2d> collisions=line_will_collide(creature_x+size*0.5f,creature_y+size*0.5f,player_middle_x,player_middle_y,false,false,true,false,1,true,true);
-                                if(collisions.size()>1){
-                                    map_main->creature[creature].wall_between_creature_and_player=1;
-                                }
-                            }
-                            if(map_main->creature[creature].wall_between_creature_and_player==0){
-                                visible_to_player=true;
-                            }
+                }
 
-                            if(visible_to_player){
-                                map_main->creature[creature].alpha+=elapsed*game_speed*CREATURE_FADE_OUT_SPEED*3;
-                                if(map_main->creature[creature].alpha>1)
-                                    map_main->creature[creature].alpha=1;
-                            }
-                        }
-                    }
-
-                    //if the creature is not visible, we can just continue
+ //if the creature is not visible, we can just continue
                     if(map_main->creature[creature].alpha==0)continue;
 
 
@@ -1983,104 +2047,87 @@ void game_engine::draw_map_creatures(int layer){//draws the creatures
                     }
                     grim->Quads_SetColor(map_main->creature[creature].light[0],map_main->creature[creature].light[1],map_main->creature[creature].light[2],map_main->creature[creature].alpha);
 
-                    //for computer player's only
-                    if(creature>0){
-                        resources.Texture_Set(mod.general_creatures[map_main->creature[creature].type].texture);
-                        grim->Quads_Begin();
+                // ---------------------------------------------------------
+                // START DRAWING SECTION
+                // ---------------------------------------------------------
 
-                        //draw legs
-                        if(map_main->creature[creature].animation[2]>=0){
-                            find_texture_coordinates(map_main->creature[creature].animation[2],&x0,&y0,&x1,&y1,4);
-                            grim->Quads_SetSubset(x0,y0,x1,y1);
-                            grim->Quads_SetRotation(map_main->creature[creature].rotation_legs);
-                            grim->Quads_Draw(-camera_x+creature_x,
-                                -camera_y+creature_y,
-                                size,
-                                size
-                                );
-                        }
-                        //draw torso
-                        if(map_main->creature[creature].animation[1]>=0){
-                            int frame=map_main->creature[creature].animation[1];
-                            find_texture_coordinates(frame,&x0,&y0,&x1,&y1,4);
-                            grim->Quads_SetSubset(x0,y0,x1,y1);
-                            grim->Quads_SetRotation(map_main->creature[creature].rotation);
-                            grim->Quads_Draw(-camera_x+creature_x,
-                                -camera_y+creature_y,
-                                size,
-                                size
-                                );
-                        }
-                        //draw head
-                        if(map_main->creature[creature].animation[0]>=0){
-                            find_texture_coordinates(map_main->creature[creature].animation[0],&x0,&y0,&x1,&y1,4);
-                            grim->Quads_SetSubset(x0,y0,x1,y1);
-                            grim->Quads_SetRotation(map_main->creature[creature].rotation_head);
-                            grim->Quads_Draw(-camera_x+creature_x,
-                                -camera_y+creature_y,
-                                size,
-                                size
-                                );
-                        }
-                        grim->Quads_End();
+                // For computer players (NPCs)
+                if (creature > 0) {
+                    resources.Texture_Set(mod.general_creatures[map_main->creature[creature].type].texture);
+                    grim->Quads_Begin();
+                    
+                    // APPLY SMOOTH LIGHTING ONCE FOR ALL NPC PARTS
+                    apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, creature);
+
+                    // legs
+                    if (map_main->creature[creature].animation[2] >= 0) {
+                        find_texture_coordinates(map_main->creature[creature].animation[2], &x0, &y0, &x1, &y1, 4);
+                        grim->Quads_SetSubset(x0, y0, x1, y1);
+                        grim->Quads_SetRotation(map_main->creature[creature].rotation_legs);
+                        grim->Quads_Draw(-camera_x + creature_x, -camera_y + creature_y, size, size);
                     }
-
-                    //draw player
-                    else{
-
-                        //draw legs
-                        resources.Texture_Set(mod.general_creatures[map_main->creature[creature].type].texture);
-                        grim->Quads_Begin();
-                        if(map_main->creature[creature].animation[2]>=0){
-                            find_texture_coordinates(map_main->creature[creature].animation[2]-4,&x0,&y0,&x1,&y1,4);
-                            grim->Quads_SetSubset(x0,y0,x1,y1);
-                            grim->Quads_SetRotation(map_main->creature[creature].rotation_legs);
-                            grim->Quads_Draw(-camera_x+creature_x,
-                                -camera_y+creature_y,
-                                size,
-                                size
-                                );
-                        }
-                        grim->Quads_End();
-
-                        //draw torso
-                        int texture=mod.general_creatures[map_main->creature[creature].type].texture;
-                        int frame=6;
-                        if(mod.general_creatures[map_main->creature[0].type].weapon>=0){
-                            texture=mod.general_races[player_race].weapon_classes[mod.general_weapons[mod.general_creatures[map_main->creature[0].type].weapon].weapon_class].texture;
-                            if(map_main->creature[creature].animation[1]>=0){
-                                frame=map_main->creature[creature].animation[1]-1+mod.general_races[player_race].weapon_classes[mod.general_weapons[mod.general_creatures[map_main->creature[0].type].weapon].weapon_class].frame*4;
-                            }
-                        }
-                        resources.Texture_Set(texture);
-                        grim->Quads_Begin();
-                            find_texture_coordinates(frame,&x0,&y0,&x1,&y1,4);
-                            grim->Quads_SetSubset(x0,y0,x1,y1);
-                            grim->Quads_SetRotation(map_main->creature[creature].rotation+(map_main->creature[creature].animation[2]-7)*0.04f);
-                            grim->Quads_Draw(-camera_x+creature_x,
-                                -camera_y+creature_y,
-                                size,
-                                size
-                                );
-                        grim->Quads_End();
-
-                        //draw head
-                        resources.Texture_Set(mod.general_creatures[map_main->creature[creature].type].texture);
-                        grim->Quads_Begin();
-                        if(map_main->creature[creature].animation[0]>=0){
-                            find_texture_coordinates(map_main->creature[creature].animation[0],&x0,&y0,&x1,&y1,4);
-                            grim->Quads_SetSubset(x0,y0,x1,y1);
-                            grim->Quads_SetRotation(map_main->creature[creature].rotation_head);
-                            grim->Quads_Draw(-camera_x+creature_x,
-                                -camera_y+creature_y,
-                                size,
-                                size
-                                );
-                        }
-                        grim->Quads_End();
-
+                    // torso
+                    if (map_main->creature[creature].animation[1] >= 0) {
+                        find_texture_coordinates(map_main->creature[creature].animation[1], &x0, &y0, &x1, &y1, 4);
+                        grim->Quads_SetSubset(x0, y0, x1, y1);
+                        grim->Quads_SetRotation(map_main->creature[creature].rotation);
+                        grim->Quads_Draw(-camera_x + creature_x, -camera_y + creature_y, size, size);
                     }
+                    // head
+                    if (map_main->creature[creature].animation[0] >= 0) {
+                        find_texture_coordinates(map_main->creature[creature].animation[0], &x0, &y0, &x1, &y1, 4);
+                        grim->Quads_SetSubset(x0, y0, x1, y1);
+                        grim->Quads_SetRotation(map_main->creature[creature].rotation_head);
+                        grim->Quads_Draw(-camera_x + creature_x, -camera_y + creature_y, size, size);
+                    }
+                    grim->Quads_End();
+                }
 
+                // For the player character
+                else {
+                    // draw legs
+                    resources.Texture_Set(mod.general_creatures[map_main->creature[creature].type].texture);
+                    grim->Quads_Begin();
+                    apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, 0);
+                    if (map_main->creature[creature].animation[2] >= 0) {
+                        find_texture_coordinates(map_main->creature[creature].animation[2] - 4, &x0, &y0, &x1, &y1, 4);
+                        grim->Quads_SetSubset(x0, y0, x1, y1);
+                        grim->Quads_SetRotation(map_main->creature[creature].rotation_legs);
+                        grim->Quads_Draw(-camera_x + creature_x, -camera_y + creature_y, size, size);
+                    }
+                    grim->Quads_End();
+
+                    // draw torso (texture often changes based on weapon)
+                    int texture = mod.general_creatures[map_main->creature[creature].type].texture;
+                    int frame = 6;
+                    if (mod.general_creatures[map_main->creature[0].type].weapon >= 0) {
+                        texture = mod.general_races[player_race].weapon_classes[mod.general_weapons[mod.general_creatures[map_main->creature[0].type].weapon].weapon_class].texture;
+                        if (map_main->creature[creature].animation[1] >= 0) {
+                            frame = map_main->creature[creature].animation[1] - 1 + mod.general_races[player_race].weapon_classes[mod.general_weapons[mod.general_creatures[map_main->creature[0].type].weapon].weapon_class].frame * 4;
+                        }
+                    }
+                    resources.Texture_Set(texture);
+                    grim->Quads_Begin();
+                    apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, 0); // Player is always index 0
+                    find_texture_coordinates(frame, &x0, &y0, &x1, &y1, 4);
+                    grim->Quads_SetSubset(x0, y0, x1, y1);
+                    grim->Quads_SetRotation(map_main->creature[creature].rotation + (map_main->creature[creature].animation[2] - 7) * 0.04f);
+                    grim->Quads_Draw(-camera_x + creature_x, -camera_y + creature_y, size, size);
+                    grim->Quads_End();
+
+                    // draw head
+                    resources.Texture_Set(mod.general_creatures[map_main->creature[creature].type].texture);
+                    grim->Quads_Begin();
+                    apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, 0); // Player is always index 0
+                    if (map_main->creature[creature].animation[0] >= 0) {
+                        find_texture_coordinates(map_main->creature[creature].animation[0], &x0, &y0, &x1, &y1, 4);
+                        grim->Quads_SetSubset(x0, y0, x1, y1);
+                        grim->Quads_SetRotation(map_main->creature[creature].rotation_head);
+                        grim->Quads_Draw(-camera_x + creature_x, -camera_y + creature_y, size, size);
+                    }
+                    grim->Quads_End();
+                }
+                
                     //draw health meter
                     int meters_drawn=0;
                     float meter_x=-camera_x+creature_x;
@@ -2136,12 +2183,10 @@ void game_engine::draw_map_creatures(int layer){//draws the creatures
                         float text_y=-camera_y+creature_y+size*0.5f-6;
                         text_manager.write(-1,mod.dialogs[map_main->creature[creature].dialog].text,1,text_x,text_y,text_x+300,screen_height-10,mod.dialogs[map_main->creature[creature].dialog].r,mod.dialogs[map_main->creature[creature].dialog].g,mod.dialogs[map_main->creature[creature].dialog].b,1);
                     }
-                }
             }
         }
-
+    }
 }
-
 //find 10 closest enemies, add them to list
 //find all own side creatures (except player), add them to list
 vector<int> game_engine::AI_list_thinkers(void){
@@ -4813,6 +4858,60 @@ void game_engine::calculate_quick_keys(bool only_inventory){
         }
     }
 }
+
+// void game_engine::draw_lights(int layer) { // draws light effects (flashlight, explosions)
+//     int i, j;
+//     float light_x, light_y;
+    
+//     grim->System_SetState_Blending(true);
+//     grim->Quads_SetSubset(0, 0, 1, 1);
+//     grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
+//     grim->System_SetState_BlendDst(grBLEND_ONE);
+
+//     // Grouping by texture type (optimization)
+//     for (j = 0; j < mod.general_lights.size(); j++) {
+//         // Note: mod.general_lights should not use .dead; that's for map_main instances
+//         resources.Texture_Set(mod.general_lights[j].texture);
+
+//         grim->Quads_Begin();
+//         for (i = 0; i < map_main->lights.size(); i++) {
+//             if (map_main->lights[i].dead) continue;
+//             if (map_main->lights[i].type != j) continue;
+
+//             // Raw position (Now correctly centered by carry_light for creatures)
+//             light_x = map_main->lights[i].x;
+//             light_y = map_main->lights[i].y;
+
+//             // FEATURE: Pulse & Size
+//             float base_size = map_main->lights[i].size * 128.0f;
+//             float pulse_size = base_size * map_main->lights[i].pulse;
+
+//             // FEATURE: Culling (Don't draw if off-screen)
+//             if (-camera_x + light_x < -pulse_size) continue;
+//             if (-camera_x + light_x > screen_width + pulse_size) continue;
+//             if (-camera_y + light_y < -pulse_size) continue;
+//             if (-camera_y + light_y > screen_height + pulse_size) continue;
+
+//             // DRAWING LOGIC
+//             grim->Quads_SetColor(map_main->lights[i].r, map_main->lights[i].g, map_main->lights[i].b, map_main->lights[i].transparency);
+//             grim->Quads_SetRotation(map_main->lights[i].rotation);
+
+//             // THE ALIGNMENT FIX:
+//             // Since we discovered your Quads_Draw is CENTER-BASED, we pass 
+//             // the raw light_x/y. The engine handles the half-size offset internally.
+//             grim->Quads_Draw(
+//                 -camera_x + light_x, 
+//                 -camera_y + light_y, 
+//                 pulse_size, 
+//                 pulse_size
+//             );
+//         }
+//         grim->Quads_End();
+//     }
+//     // Restore normal alpha blending for UI/Creatures
+//     grim->System_SetState_BlendDst(grBLEND_INVSRCALPHA);
+// }
+
 
 void game_engine::draw_lights(int layer){//draws light effects (flashlight, explosions
     int i,j;
@@ -7584,13 +7683,30 @@ bool game_engine::run_effect(Mod::effect effect, creature_base *creature, int cr
                         delete_light(map_main,creature->carry_light);
 
                     //now activate it
-                        int type=effect.parameter1;
-                        creature->carry_light=map_main->create_light(creature->x,creature->y,type,effect.parameter2,mod.general_lights[type].r,mod.general_lights[type].g,mod.general_lights[type].b,mod.general_lights[type].a,-1);
-                        creature->light_attached_to=effect.parameter3;
-                        creature->carry_light_size=effect.parameter2;
-                        creature->carry_light_type=type;
-                        carry_light(map_main,creature,creature->carry_light);
+                    float cSize = mod.general_creatures[creature->type].size * creature->size * general_creature_size;
+                    float centerX = creature->x + (cSize * 0.5f);
+                    float centerY = creature->y + (cSize * 0.5f);
 
+                    int type=effect.parameter1;
+                    
+                    creature->carry_light = map_main->create_light(
+                        centerX,                  // X (Now Centered)
+                        centerY,                  // Y (Now Centered)
+                        type,                     // Parameter 1: Light Type
+                        effect.parameter2,        // Parameter 2: Light Size
+                        mod.general_lights[type].r, 
+                        mod.general_lights[type].g, 
+                        mod.general_lights[type].b, 
+                        mod.general_lights[type].a, 
+                        -1
+                    );
+
+                    creature->light_attached_to = effect.parameter3; 
+
+                    creature->carry_light_size = effect.parameter2; // Parameter 2: Stored Size
+                    creature->carry_light_type = type;             // Parameter 1: Stored Type
+
+                    carry_light(map_main, creature, creature->carry_light);
                     }
             }
             else{
