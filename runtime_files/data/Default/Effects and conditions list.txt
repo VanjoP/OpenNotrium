@@ -41,7 +41,7 @@ Effect/Condition List
 	25=show animation parameter1, and if (parameter2, 0=continue game, 1=end game)
 	26=fire particle parameter1 times parameter2 with parameters (spread, speed, time) taken from weapon number parameter3
 	27=make light number parameter1 for time parameter2 (-1=infinite) size min parameter3, max parameter4
-	28=bar parameter1 increased by bar parameter2 * parameter3
+	28=bar parameter1 increased by bar parameter2 * parameter3. parameter4 (-1 = ONLY if parameter2 bar is BELOW minimum, 1 = Trigger ONLY if parameter2 bar is ABOVE maximu 0 = normal)
 	29=run script parameter1, parameter2=check conditions (0=no, 1=yes)
 	30=set creature's eat item amount to parameter1
 

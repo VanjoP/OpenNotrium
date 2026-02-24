@@ -331,6 +331,7 @@ protected:
     int slider_texture;
     int credits_texture;
     int carry_icon;
+    int vision_texture_handle;
 
     //pop-up
     float pop_up_x,pop_up_y;//location for the computer
@@ -486,6 +487,8 @@ protected:
     void create_minimap(map *map_to_edit, int d);
     void draw_map_grid_small(map *map_to_edit, int texture, int texture2);//draws the map grid to map texture
     void calculate_quick_keys(bool only_inventory);
+    void draw_vision_cone();
+    void draw_realistic_shadows();
 
 public:
 

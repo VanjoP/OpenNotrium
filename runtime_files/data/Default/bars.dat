@@ -22,6 +22,11 @@ Creature health;//name----------------------------------------------------------
 	0;//red color component for maximum
 	1;//green color component for maximum
 	0.4;//blue color component for maximum
+	0;//handle moodlet
+	-1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    none;//moodlet image
+	begin_moodlet_breakpoints;
+	end_moodlet_breakpoints;
 Recommended daily Hydration;//name----------------------------------------------------------------------------
 	1;//identifier
 	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -46,6 +51,65 @@ Recommended daily Hydration;//name----------------------------------------------
 	0.1;//red color component for maximum
 	0.6;//green color component for maximum
 	0.9;//blue color component for maximum
+	1;//handle moodlet
+	0;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    liquid.png;//moodlet image
+  begin_moodlet_breakpoints;
+  Critical Dehydration;//name
+        -0.25;//Breakpoint
+        1;//Visible
+        0.0;//red (Black)
+        0.0;//green
+        0.0;//blue
+    Dehydrated;//name
+        0.0;//Breakpoint
+        1;//Visible
+        1.0;//red (Intense Red)
+        0.0;//green
+        0.0;//blue
+    Parched;//name
+        0.3;//Breakpoint
+        1;//Visible
+        1.0;//red
+        0.3;//green
+        0.3;//blue
+    Thirsty;//name
+        0.45;//Breakpoint
+        1;//Visible
+        1.0;//red
+        0.5;//green
+        0.5;//blue
+    Slightly Dry;//name
+        0.6;//Breakpoint
+        1;//Visible
+        1.0;//red
+        0.7;//green
+        0.7;//blue
+    Refreshed;//name
+        0.7;//Breakpoint (Very Light Red)
+        0;//Visible
+        1.0;//red 
+        0.85;//green
+        0.85;//blue
+    Quenched;//name
+        1.0;//Breakpoint (Very Light Green)
+        1;//Visible
+        0.85;//red
+        1.0;//green
+        0.85;//blue
+    Well-hydrated;//name
+        1.25;//Breakpoint
+        1;//Visible
+        0.0;//red
+        0.7;//green
+        0.0;//blue
+    Overhydrated;//name
+        1.5;//Breakpoint (Dark Greenish)
+        1;//Visible
+        0.0;//red
+        0.35;//green
+        0.1;//blue
+  end_moodlet_breakpoints;
 Activity;//name----------------------------------------------------------------------------
 	2;//identifier
 	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -69,7 +133,12 @@ Activity;//name-----------------------------------------------------------------
 	0.5;//blue color component for minimum
 	0.6;//red color component for maximum
 	0.7;//green color component for maximum
-	0.8;//blue color component for maximum
+	0.8;//blue color component for maximum	
+	0;//handle moodlet
+	-1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    none;//moodlet image
+	begin_moodlet_breakpoints;
+	end_moodlet_breakpoints;
 Stomach fullness;//name----------------------------------------------------------------------------
 	3;//identifier
 	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -94,6 +163,41 @@ Stomach fullness;//name---------------------------------------------------------
 	0.6;//red color component for maximum
 	0.7;//green color component for maximum
 	0.2;//blue color component for maximum
+	1;//handle moodlet
+	1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    devour.png;//moodlet image
+	begin_moodlet_breakpoints;
+		No description;//name
+			0.0;// Threshold
+			0;// Visible: NO (Good/Normal state)
+			0.0;// R
+			1.0;// G
+			0.0;// B
+		Slightly Full;//name
+			0.25;// Threshold
+			1;// Visible: YES
+			0.0;// R: Green
+			1.0;// G
+			0.0;// B
+		Full Stomach;//name
+			0.5;// Threshold
+			1;// Visible: YES
+			1.0;// R
+			0.8;// G
+			0.0;// B
+		Stuffed;//name
+			0.75;// Threshold
+			1;// Visible: YES
+			1.0;// R
+			0.0;// G
+			0.0;// B
+		You ate too much;//name
+			1.0;// Threshold
+			1;// Visible: YES
+			0.5;// R: Dark Red
+			0.0;// G
+			0.0;// B
+	end_moodlet_breakpoints;
 Wellness;//name----------------------------------------------------------------------------
 	4;//identifier
 	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -118,6 +222,11 @@ Wellness;//name-----------------------------------------------------------------
 	0.2;//red color component for maximum
 	0.7;//green color component for maximum
 	0.2;//blue color component for maximum
+	0;//handle moodlet
+	-1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    none;//moodlet image
+	begin_moodlet_breakpoints
+	end_moodlet_breakpoints;
 Recommended daily Nutrition;//name----------------------------------------------------------------------------
 	5;//identifier
 	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -142,6 +251,65 @@ Recommended daily Nutrition;//name----------------------------------------------
 	0.2;//red color component for maximum
 	0.7;//green color component for maximum
 	0.2;//blue color component for maximum
+	1;//handle moodlet
+	0;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    meat.png;//moodlet image
+	begin_moodlet_breakpoints;
+	 Starving;//name
+        -0.25;//Breakpoint
+        1;//Visible
+        0.0;//red (Black)
+        0.0;//green
+        0.0;//blue
+    Famished;//name
+        0.0;//Breakpoint
+        1;//Visible
+        1.0;//red (Intense Red)
+        0.0;//green
+        0.0;//blue
+    Hungry;//name
+        0.3;//Breakpoint
+        1;//Visible
+        1.0;//red
+        0.3;//green
+        0.3;//blue
+    Peckish;//name
+        0.45;//Breakpoint
+        1;//Visible
+        1.0;//red
+        0.5;//green
+        0.5;//blue
+    Not Hungry;//name
+        0.6;//Breakpoint
+        1;//Visible
+        1.0;//red
+        0.7;//green
+        0.7;//blue
+    Satiated;//name
+        0.7;//Breakpoint (Very Light Red - Safety Anchor)
+        0;//Visible
+        1.0;//red 
+        0.85;//green
+        0.85;//blue
+    Full;//name
+        1.0;//Breakpoint (Very Light Green)
+        1;//Visible
+        0.85;//red
+        1.0;//green
+        0.85;//blue
+    Stuffed;//name
+        1.25;//Breakpoint
+        1;//Visible
+        0.0;//red
+        0.7;//green
+        0.0;//blue
+    Gorged;//name
+        1.5;//Breakpoint (Dark Greenish)
+        1;//Visible
+        0.0;//red
+        0.35;//green
+        0.1;//blue
+	end_moodlet_breakpoints;
 Energy;//name----------------------------------------------------------------------------
 	6;//identifier
 	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -166,6 +334,65 @@ Energy;//name-------------------------------------------------------------------
 	1;//red color component for maximum
 	0.5;//green color component for maximum
 	0.2;//blue color component for maximum
+	1;//handle moodlet
+	0;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    sleep.png;//moodlet image
+	begin_moodlet_breakpoints;
+    Comatose;//name
+        -0.25;//Breakpoint
+        1;//Visible
+        0.0;//red (Black)
+        0.0;//green
+        0.0;//blue
+    Exhausted;//name
+        0.0;//Breakpoint
+        1;//Visible
+        1.0;//red (Intense Red)
+        0.0;//green
+        0.0;//blue
+    Tired;//name
+        0.3;//Breakpoint
+        1;//Visible
+        1.0;//red
+        0.3;//green
+        0.3;//blue
+    Drowsy;//name
+        0.45;//Breakpoint
+        1;//Visible
+        1.0;//red
+        0.5;//green
+        0.5;//blue
+    Stable;//name
+        0.6;//Breakpoint
+        1;//Visible
+        1.0;//red
+        0.7;//green
+        0.7;//blue
+    Rested;//name
+        0.7;//Breakpoint (Very Light Red - Safety Anchor)
+        0;//Visible
+        1.0;//red 
+        0.85;//green
+        0.85;//blue
+    Wide Awake;//name
+        1.0;//Breakpoint (Very Light Green)
+        1;//Visible
+        0.85;//red
+        1.0;//green
+        0.85;//blue
+    Fully Charged;//name
+        1.25;//Breakpoint
+        1;//Visible
+        0.0;//red
+        0.7;//green
+        0.0;//blue
+    Wired;//name
+        1.5;//Breakpoint (Dark Greenish)
+        1;//Visible
+        0.0;//red
+        0.35;//green
+        0.1;//blue
+	end_moodlet_breakpoints;
 Stamina;//name----------------------------------------------------------------------------
 	7;//identifier
 	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -175,21 +402,168 @@ Stamina;//name------------------------------------------------------------------
 	1;//show number
 	3;//anchor point (0=left top, 1=right top, 2=left bottom, 3=right bottom)
 		-250;//location x, pixels from anchor point
-		-130;//location y, pixels from anchor point
+		-30;//location y, pixels from anchor point
 	bar.png;//bar picture
 	none;//background picture
 		0;//background picture x offset
 		0;//background picture y offset
 		0;//background picture width
 		0;//background picture height
-	0.7;//height    
+	1;//height    
 	-180;//length in pixels for maximum (negative = bar increases to left)
 		1;//red color component for minimum
-		0.6;//green color component for minimum
-		0.6;//blue color component for minimum
-		0.8;//red color component for maximum
-		0.8;//green color component for maximum
-		1;//blue color component for maximum
+		0;//green color component for minimum
+		0;//blue color component for minimum
+		0;//red color component for maximum
+		1;//green color component for maximum
+		0;//blue color component for maximum
+	0;//handle moodlet
+	-1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    none;//moodlet image
+	begin_moodlet_breakpoints;
+	end_moodlet_breakpoints;
+Player health;//name----------------------------------------------------------------------------
+	10;//identifier
+	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
+		0;//parameter0
+	1;//visible (only applicable for player's bars)
+	1;//visible on enemies
+	1;//show number
+	3;//anchor point (0=left top, 1=right top, 2=left bottom, 3=right bottom)
+	-250;//location x, pixels from anchor point
+	-20;//location y, pixels from anchor point
+	bar.png;//bar picture
+	none;//background picture
+	0;//background picture x offset
+	0;//background picture y offset
+	0;//background picture width
+	0;//background picture height
+	0.7;//height    
+	-200;//length in pixels for maximum (negative = bar increases to left)
+	0.0;//red color component for minimum
+	1;//green color component for minimum
+	0.4;//blue color component for minimum
+	0;//red color component for maximum
+	1;//green color component for maximum
+	0.4;//blue color component for maximum
+	1;//handle moodlet
+	0;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    health.png;//moodlet image
+	begin_moodlet_breakpoints;
+	Fatal Injuries;//name
+        -1.0;//Breakpoint (Min)
+        1;//Visible
+        0.0;//red (Black)
+        0.0;//green
+        0.0;//blue
+    Critical Condition;//name
+        -0.5;//Breakpoint
+        1;//Visible
+        0.5;//red (Dark Red)
+        0.0;//green
+        0.0;//blue
+    Dying;//name
+        0.0;//Breakpoint (Intense Red / Start of "Very Bad")
+        1;//Visible
+        1.0;//red
+        0.0;//green
+        0.0;//blue
+    Injured;//name
+        0.2;//Breakpoint
+        1;//Visible
+        1.0;//red
+        0.3;//green
+        0.3;//blue
+    Hurt;//name
+        0.45;//Breakpoint
+        1;//Visible
+        1.0;//red
+        0.5;//green
+        0.5;//blue
+    Minor Wounds;//name
+        0.7;//Breakpoint (Whitish Red)
+        1;//Visible
+        1.0;//red
+        0.8;//green
+        0.8;//blue
+    Healthy;//name
+        1.0;//Breakpoint (Max / Safety Anchor)
+        0;//Visible (Hidden at 1 or above)
+        0.85;//red (Whitish Green)
+        1.0;//green
+        0.85;//blue
+	end_moodlet_breakpoints;
+Critical timer;//name----------------------------------------------------------------------------
+	11;//identifier
+	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
+		0;//parameter0
+	1;//visible (only applicable for player's bars)
+	1;//visible on enemies
+	1;//show number
+	3;//anchor point (0=left top, 1=right top, 2=left bottom, 3=right bottom)
+	-250;//location x, pixels from anchor point
+	-10;//location y, pixels from anchor point
+	bar.png;//bar picture
+	none;//background picture
+	0;//background picture x offset
+	0;//background picture y offset
+	0;//background picture width
+	0;//background picture height
+	0.7;//height    
+	-200;//length in pixels for maximum (negative = bar increases to left)
+	0.0;//red color component for minimum
+	1;//green color component for minimum
+	0.4;//blue color component for minimum
+	0;//red color component for maximum
+	1;//green color component for maximum
+	0.4;//blue color component for maximum
+	1;//handle moodlet
+	0;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    death.png;//moodlet image
+	begin_moodlet_breakpoints;
+	DECEASED;//name
+        -0.01;//Breakpoint (Absolute Zero)
+        1;//Visible
+        0.0;//red (Black)
+        0.0;//green
+        0.0;//blue
+	About to die...;//name
+        0.0;//Breakpoint (Absolute Zero)
+        1;//Visible
+        0.2;//red (Black)
+        0.0;//green
+        0.0;//blue
+    Systemic Failure;//name
+        0.2;//Breakpoint
+        1;//Visible
+        0.4;//red (Dark Maroon)
+        0.0;//green
+        0.0;//blue
+    Severe Trauma;//name
+        0.4;//Breakpoint
+        1;//Visible
+        0.8;//red (Deep Blood Red)
+        0.0;//green
+        0.0;//blue
+    Shock;//name
+        0.6;//Breakpoint
+        1;//Visible
+        1.0;//red (Solid Red)
+        0.0;//green
+        0.0;//blue
+    Slowly dying;//name
+        0.9;//Breakpoint
+        1;//Visible
+        1.0;//red (Bright Red)
+        0.2;//green (Warm Red)
+        0.0;//blue
+    Ok;//name
+        1.0;//Breakpoint (Barely OK / Dying Process Starts)
+        0;//Visible
+        0.5;//red (Hot Orange-Red)
+        1.5;//green
+        0.5;//blue
+	end_moodlet_breakpoints;
 Makeshift Stun Prod - Energy;//name----------------------------------------------------------------------------
 	50;//identifier
 	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -214,6 +588,11 @@ Makeshift Stun Prod - Energy;//name---------------------------------------------
 		0.4;//red color component for maximum
 		0.4;//green color component for maximum
 		1;//blue color component for maximum
+	0;//handle moodlet
+	-1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    none;//moodlet image
+	begin_moodlet_breakpoints;
+	end_moodlet_breakpoints;
 Makeshift Stun Gun - Energy;//name----------------------------------------------------------------------------
 	51;//identifier
 	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -238,6 +617,11 @@ Makeshift Stun Gun - Energy;//name----------------------------------------------
 		0.4;//red color component for maximum
 		0.4;//green color component for maximum
 		1;//blue color component for maximum
+	0;//handle moodlet
+	-1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    none;//moodlet image
+	begin_moodlet_breakpoints;
+	end_moodlet_breakpoints;
 Durability - Metal rod;//name----------------------------------------------------------------------------
 	52;//identifier
 	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -262,6 +646,11 @@ Durability - Metal rod;//name---------------------------------------------------
 		0.4;//red color component for maximum
 		0.1;//green color component for maximum
 		0.9;//blue color component for maximum
+	0;//handle moodlet
+	-1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    none;//moodlet image
+	begin_moodlet_breakpoints;
+	end_moodlet_breakpoints;
 Real Seconds;//name----------------------------------------------------------------------------
   	90;//identifier
   	6;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -286,6 +675,11 @@ Real Seconds;//name-------------------------------------------------------------
     0;//red color component for maximum
     1;//green color component for maximum
     0;//blue color component for maximum
+	0;//handle moodlet
+	-1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    none;//moodlet image
+	begin_moodlet_breakpoints;
+	end_moodlet_breakpoints;
 Ingame Days;//name----------------------------------------------------------------------------
   	91;//identifier
   	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -310,6 +704,11 @@ Ingame Days;//name--------------------------------------------------------------
     0;//red color component for maximum
     1;//green color component for maximum
     0;//blue color component for maximum
+	0;//handle moodlet
+	-1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    none;//moodlet image
+	begin_moodlet_breakpoints;
+	end_moodlet_breakpoints;
 Ingame Minutes;//name----------------------------------------------------------------------------
   	92;//identifier
   	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -334,6 +733,11 @@ Ingame Minutes;//name-----------------------------------------------------------
     0;//red color component for maximum
     1;//green color component for maximum
     0;//blue color component for maximum
+	0;//handle moodlet
+	-1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    none;//moodlet image
+	begin_moodlet_breakpoints;
+	end_moodlet_breakpoints;
 Ingame Hours;//name----------------------------------------------------------------------------
   	93;//identifier
   	0;//bar type, 0=normal, 1=show body temperature, 2=show number of items parameter0, 3=show wielded weapon ammo, 4=show armor, 5=show carry weight, 6=show seconds from game start
@@ -358,6 +762,11 @@ Ingame Hours;//name-------------------------------------------------------------
     0;//red color component for maximum
     1;//green color component for maximum
     0;//blue color component for maximum
+	0;//handle moodlet
+	-1;//pulse mode (-1: none, 0: min, 1: max, 2: both)
+    none;//moodlet image
+	begin_moodlet_breakpoints;
+	end_moodlet_breakpoints;
 end_of_file;
 
 maximum amount of bars is 100

@@ -1773,6 +1773,8 @@ void Mod::load_race_info(const string& filename){//loads race info from file
             stripped_fgets(rivi,sizeof(rivi),fil);
             temp_race.rag_doll=resources->load_texture(rivi,mod_name);
             stripped_fgets(rivi,sizeof(rivi),fil);
+            temp_race.moodlet_hud_texture=resources->load_texture(rivi,mod_name);
+            stripped_fgets(rivi,sizeof(rivi),fil);
             temp_race.interface_texture=resources->load_texture(rivi,mod_name);
 
 
@@ -2155,6 +2157,41 @@ void Mod::load_bars(const string& filename){//loads bar info from file
             temp_bar.color_max_r=atof(stripped_fgets(rivi,sizeof(rivi),fil));
             temp_bar.color_max_g=atof(stripped_fgets(rivi,sizeof(rivi),fil));
             temp_bar.color_max_b=atof(stripped_fgets(rivi,sizeof(rivi),fil));
+
+            // 1. Handle Moodlet (0 or 1)
+            temp_bar.handle_moodlet = atoi(stripped_fgets(rivi, sizeof(rivi), fil));
+            temp_bar.pulse_mode = atoi(stripped_fgets(rivi, sizeof(rivi), fil));
+
+            // 2. Moodlet Picture (Must exist in .dat even if handle is 0, use "none")
+            stripped_fgets(rivi, sizeof(rivi), fil); 
+            temp_bar.moodlet_image = resources->load_texture(rivi, mod_name);
+
+            // 3. Clear breakpoints for this specific bar instance
+            temp_bar.moodlet_breakpoints.clear();
+
+            // 4. Breakpoint Block
+            char* tag = stripped_fgets(rivi, sizeof(rivi), fil);
+            if (tag && strstr(tag, "begin_moodlet_breakpoints") != NULL) {
+                while (true) {
+                    char* bp_line = stripped_fgets(rivi, sizeof(rivi), fil);
+                    
+                    // Exit loop if we hit the end tag
+                    if (!bp_line || strstr(bp_line, "end_moodlet_breakpoints") != NULL) {
+                        break;
+                    }
+
+                    // We found a breakpoint! Read exactly 5 lines for it.
+                    moodlet_breakpoint bp;
+                    bp.description = bp_line;                            
+                    bp.threshold = atof(stripped_fgets(rivi, sizeof(rivi), fil));                         
+                    bp.visible = atoi(stripped_fgets(rivi, sizeof(rivi), fil));   
+                    bp.r = atof(stripped_fgets(rivi, sizeof(rivi), fil));         
+                    bp.g = atof(stripped_fgets(rivi, sizeof(rivi), fil));         
+                    bp.b = atof(stripped_fgets(rivi, sizeof(rivi), fil));          
+                    
+                    temp_bar.moodlet_breakpoints.push_back(bp);
+                }
+            }
 
             temp_bar.dead=true;
             while(general_bars.size()<temp_bar.identifier+1){

@@ -124,6 +124,36 @@ Check if it is night;//name //TODO: FINISH THIS
 			0.000000;//parameter3
 			0.000000;//parameter4	
 	end_effects;
+Health Update;//name------------------------------------------------------------------------------------------------------
+	5;//identifier
+	1;//run without calling (set to 0 if you use the script for example as a wield script)
+	0;//call position, 0=player location, 1=mouse location
+	0;//calling creature 0=player, 1=creature nearest to the mouse, 2=player controlled creature
+	100;//run every n milliseconds
+	none;//message
+	0;//message type, 0=quick message, 1=journal
+	none;//sound, none for nothing
+	0;//delay script for n seconds after conditions met
+	0;//disabled after first use, 0=no, 1=yes
+	begin_conditions;
+	end_conditions;
+	begin_effects;
+		17;//effect number-----------------------Reset Health
+			100.000000;//parameter1
+			0.000000;//parameter2
+			10.000000;//parameter3
+			0.000000;//parameter4
+		28;//effect number-----------------------Give Dehydration damage
+			10.000000;//parameter1
+			1.000000;//parameter2
+			0.1666666;//parameter3
+			-1.000000;//parameter4
+		28;//effect number-----------------------Lower critical timer - This can probably be in player_races?
+			11.000000;//parameter1
+			10.000000;//parameter2
+			0.0002500;//parameter3
+			0.000000;//parameter4
+	end_effects;//}
 TOKEN System Script;//name
 	10;//identifier
 	1;//run without calling (set to 0 if you use the script for example as a wield script)

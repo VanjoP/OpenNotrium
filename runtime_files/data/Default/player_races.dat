@@ -14,6 +14,7 @@ Human;//name------------------------------
 	10;//maximum carry weight
 	1.0;//climatic temperature change multiplier
 	ragdoll_human.png;//rag doll texture
+	slot.png;//moodlet hud
 	computer.png;//interface texture
 	begin_weapon_frames;//must contain all weapon classes in order starting from 0//{
 		0;//weapon class number------------------------------ |Unknown|
@@ -48,6 +49,22 @@ Human;//name------------------------------
 			16.000000;//weapon_y
 	end_weapon_frames;
 	begin_specialties;
+		Critical timer meter;//description
+			5;//specialty 
+			0;//difficulty level
+			none;//message
+			11.000000;//parameter0
+			0.000000;//parameter1
+			100.000000;//parameter2
+			100.000000;//parameter3
+		Health meter;//description
+			5;//specialty 
+			0;//difficulty level
+			none;//message
+			10.000000;//parameter0
+			0.000000;//parameter1
+			100.000000;//parameter2
+			100.000000;//parameter3
 		Energy meter;//description
 			5;//specialty 
 			0;//difficulty level
@@ -96,12 +113,12 @@ Human;//name------------------------------
 			0.000000;//parameter1
 			300.000000;//parameter2
 			100.000000;//parameter3
-		Drain hydration - any difficulty;//description (-0.104 per second)
+		Drain hunger - any difficulty;//description (-0.104 per second)
 			7;//specialty 
 			0;//difficulty level
 			none;//message
 			5;//parameter0
-			0;//parameter1
+			-999;//parameter1
 			5;//parameter2
 			-0.104;//parameter3
 		Hydration meter;//description
@@ -111,13 +128,13 @@ Human;//name------------------------------
 			1.000000;//parameter0
 			0.000000;//parameter1
 			300.000000;//parameter2
-			100.000000;//parameter3
+			-900.000000;//parameter3
 		Drain hydration - any difficulty;//description (-0.104 per second)
 			7;//specialty 
 			0;//difficulty level
 			none;//message
 			1;//parameter0
-			0;//parameter1
+			-999;//parameter1
 			1;//parameter2
 			-0.104;//parameter3
 		Stomach fullness;//description

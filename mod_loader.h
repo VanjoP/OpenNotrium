@@ -376,6 +376,7 @@ public:
         std::string journal_name;
         int identifier;
         int rag_doll;//texture for paper doll
+        int moodlet_hud_texture;
         float day_speed;
         float temperature_multiplier;
 
@@ -435,6 +436,13 @@ public:
         std::vector <bool> friend_with_side;
     };
 
+    struct moodlet_breakpoint {
+        std::string description;
+        float threshold;
+        int visible;
+        float r, g, b;
+    };
+
     //base structure for loading bar info
     struct bar_base{
         std::string name;
@@ -463,7 +471,14 @@ public:
         float background_picture_y_offset;
         float background_picture_width;
         float background_picture_height;
+
+        int handle_moodlet;
+        int pulse_mode; // -1: none, 0: min, 1: max, 2: both
+        int moodlet_image;
+        float pulse_accumulator;
+        std::vector<moodlet_breakpoint> moodlet_breakpoints;
     };
+
 
     //base structure for loading script info
     struct script{

@@ -798,9 +798,7 @@ void game_engine::initialize_game(void){//initialize game variables
     menu=resources.load_texture("menu.jpg","Default");
     bar_texture=resources.load_texture("bar.png","Default");
     carry_icon=resources.load_texture("carry_icon.png","Default");
-
-
-
+    vision_texture_handle = resources.load_texture("vision_mask.png", "Default");
 }
 
 void game_engine::uninitialize_game(void){//uninitialize game
@@ -1259,6 +1257,9 @@ void game_engine::render_map(void){//renders game map
     debug.debug_output("Draw particles level 2",Action::END,Logfile::FRAME);
 
 
+    draw_realistic_shadows();
+    draw_vision_cone();
+
     //draw pop-up text
     debug.debug_output("Draw Interface",Action::START,Logfile::FRAME);
     if(!ask_quit)
@@ -1381,6 +1382,36 @@ void game_engine::render_map(void){//renders game map
     }
 
 
+}
+
+void game_engine::draw_vision_cone() {
+    // 1. Get player screen position
+    float size = mod.general_creatures[map_main->creature[0].type].size * map_main->creature[0].size * general_creature_size;
+    float px = -camera_x + map_main->creature[0].x + size * 0.25f;
+    float py = -camera_y + map_main->creature[0].y + size * 0.25f;
+
+    // 2. Setup Blending
+    grim->System_SetState_Blending(true);
+    grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
+    grim->System_SetState_BlendDst(grBLEND_INVSRCALPHA);
+
+    // 3. Set your new texture
+    // Ensure 'vision_mask_handle' is loaded once in initialize_game()
+    resources.Texture_Set(vision_texture_handle);
+
+    // 4. Draw the single mask quad
+    // We use the player's rotation directly. 
+    // If the "front" of your PNG is facing UP, this will align perfectly.
+    grim->Quads_SetRotation(map_main->creature[0].rotation);
+    grim->Quads_SetColor(1, 1, 1, 1.0f); 
+    grim->Quads_SetSubset(0, 0, 1, 1);
+
+    // Make the mask 2.5x the screen size so no edges leak during rotation
+    float maskSize = (screen_width > screen_height ? screen_width : screen_height) * 1.5f;
+
+    grim->Quads_Begin();
+        grim->Quads_Draw(px - maskSize * 0.5f, py - maskSize * 0.5f, maskSize, maskSize);
+    grim->Quads_End();
 }
 
 void game_engine::draw_map_grid(void){//renders map grid
@@ -5237,6 +5268,23 @@ void game_engine::calculate_bullets(void){
             //play bullet hit sound
             playsound(mod.general_weapons[(*it).type].sound_hit,1,wall_collisions[a].x,wall_collisions[a].y,player_middle_x,player_middle_y);
 
+            for (b = 0; b < mod.general_weapons[(*it).type].hit_effects.size(); b++) {
+                Mod::effect temp_effect = mod.general_weapons[(*it).type].hit_effects[b];
+
+                // Only run effects that make sense for inanimate objects (lights, particles, sounds)
+                // Effects like "increase bar" (4) or "stun" (1) are skipped naturally 
+                // because we pass NULL for the creature 
+
+                for (b = 0; b < mod.general_weapons[(*it).type].hit_effects.size(); b++) {
+                    Mod::effect& eff = mod.general_weapons[(*it).type].hit_effects[b];
+
+                    // Only process if it is Effect 27 (Make Light)
+                    if ((int)eff.effect_number == 27) {
+                        run_effect(temp_effect, NULL, -1, wall_collisions[a].x, wall_collisions[a].y, (*it).angle, false);
+                    }
+                }
+            }
+
             //stop the bullet
             //if(mod.general_weapons[(*it).type].stop_on_hit==0){
                 (*it).dead_on_next=true;
@@ -7632,12 +7680,10 @@ bool game_engine::run_effect(Mod::effect effect, creature_base *creature, int cr
                                 return_value=true;
                             }
                         }
+                        //make sure no bar is below minimum
+                        if(creature->bars[(int)effect.parameter3].value<creature->bars[(int)effect.parameter3].minimum)
+                            set_bar(creature,(int)effect.parameter3,creature->bars[(int)effect.parameter3].minimum);
                     }
-
-                    //make sure no bar is below minimum
-                    if(creature->bars[(int)effect.parameter3].value<creature->bars[(int)effect.parameter3].minimum)
-                        set_bar(creature,(int)effect.parameter3,creature->bars[(int)effect.parameter3].minimum);
-
                 }
             }
             break;
@@ -8201,12 +8247,31 @@ bool game_engine::run_effect(Mod::effect effect, creature_base *creature, int cr
             }
             break;
         case 28:
-            //28=bar parameter1 increased by bar parameter2 * parameter3
+            // 28 = bar parameter1 increased by bar parameter2 * parameter3
+            // parameter4 (Optional): 
+            // -1 = Trigger ONLY if parameter2 bar is BELOW minimum
+            //  1 = Trigger ONLY if parameter2 bar is ABOVE maximum
             if(!undo){
-                //set_bar(creature,(int)effect.parameter3,creature->bars[(int)effect.parameter1].value+creature->bars[(int)effect.parameter2].value*effect.parameter3);
-                set_bar(creature,(int)effect.parameter1,creature->bars[(int)effect.parameter1].value+creature->bars[(int)effect.parameter2].value*effect.parameter3);
+                bool can_proceed = true;
+                float src_val = creature->bars[(int)effect.parameter2].value;
+                float src_min = creature->bars[(int)effect.parameter2].minimum;
+                float src_max = creature->bars[(int)effect.parameter2].maximum;
 
-                return_value=true;
+                // --- CONDITION: BELOW MINIMUM ---
+                if (effect.parameter4 == -1) {
+                    if (src_val >= src_min) can_proceed = false;
+                }
+                // --- CONDITION: ABOVE MAXIMUM ---
+                else if (effect.parameter4 == 1) {
+                    if (src_val <= src_max) can_proceed = false;
+                }
+
+                if (can_proceed) {
+                    set_bar(creature, (int)effect.parameter1, 
+                            creature->bars[(int)effect.parameter1].value + 
+                            src_val * effect.parameter3);
+                    return_value = true;
+                }
             }
             break;
         case 29:
@@ -16003,8 +16068,11 @@ void game_engine::draw_bars(void){
     int anchor_x[4]={0,1024,0,1024};
     int anchor_y[4]={0,0,768,768};
     int show_name=-1;
-
-
+    int moodlet_count = 0;
+    int show_moodlet_desc = -1; // Index of the bar with the hovered moodlet
+    std::string active_desc = "";
+    static float m_anim[256] = {0.0f};
+    static int m_last_idx[256] = {-1}; // Remembers the previous breakpoint index
 
     for(a=0;a<maximum_bars;a++){
         if(a>=mod.general_bars.size())continue;
@@ -16148,12 +16216,240 @@ void game_engine::draw_bars(void){
             text_manager.write(font,temprivi,1.0f*x_multiplier,left_side, y ,0,0,1.0f,1.0f,1.0f,1);
         }
 
+        // --- NEW MOODLET DRAWING SECTION ---
+        if (mod.general_bars[a].handle_moodlet && (!mod.general_bars[a].moodlet_breakpoints.size()) == 0) {
+            float min_v = map_main->creature[0].bars[a].minimum;
+            float max_v = map_main->creature[0].bars[a].maximum;
+            float cur_v = map_main->creature[0].bars[a].value;
+            float norm_v = (max_v - min_v != 0) ? (cur_v - min_v) / (max_v - min_v) : 0;
+            int low_idx = -1;
+            int high_idx = -1;
+            float pulse_intensity = 0.0f;
+
+            // 2. FIND BREAKPOINT INDICES USING norm_v
+            for (unsigned int b = 0; b < mod.general_bars[a].moodlet_breakpoints.size(); b++) {
+                if (norm_v >= mod.general_bars[a].moodlet_breakpoints[b].threshold) {
+                    low_idx = b;
+                } else {
+                    high_idx = b;
+                    break; 
+                }
+            }
+
+            if (low_idx == -1 && mod.general_bars[a].moodlet_breakpoints.size() > 0) {
+                low_idx = 0; 
+            }
+
+            // --- PULSE INTENSITY CALCULATION ---
+            if (mod.general_bars[a].pulse_mode != -1) {
+                // --- MODE 0: MIN IS BAD (e.g., Thirst) ---
+
+                if (mod.general_bars[a].pulse_mode == 0 || mod.general_bars[a].pulse_mode == 2) {
+                    float peak = mod.general_bars[a].moodlet_breakpoints.front().threshold; // e.g. -1.0
+                    float stop = peak;
+                    bool found_stop = false;
+
+                    for (auto& bp : mod.general_bars[a].moodlet_breakpoints) {
+                        if (bp.visible == 0) { stop = bp.threshold; found_stop = true; break; }
+                    }
+
+                    if (found_stop && norm_v < stop) {
+                        float danger_range = stop - peak; // e.g. 0.7 - (-1.0) = 1.7
+                        if (danger_range > 0.001f) {
+                            float p = (stop - norm_v) / danger_range;
+                            if (p > 1.0f) p = 1.0f;
+                            if (p < 0.0f) p = 0.0f;
+                            if (p > pulse_intensity) pulse_intensity = p;
+                        }
+                    }
+
+                }
+
+                // --- MODE 1 or 2: High Danger (Max is Bad) ---
+                if (mod.general_bars[a].pulse_mode == 1 || mod.general_bars[a].pulse_mode == 2) {
+                    float peak = mod.general_bars[a].moodlet_breakpoints.back().threshold; // e.g. 1.5
+                    float stop = peak;
+                    bool found_stop = false;
+
+                    for (int i = (int)mod.general_bars[a].moodlet_breakpoints.size() - 1; i >= 0; i--) {
+                        if (mod.general_bars[a].moodlet_breakpoints[i].visible == 0) { 
+                            stop = mod.general_bars[a].moodlet_breakpoints[i].threshold; 
+                            found_stop = true; 
+                            break; 
+                        }
+                    }
+
+                    if (found_stop && norm_v > stop) {
+                        float danger_range = peak - stop;
+                        if (danger_range > 0.001f) {
+                            float p = (norm_v - stop) / danger_range;
+                            if (p > 1.0f) p = 1.0f;
+                            if (p < 0.0f) p = 0.0f;
+                            if (p > pulse_intensity) pulse_intensity = p;
+                        }
+                    }
+                }
+
+
+
+
+            }
+            // --- DEBUG CONSOLE OUTPUT ---
+                
+                // Check which Mode 0 anchors were found
+                float peak = mod.general_bars[a].moodlet_breakpoints.front().threshold;
+                float stop = 0.0f;
+                for (auto& bp : mod.general_bars[a].moodlet_breakpoints) {
+                    if (bp.visible == 0) { stop = bp.threshold; break; }
+                }
+            
+
+            if (pulse_intensity < 0.0f) pulse_intensity = 0.0f;
+            if (pulse_intensity > 1.0f) pulse_intensity = 1.0f;
+            
+            float pulse_val = 1.0f;
+         if (pulse_intensity > 0.0f) {
+            float max_gap = 6.0f; 
+            float min_gap = 0.35f;
+            float current_gap = max_gap - (pulse_intensity * (max_gap - min_gap));
+
+            float beat_duration = 0.3f; 
+            float total_cycle = current_gap + beat_duration;
+
+            // 2. Increment this bar's specific timer
+            mod.general_bars[a].pulse_accumulator += (elapsed / 1000.0f);
+            
+            // 3. Keep the accumulator in bounds [0, total_cycle]
+            if (mod.general_bars[a].pulse_accumulator >= total_cycle) {
+                // We use subtraction instead of fmod here for slightly better precision
+                // and to handle the "intensity change" more smoothly.
+                mod.general_bars[a].pulse_accumulator -= total_cycle; 
+            }
+
+            // 4. Calculate the visual scale
+            if (mod.general_bars[a].pulse_accumulator < beat_duration) {
+                // Normalize 0.0 to 1.0
+                float beat_t = mod.general_bars[a].pulse_accumulator / beat_duration;
+                
+                // Sine wave (0 to PI) makes it go: 1.0 -> 1.3 -> 1.0
+                float wave = sin(beat_t * 3.14159f);
+                pulse_val = 1.0f + (wave * wave * 0.3f);
+                } else {
+                    pulse_val = 1.0f; // Silent period
+                }
+            }
+
+            Mod::moodlet_breakpoint* active_bp = nullptr;
+            float final_r = 1.0f, final_g = 1.0f, final_b = 1.0f;
+
+
+            if (low_idx != -1) {
+                active_bp = &mod.general_bars[a].moodlet_breakpoints[low_idx];
+                if (high_idx != -1) {
+                    // Smooth Interpolation
+                   Mod::moodlet_breakpoint* next_bp = &mod.general_bars[a].moodlet_breakpoints[high_idx];
+                    float range = next_bp->threshold - active_bp->threshold;
+                    float ratio = (norm_v - active_bp->threshold) / range;
+
+                    final_r = active_bp->r + (next_bp->r - active_bp->r) * ratio;
+                    final_g = active_bp->g + (next_bp->g - active_bp->g) * ratio;
+                    final_b = active_bp->b + (next_bp->b - active_bp->b) * ratio;
+                } else {
+                    // Cap at the last breakpoint color
+                    final_r = active_bp->r;
+                    final_g = active_bp->g;
+                    final_b = active_bp->b;
+                }
+            }
+
+            if (active_bp && active_bp->visible == 1) {
+                // If the stage changed while the moodlet was already visible
+                if (m_last_idx[a] != -1 && m_last_idx[a] != low_idx) {
+                    // Drop the timer back to 0.7 to trigger the "Bounce Back" 
+                    // without making it slide all the way from the bottom again.
+                    if (m_anim[a] > 0.3f) m_anim[a] = 0.3f; 
+                }
+                m_last_idx[a] = low_idx; // Update the "memory" for the next frame
+                
+                // Advance animation toward 1.0
+                if (m_anim[a] < 1.0f) m_anim[a] += 0.025f; 
+            } else {
+                // Slide out and reset memory
+                if (m_anim[a] > 0.0f) m_anim[a] -= 0.05f;
+                m_last_idx[a] = -1; 
+            }
+
+  
+
+            if (m_anim[a] > 0.0f) {
+    
+                // Define Bottom-Left Position (Anchor Point 2 is Left-Bottom)
+                // Stack them horizontally or vertically? Let's go horizontally for now.
+                float hud_size = 26.0f; 
+                float img_size = 22.0f; // Smaller so it fits inside the frame
+                float margin = 14.0f;
+                float s = 1.70158f; // "s" is the intensity of the bounce. Higher = more bounce.
+
+                float t_adj = m_anim[a] - 1.0f;
+                float bounce_val = t_adj * t_adj * ((s + 1.0f) * t_adj + s) + 1.0f;
+                float slide_offset = (1.0f - bounce_val) * 60.0f;
+
+                float center_x = (margin + (moodlet_count * 32) + (hud_size / 2.0f)) * x_multiplier;
+                float center_y = (768.0f - margin - (hud_size / 2.0f) + slide_offset) * y_multiplier;
+
+                float p_hud_w = hud_size * pulse_val * x_multiplier;
+                float p_hud_h = hud_size * pulse_val * y_multiplier;
+                
+                float p_img_w = img_size * x_multiplier;
+                float p_img_h = img_size * y_multiplier;
+
+                float final_alpha = 1.0f;
+                    if (!(active_bp && active_bp->visible == 1)) {
+                        final_alpha = m_anim[a]; 
+                    } else if (m_anim[a] < 0.5f && m_last_idx[a] == -1) {
+                        final_alpha = m_anim[a] * 2.0f; 
+                    }
+
+
+                // DRAW HUD FRAME (The color-changing background)
+                if (mod.general_races[player_race].moodlet_hud_texture >= 0) {
+                    resources.Texture_Set(mod.general_races[player_race].moodlet_hud_texture);
+                    grim->Quads_Begin();
+                    grim->Quads_SetColor(final_r, final_g, final_b, final_alpha); // SMOOTH COLOR HERE
+                    grim->Quads_SetSubset(0, 0, 1, 1);
+                    grim->Quads_Draw(center_x - (p_hud_w / 2.0f), center_y - (p_hud_h / 2.0f), p_hud_w, p_hud_h);   
+                    grim->Quads_End();
+                }
+
+                // DRAW MOODLET IMAGE (Always original color)
+                if (mod.general_bars[a].moodlet_image >= 0) {
+                    resources.Texture_Set(mod.general_bars[a].moodlet_image);
+                    grim->Quads_Begin();
+                    grim->Quads_SetColor(1.0f, 1.0f, 1.0f, final_alpha); // Original color
+                    grim->Quads_SetSubset(0, 0, 1, 1);
+                    grim->Quads_Draw(center_x - (p_img_w / 2.0f), center_y - (p_img_h / 2.0f), p_img_w, p_img_h);
+                    grim->Quads_End();
+                }
+
+                float hit_x = (margin + (moodlet_count * 32)) * x_multiplier;
+                float hit_y = (768.0f - margin - hud_size + slide_offset) * y_multiplier;
+
+                if (mousex > hit_x && mousex < hit_x + (hud_size * x_multiplier) &&
+                        mousey > hit_y && mousey < hit_y + (hud_size * y_multiplier)) {
+                        active_desc = active_bp->description;
+                        show_moodlet_desc = a; 
+                    }
+
+                moodlet_count++; // Move the next moodlet over
+            }
+        }
+        // --- END MOODLET DRAWING ---
+
         //mouse on, show name
         if((mousex>left_side-7)&&(mousex<right_side+7)&&(mousey>y)&&(mousey<y+16*mod.general_bars[a].height*y_multiplier)){
             show_name=a;
             //text_manager.write(font,mod.general_bars[a].name,1.0f,mousex+20, mousey-10 ,screen_height,screen_width,false,1.0f,1.0f,1.0f,1);
         }
-
     }
 
     if(show_name>=0){
@@ -16162,7 +16458,16 @@ void game_engine::draw_bars(void){
         if(x+mod.general_bars[show_name].name.length()*10>screen_width)x=screen_width-mod.general_bars[show_name].name.length()*10;
         text_manager.write(font,mod.general_bars[show_name].name,1.0f,x, y ,screen_width,screen_height,1.0f,1.0f,1.0f,1);
     }
-
+     if (!active_desc.empty()) {
+            float tx = mousex + 20;
+            float ty = mousey - 8;
+            
+            // Simple screen boundary check
+            if (tx + active_desc.length() * 8 > screen_width) {
+                tx = screen_width - active_desc.length() * 8;
+            }
+            text_manager.write(font, active_desc, 1.0f, tx, ty, screen_width, screen_height, 1.0f, 1.0f, 1.0f, 1);
+        }
 }
 
 void game_engine::count_bars(void){
@@ -17226,21 +17531,202 @@ void game_engine::initialize_animation_frames(map *map_to_edit){
         }
     }*/
 }
+void game_engine::find_suggested_camera_position(float *suggested_camera_x, float *suggested_camera_y) {
+    if (attach_camera_type == 0) { // Standard Player Follow
+        float camera_distance = attach_camera_parameter2;
+        
+        // 1. Get Player Dimensions and Center Position
+        float size = mod.general_creatures[map_main->creature[attach_camera_parameter1].type].size * map_main->creature[attach_camera_parameter1].size * general_creature_size;
+        
+        float pX = map_main->creature[attach_camera_parameter1].x + size * 0.5f;
+        float pY = map_main->creature[attach_camera_parameter1].y + size * 0.5f;
 
-void game_engine::find_suggested_camera_position(float *suggested_camera_x, float *suggested_camera_y){
+        // 2. Mouse Offset from Screen Center (using screen-space for stability)
+        float mOffX = mousex - (screen_width / 2.0f);
+        float mOffY = mousey - (screen_height / 2.0f);
 
-    if(attach_camera_type==0){
-        float camera_distance=attach_camera_parameter2;
-        float size=mod.general_creatures[map_main->creature[attach_camera_parameter1].type].size*map_main->creature[attach_camera_parameter1].size*general_creature_size;
-        *suggested_camera_x=map_main->creature[attach_camera_parameter1].x+size*0.5f-sincos.table_cos(map_main->creature[attach_camera_parameter1].rotation+pi/2)*camera_distance-screen_width/2.0f;
-        *suggested_camera_y=map_main->creature[attach_camera_parameter1].y+size*0.5f-sincos.table_sin(map_main->creature[attach_camera_parameter1].rotation+pi/2)*camera_distance-screen_height/2.0f;
+        // 3. Distance from Center for Circular Logic
+        float distFromCenter = sqrtf(mOffX * mOffX + mOffY * mOffY);
+
+        // 4. TUNING PARAMETERS
+        float maxLookDistance = 350.0f; // Max distance camera can drift from player
+        float deadZone = 100.0f;        // Radius where camera stays perfectly centered
+        float mouseIntensity = 0.5f;   // Scaling factor for look-ahead speed
+
+        float finalOffsetX = 0;
+        float finalOffsetY = 0;
+
+        if (distFromCenter > deadZone) {
+            // Calculate how far to push the camera target
+            float lookDist = (distFromCenter - deadZone) * mouseIntensity;
+            
+            // Clamp to the hard circular limit
+            if (lookDist > maxLookDistance) lookDist = maxLookDistance;
+
+            // Normalize and apply the offset
+            if (distFromCenter > 0) {
+                finalOffsetX = (mOffX / distFromCenter) * lookDist;
+                finalOffsetY = (mOffY / distFromCenter) * lookDist;
+            }
+        }
+
+        // 5. Set Target Position (World Position + Mouse Offset - Screen Half-Width)
+        *suggested_camera_x = pX + finalOffsetX - (screen_width / 2.0f);
+        *suggested_camera_y = pY + finalOffsetY - (screen_height / 2.0f);
+
+        // 6. Apply Rotation-based camera distance (if used for specific effects/vehicles)
+        float rot = map_main->creature[attach_camera_parameter1].rotation;
+        *suggested_camera_x -= sincos.table_cos(rot + pi/2) * camera_distance;
+        *suggested_camera_y -= sincos.table_sin(rot + pi/2) * camera_distance;
     }
-    if(attach_camera_type==1){
-        *suggested_camera_x=attach_camera_parameter1-screen_width/2.0f;
-        *suggested_camera_y=attach_camera_parameter2-screen_height/2.0f;
+    
+    if (attach_camera_type == 1) { // Fixed Point Camera
+        *suggested_camera_x = attach_camera_parameter1 - screen_width / 2.0f;
+        *suggested_camera_y = attach_camera_parameter2 - screen_height / 2.0f;
     }
 }
+void game_engine::draw_realistic_shadows() {
+    float px = player_middle_x;
+    float py = player_middle_y;
+    float shadow_dist = 4000.0f; 
 
+    // Global Shadow State Setup
+    grim->System_SetState_Blending(true);
+    grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
+    grim->System_SetState_BlendDst(grBLEND_INVSRCALPHA);
+    grim->Quads_SetColor(0.0f, 0.0f, 0.0f, 1.0f); // Solid Black
+    resources.Texture_Set(black_texture);
+    grim->Quads_SetRotation(0);
+    grim->Quads_SetSubset(0, 0, 1, 1);
+
+    int range = 12; 
+    int sx = std::max(0, (int)(px / 128) - range);
+    int sy = std::max(0, (int)(py / 128) - range);
+    int ex = std::min((int)map_main->sizex - 1, (int)(px / 128) + range);
+    int ey = std::min((int)map_main->sizey - 1, (int)(py / 128) + range);
+
+    // Lambda to handle the math so we don't duplicate code for Objects and Items
+    auto process_caster = [&](int type, float obj_x, float obj_y, float obj_s, float obj_rot) {
+        if (type < 0 || type >= (int)mod.general_objects.size()) return;
+        if (!mod.general_objects[type].blocks_vision) return;
+
+        float obj_size = obj_s * general_object_size;
+        float ox = obj_x + obj_size * 0.5f;
+        float oy = obj_y + obj_size * 0.5f;
+        int coll_type = mod.general_objects[type].collision_type;
+
+        // --- CASE 1: CIRCLE COLLISION ---
+        if (coll_type == 0) {
+            float radius = (obj_size * mod.general_objects[type].collision_parameter0) * 0.5f;
+            if (radius <= 0) return;
+            float dx = ox - px, dy = oy - py;
+            float dist_sq = dx * dx + dy * dy;
+            if (dist_sq <= radius * radius) return;
+
+            float angle_to_center = atan2(dy, dx);
+            
+            // 1. REDUCE WIDTH: Lowered from 1.3f to 0.7f (adjust as needed)
+            float angle_offset = 0.9f; 
+            
+            // 2. MOVE FURTHER AWAY: How many pixels to push the shadow start point back
+            float shadow_push = 1.5f; 
+
+            // Calculate initial points on the circle circumference
+            float x1 = ox + cos(angle_to_center + angle_offset) * radius;
+            float y1 = oy + sin(angle_to_center + angle_offset) * radius;
+            float x2 = ox + cos(angle_to_center - angle_offset) * radius;
+            float y2 = oy + sin(angle_to_center - angle_offset) * radius;
+
+            // Apply the "push" to move the start of the shadow away from the player
+            float vx1 = x1 - px, vy1 = y1 - py;
+            float vx2 = x2 - px, vy2 = y2 - py;
+            float len1 = sqrt(vx1 * vx1 + vy1 * vy1);
+            float len2 = sqrt(vx2 * vx2 + vy2 * vy2);
+
+            // Normalize and offset the start points
+            if (len1 > 0) { x1 += (vx1 / len1) * shadow_push; y1 += (vy1 / len1) * shadow_push; }
+            if (len2 > 0) { x2 += (vx2 / len2) * shadow_push; y2 += (vy2 / len2) * shadow_push; }
+
+            // Project to the far distance
+            float ex1 = x1 + (vx1 / len1) * shadow_dist;
+            float ey1 = y1 + (vy1 / len1) * shadow_dist;
+            float ex2 = x2 + (vx2 / len2) * shadow_dist;
+            float ey2 = y2 + (vy2 / len2) * shadow_dist;
+
+            grim->Quads_Begin();
+            grim->Quads_Draw4V(x1 - camera_x, y1 - camera_y, x2 - camera_x, y2 - camera_y, 
+                            ex2 - camera_x, ey2 - camera_y, ex1 - camera_x, ey1 - camera_y);
+            grim->Quads_End();
+        }
+        // --- CASE 2: POLYGON COLLISION ---
+        else if (coll_type == 1) {
+            int poly_idx = mod.general_objects[type].collision_parameter0;
+            if (poly_idx < 0 || poly_idx >= (int)mod.polygons.size()) return;
+
+            float coll_scale = mod.general_objects[type].collision_parameter1;
+            auto& poly = mod.polygons[poly_idx];
+            float sinR = sincos.table_sin(obj_rot);
+            float cosR = sincos.table_cos(obj_rot);
+
+            for (unsigned int a = 0; a < poly.points.size() - 1; a++) {
+                float px1 = poly.points[a].x * obj_size * coll_scale * 0.95f; // shrink
+                float py1 = poly.points[a].y * obj_size * coll_scale * 0.95f;
+                float px2 = poly.points[a+1].x * obj_size * coll_scale * 0.95f;
+                float py2 = poly.points[a+1].y * obj_size * coll_scale * 0.95f;
+
+                float x1 = cosR * px1 + sinR * py1 + ox;
+                float y1 = sinR * px1 - cosR * py1 + oy;
+                float x2 = cosR * px2 + sinR * py2 + ox;
+                float y2 = sinR * px2 - cosR * py2 + oy;
+
+                float midX = (x1 + x2) * 0.5f;
+                float midY = (y1 + y2) * 0.5f;
+                
+                if ((midX - ox) * (midX - px) + (midY - oy) * (midY - py) > 0) {
+                    float nx = -(y2 - y1), ny = (x2 - x1);
+                    float len = sqrt(nx*nx + ny*ny);
+                    if (len > 0) {
+                        nx /= len; ny /= len;
+                        if (point_will_collide(map_main, midX + nx * 5.0f, midY + ny * 5.0f, true)) continue;
+                    }
+
+                    float ex1 = x1 + (x1 - px) * shadow_dist;
+                    float ey1 = y1 + (y1 - py) * shadow_dist;
+                    float ex2 = x2 + (x2 - px) * shadow_dist;
+                    float ey2 = y2 + (y2 - py) * shadow_dist;
+                    float cp = (x2 - x1) * (py - y1) - (y2 - y1) * (px - x1);
+
+                    grim->Quads_Begin();
+                    if (cp > 0) grim->Quads_Draw4V(x1 - camera_x, y1 - camera_y, ex1 - camera_x, ey1 - camera_y, ex2 - camera_x, ey2 - camera_y, x2 - camera_x, y2 - camera_y);
+                    else grim->Quads_Draw4V(x2 - camera_x, y2 - camera_y, ex2 - camera_x, ey2 - camera_y, ex1 - camera_x, ey1 - camera_y, x1 - camera_x, y1 - camera_y);
+                    grim->Quads_End();
+                }
+            }
+        }
+    };
+
+    // Correct Loop: Use map_main->at() to get grid points
+    for (int i = sx; i <= ex; i++) {
+        for (int j = sy; j <= ey; j++) {
+            auto& grid_pt = map_main->at(i, j);
+
+            // Process Standard Objects
+            for (auto& idx : grid_pt.objects) {
+                map_object& o = map_main->object[idx];
+                if (!o.dead) process_caster(o.type, o.x, o.y, o.size, o.rotation);
+            }
+
+            // Process Items (Plot Objects / Doors)
+            for (auto& idx : grid_pt.items) {
+                item& it = map_main->items[idx];
+                // Only plot objects (base_type 0) should cast these shadows
+                if (!it.dead && it.base_type == 0) {
+                    process_caster(it.type, it.x, it.y, it.size, it.rotation);
+                }
+            }
+        }
+    }
+}
 void game_engine::draw_map_grid_small(map *map_to_edit, int texture, int texture2){//renders map grid
 
     if(can_draw_map){

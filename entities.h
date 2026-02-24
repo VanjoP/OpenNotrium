@@ -64,7 +64,6 @@ protected:
         int creatures[20];//list the creatures that are here
         int current_frame;
         float frame_time;
-
     };
 
 //	struct row{

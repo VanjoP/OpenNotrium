@@ -36,7 +36,7 @@
       "patterns": [
         {
           "name": "string.other.link.notrium",
-          "match": "\\b[\\w\\d_-]+\\.(jpg|bmp|png|wav|mp3|ogg)\\b",
+          "match": "\\b[\\w\\d_-]+\\.(jpg|bmp|png|wav|mp3|ogg|dat)\\b",
           "comment": "Matches filenames with common game extensions"
         }
       ]
