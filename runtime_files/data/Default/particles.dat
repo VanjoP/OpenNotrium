@@ -10,6 +10,8 @@ No particles;//name---------------------------------------------------------
 	0;//can be rotated (faster if not)
 	-1;//change into another particle when hits ground
 	0;//blending type (0=normal, 1=light)
+	0;//Stoped by walls
+	0;//Affected by lights
 Wood particles;//name---------------------------------------------------------
 	1;//identifier
 	wood_particle.png;//texture
@@ -22,6 +24,8 @@ Wood particles;//name---------------------------------------------------------
 	1;//can be rotated (faster if not)
 	1;//change into another particle when hits ground
 	0;//blending type (0=normal, 1=light)
+	1;//Stoped by walls
+	1;//Affected by lights
 Plastic particles;//name---------------------------------------------------------
 	2;//identifier
 	wood_particle.png;//texture
@@ -34,6 +38,8 @@ Plastic particles;//name--------------------------------------------------------
 	1;//can be rotated (faster if not)
 	2;//change into another particle when hits ground
 	0;//blending type (0=normal, 1=light)
+	0;//Stoped by walls
+	0;//Affected by lights
 Water particles;//name---------------------------------------------------------
 	3;//identifier
 	splash.png;//texture
@@ -46,6 +52,8 @@ Water particles;//name---------------------------------------------------------
 	1;//can be rotated (faster if not)
 	3;//change into another particle when hits ground
 	0;//blending type (0=normal, 1=light)
+	0;//Stoped by walls
+	0;//Affected by lights
 Metal particles;//name---------------------------------------------------------
 	4;//identifier
 	particle.png;//texture
@@ -58,6 +66,8 @@ Metal particles;//name---------------------------------------------------------
 	1;//can be rotated (faster if not)
 	4;//change into another particle when hits ground
 	0;//blending type (0=normal, 1=light)
+	0;//Stoped by walls
+	0;//Affected by lights
 Bush particles;//name---------------------------------------------------------
 	5;//identifier
 	puu5.png;//texture
@@ -70,6 +80,8 @@ Bush particles;//name---------------------------------------------------------
 	1;//can be rotated (faster if not)
 	5;//change into another particle when hits ground
 	0;//blending type (0=normal, 1=light)
+	1;//Stoped by walls
+	1;//Affected by lights
 Glass particles;//name---------------------------------------------------------
 	6;//identifier
 	glass_particle.png;//texture
@@ -82,6 +94,8 @@ Glass particles;//name---------------------------------------------------------
 	1;//can be rotated (faster if not)
 	6;//change into another particle when hits ground
 	0;//blending type (0=normal, 1=light)
+	0;//Stoped by walls
+	0;//Affected by lights
 Sleep effect;//name---------------------------------------------------------
 	7;//identifier
 	sleep.png;//texture
@@ -94,6 +108,8 @@ Sleep effect;//name---------------------------------------------------------
 	0;//can be rotated (faster if not)
 	-1;//change into another particle when hits ground
 	0;//blending type (0=normal, 1=light)
+	0;//Stoped by walls
+	0;//Affected by lights
 Electric;//name---------------------------------------------------------
 	20;//identifier
 	electric.png;//texture
@@ -106,4 +122,6 @@ Electric;//name---------------------------------------------------------
 	1;//can be rotated (faster if not)
 	-1;//change into another particle when hits ground
 	0;//blending type (0=normal, 1=light)
+	1;//Stoped by walls
+	0;//Affected by lights
 end_of_file;

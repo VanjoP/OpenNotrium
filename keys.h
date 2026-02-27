@@ -10,6 +10,7 @@ typedef SDL_Keycode Key;
 #define KEY_SPACE SDLK_SPACE
 #define KEY_BACK SDLK_BACKSPACE
 #define KEY_DELETE SDLK_DELETE
+#define KEY_TAB SDLK_TAB
 
 #define KEY_A SDLK_a
 #define KEY_B SDLK_b

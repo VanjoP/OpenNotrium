@@ -24,6 +24,16 @@ const float grid_size = 128.0f; //how many pixels is each grid square
 
 const float minimum_distance_from_edge = 0.4f;//how far must items be from map edges
 
+
+struct SectorInstance {
+    int id;                        // Unique ID for THIS specific room (Generated)
+    int preset_id;                 // Blueprint type (e.g., 1 for "Office")
+    int special_id;                // Editor room number (e.g., 1)
+    int parent_sector_id;          // 0 if it's a main sector, or the ID of the parent
+    std::string custom_name;       
+    std::vector<bool> active_tags; // Live status of tags
+};
+
 //bullets
 class bullet
 {
@@ -64,6 +74,8 @@ protected:
         int creatures[20];//list the creatures that are here
         int current_frame;
         float frame_time;
+        unsigned char sector_id;       // Points to a unique SectorInstance::id
+        unsigned char subsector_id;    // Points to a unique SubsectorInstance::id
     };
 
 //	struct row{
@@ -112,7 +124,6 @@ public:
     int create_light(float x, float y, int type, float size, float r, float g, float b, float a, float time);//sets in a light
     void initialize_items(void);//initializes the map
     void initialize_objects(void);//initializes the map
-
     /// obtain reference to grid point at the given grid coordinates
     map::grid_point& at(int x, int y);
 
@@ -124,6 +135,7 @@ public:
 
     /// obtain reference to grid point at the given real coordinates (const version)
     const map::grid_point& at_real(float x, float y) const;
+    std::vector<SectorInstance> sector_instances;
 };
 
 //objects that are on the map, trees, buildings

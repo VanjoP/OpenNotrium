@@ -33,6 +33,11 @@ map::map(int sizex, int sizey, int climate)
 {
     //initialize grid
     this->grid = std::unique_ptr<grid_point[]>(new grid_point[sizex * sizey]);
+
+    for(int i = 0; i < sizex * sizey; ++i) {
+        grid[i].sector_id = 0; 
+        grid[i].sector_id = 1; 
+    }
 }
 
 //normal constructor

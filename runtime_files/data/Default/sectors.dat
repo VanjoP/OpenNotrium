@@ -1,0 +1,25 @@
+No sector;//name
+  0;//identifier
+  none;//texture
+  begin_tags;
+  end_tags;
+Wing;//name
+  1;//identifier
+  bar.png;//texture
+  begin_tags;
+    10;//APC
+  end_tags;
+Main Hallway;//name
+  2;//identifier
+  mapdot.png;//texture
+  begin_tags;
+    0;//LIGHTS
+    1;//NIGHT LIGHTS
+  end_tags;
+Room;//name
+  3;//identifier
+  crate_0.png;//texture
+  begin_tags;
+    0;//LIGHTS
+  end_tags;
+end_of_file;

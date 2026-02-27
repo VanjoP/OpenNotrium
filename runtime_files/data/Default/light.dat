@@ -46,7 +46,7 @@ Ceeling light low;//name-------
 	0.15;//green color component
 	0.45;//blue color component
 	0.4;//alpha color component
-	0.6;//light intensity
+	2.5;//light intensity
 	-1;//flash particle (-1=nothing)
 		0;//flashing speed
 		0;//particle life time   

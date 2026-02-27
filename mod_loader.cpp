@@ -2486,17 +2486,34 @@ void Mod::load_terrain_maps(const string& filename){
                 stringtok (ls, rivi, ",");
                 //int d=ls.size();
                 //separate by .
-                for(int b=0;b<ls.size();b++){
+                for (int b = 0; b < ls.size(); b++) {
+                    terrain_map_base::terrain_grid_base temp_point;
 
-                    terrain_map_base::terrain_grid_base	temp_point;
+                    temp_point.sector_preset_id = 0;
+                    temp_point.sector_special_id = 0;
+                    temp_point.subsector_preset_id = 0;
+                    temp_point.subsector_special_id = 0;
+
                     vector<string> terrain_point_parts;
-                    stringtok (terrain_point_parts, ls[b].c_str(), ".");
+                    stringtok(terrain_point_parts, ls[b].c_str(), ".");
 
-                    temp_point.terrain_type=atoi(terrain_point_parts[0].c_str());
-                    temp_point.no_random_items=atoi(terrain_point_parts[1].c_str());
+                    if (terrain_point_parts.size() >= 2) {
+                        temp_point.terrain_type = atoi(terrain_point_parts[0].c_str());
+                        temp_point.no_random_items = atoi(terrain_point_parts[1].c_str());
+                    }
 
+                    // Load Sector Data (Part 3 and 4)
+                    if (terrain_point_parts.size() >= 4) {
+                        temp_point.sector_preset_id = (unsigned char)atoi(terrain_point_parts[2].c_str());
+                        temp_point.sector_special_id = (unsigned char)atoi(terrain_point_parts[3].c_str());
+                    }
+
+                    if (terrain_point_parts.size() >= 6) {
+                        temp_point.subsector_preset_id = (unsigned char)atoi(terrain_point_parts[4].c_str());
+                        temp_point.subsector_special_id = (unsigned char)atoi(terrain_point_parts[5].c_str());
+                    }
+                
                     temp_row.terrain_blocks.push_back(temp_point);
-                    //map_list[a*height+b]=atoi(ls[b].c_str());
                 }
                 temp_map.terrain_grid.push_back(temp_row);
             }
@@ -2517,6 +2534,32 @@ void Mod::load_terrain_maps(const string& filename){
 
                 temp_map.map_objects.push_back(temp_object);
             }
+
+        //   // 1. Scan the loaded grid for the highest sector ID
+        //     int max_sid = 0;
+        //     for (const auto& row : temp_map.terrain_grid) {
+        //         for (const auto& block : row.terrain_blocks) {
+        //             if (block.sector_id > max_sid) max_sid = block.sector_id;
+        //         }
+        //     }
+
+        //     // 2. Populate the template's sector instances
+        //     temp_map.sector_instances.clear();
+
+        //     // 2. Populate the template's sector list based on the IDs found in the grid
+        //    for (int s = 1; s <= max_sid; s++) {
+        //     SectorPreset sp; // Use the correct struct name defined in mod_loader.h
+        //     sp.identifier = s;
+        //     sp.name = "Sector " + std::to_string(s);
+        //     sp.default_tags.assign(this->general_tags.size(), false);
+            
+        //     // If you are populating the instance list:
+        //     SectorInstance inst;
+        //     inst.preset_id = 0; // Default preset
+        //     inst.custom_name = sp.name;
+        //     inst.active_tags.assign(this->general_tags.size(), false);
+        //     temp_map.sector_instances.push_back(inst);
+        // }
 
             //if the identifier is bigger than current list size, increase list size
             temp_map.dead=true;
@@ -2547,9 +2590,8 @@ void Mod::save_terrain_maps(string filename){
     FILE *fil;
 
     fil = fopen(filename.c_str(),"wt");
-    terrain_map_base temp_map;
     for(unsigned int a=0;a<terrain_maps.size();a++){
-        temp_map=terrain_maps[a];
+        auto& temp_map = terrain_maps[a];
         if(temp_map.dead)continue;
 
         fprintf(fil, "%s;//name---------------------------------------\n", temp_map.name.c_str());
@@ -2561,11 +2603,22 @@ void Mod::save_terrain_maps(string filename){
         fprintf(fil, "  begin_map_grid;\n");
         for(unsigned int b=0;b<temp_map.terrain_grid.size();b++){
             fprintf(fil, "    ");
-            for(unsigned int c=0;c<temp_map.terrain_grid[b].terrain_blocks.size();c++){
-                fprintf(fil, "%d", temp_map.terrain_grid[b].terrain_blocks[c].terrain_type);
-                fprintf(fil, ".");
-                fprintf(fil, "%d", temp_map.terrain_grid[b].terrain_blocks[c].no_random_items);
-                if(c==temp_map.terrain_grid[b].terrain_blocks.size()-1)
+            for(unsigned int c=0; c < temp_map.terrain_grid[b].terrain_blocks.size(); c++){
+                auto& block = temp_map.terrain_grid[b].terrain_blocks[c];
+                
+                // Format: Terrain.NoRandom.SectorPreset.SectorInstance
+                    fprintf(fil, "%d.%d.%d.%d.%d.%d",
+                        block.terrain_type, 
+                        block.no_random_items, 
+                        (int)block.sector_preset_id, 
+                        (int)block.sector_special_id,
+                        (int)block.subsector_preset_id,
+                        (int)block.subsector_special_id);
+                        
+                // Optional: Add subsectors if you are using them
+                // fprintf(fil, ".%d.%d", (int)block.subsector_preset_id, (int)block.subsector_special_id);
+
+                if(c == temp_map.terrain_grid[b].terrain_blocks.size() - 1)
                     fprintf(fil, "\n");
                 else
                     fprintf(fil, ",");
@@ -2686,11 +2739,90 @@ void Mod::load_music(const string& filename){
     debug->debug_output("Load file "+filename,Action::END,Logfile::STARTUP);
 }
 
+void Mod::load_tags(const std::string& filename) {
+    FILE *fil = fopen(filename.c_str(), "rt");
+    if (!fil) return;
+
+    char rivi[2000];
+    // general_tags is our std::vector<Tag>
+    general_tags.clear();
+
+    while (strcmp(stripped_fgets(rivi, sizeof(rivi), fil), "end_of_file") != 0) {
+        tag_base temp_tag;
+        temp_tag.name = rivi; // The name from the first line
+        
+        // Get the identifier from the second line
+        char* id_line = stripped_fgets(rivi, sizeof(rivi), fil);
+        if (id_line) {
+            temp_tag.identifier = atoi(id_line);
+        }
+
+        // Padding logic: Ensure the vector is large enough to use the ID as an index
+        temp_tag.dead = true;
+        while (general_tags.size() < (size_t)temp_tag.identifier + 1) {
+            general_tags.push_back(temp_tag);
+        }
+
+        // Place the tag in its correct slot
+        temp_tag.dead = false;
+        general_tags[temp_tag.identifier] = temp_tag;
+    }
+    fclose(fil);
+}
+void Mod::load_sector_presets(const std::string& filename) {
+    FILE *fil = fopen(filename.c_str(), "rt");
+    if (!fil) return;
+
+    char rivi[2000];
+    general_sector_presets.clear();
+
+    while (true) {
+        char* name_line = stripped_fgets(rivi, sizeof(rivi), fil);
+        if (!name_line || strstr(name_line, "end_of_file")) break;
+
+        SectorPreset temp_preset;
+        temp_preset.name = name_line;
+
+        // 1. READ ID
+        char* id_line = stripped_fgets(rivi, sizeof(rivi), fil);
+        if (!id_line) break;
+        temp_preset.identifier = atoi(id_line);
+
+        char* tex_line = stripped_fgets(rivi, sizeof(rivi), fil);
+        if (tex_line) {
+            temp_preset.texture = resources->load_texture(rivi,mod_name);
+        }
+
+        // 2. READ TAG BLOCK START
+        char* tag_start = stripped_fgets(rivi, sizeof(rivi), fil);
+        // Use strstr to be safe against missing semicolons or hidden spaces
+        if (tag_start && strstr(tag_start, "begin_tags")) {
+            while (true) {
+                char* tag_line = stripped_fgets(rivi, sizeof(rivi), fil);
+                if (!tag_line || strstr(tag_line, "end_tags")) break;
+                
+                temp_preset.default_tags.push_back(atoi(tag_line));
+            }
+        }
+
+        // 3. STORAGE
+        while (general_sector_presets.size() < (size_t)temp_preset.identifier + 1) {
+            SectorPreset dummy; dummy.dead = true;
+            general_sector_presets.push_back(dummy);
+        }
+        temp_preset.dead = false;
+        general_sector_presets[temp_preset.identifier] = temp_preset;
+    }
+    fclose(fil);
+}
+
 void Mod::load_mod(const string& mod, debugger *debugger, resource_handler *resources){
     debug=debugger;
     this->resources=resources;
     this->mod_name=mod;
 
+    load_tags("data/"+mod_name+"/tags.dat");
+    load_sector_presets("data/" + mod_name + "/sectors.dat");
     load_object_info("data/"+mod_name+"/object_definitions.dat");
     load_climate_info("data/"+mod_name+"/climate_types.dat");
     load_creature_info("data/"+mod_name+"/creatures.dat");

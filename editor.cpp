@@ -204,6 +204,18 @@ bool Editor::render_map(float elapsed, mouse_control_base mouse_controls){
     if(grim->Key_Click(KEY_F2)){
         show_selector(1);
     }
+    if (selector_active == 1) { 
+        if (grim->Key_Click(KEY_TAB)) {
+            // ...switch it to the Sector selector!
+            show_selector(7); 
+        }
+    } 
+    // Optionally, allow TAB to switch back
+    else if (selector_active == 7) {
+        if (grim->Key_Click(KEY_TAB)) {
+            show_selector(1);
+        }
+    }
     if(grim->Key_Click(KEY_F3)){
         show_selector(2);
     }
@@ -279,6 +291,8 @@ void Editor::start_editor(Engine *grim, Mod *mod_to_edit, text_output *text_mana
     grid_size_zoom=128.0f;
     zoom=1;
     select_type=0;
+    this->editing_sub_layer = false; 
+    this->instance_id = 1;
 
     spot_texture=resources->load_texture("bar.png","Default");
 
@@ -327,7 +341,7 @@ void Editor::draw_map_grid(float elapsed, mouse_control_base mouse_controls){//r
             int current_type = block.terrain_type;
             int current_texture = mod_to_edit->terrain_types[current_type].terrain_frames[0].texture;
 
-            // Only switch texture and restart batch if the terrain type changes
+            // Standard texture switch logic
             if (current_texture != last_texture) {
                 if (batch_active) grim->Quads_End();
                 
@@ -340,25 +354,26 @@ void Editor::draw_map_grid(float elapsed, mouse_control_base mouse_controls){//r
 
             grim->Quads_Draw(-camera_x + i * grid_size_zoom, -camera_y + j * grid_size_zoom, grid_size_zoom, grid_size_zoom);
 
-            // Handle the "No Random Items" overlay
-            if (block.no_random_items == 1) {
-                grim->Quads_End(); // Temporarily stop terrain batch
+            // --- THE FIX: Handle the "No Random Items" overlay properly ---
+            if (block.no_random_items == 1) {                
                 grim->System_SetState_Blending(true);
-                
                 resources->Texture_Set(mod_to_edit->terrain_types[1].terrain_frames[0].texture);
                 grim->Quads_Begin();
                 grim->Quads_Draw(-camera_x + i * grid_size_zoom, -camera_y + j * grid_size_zoom, grid_size_zoom, grid_size_zoom);
-                grim->Quads_End();
+                grim->Quads_End(); // Terminate the overlay batch immediately
                 
-                // Restore terrain batch
+                // CRITICAL FIX: Reset these so the next iteration re-opens the terrain batch correctly
+                last_texture = -1; 
+                batch_active = false;
                 grim->System_SetState_Blending(false);
-                resources->Texture_Set(current_texture);
-                grim->Quads_Begin();
             }
         }
     }
 
-    if (batch_active) grim->Quads_End();
+    if (batch_active) {
+        grim->Quads_End();
+        batch_active = false; // Reset the flag
+    }
 
     //objects
     int closest=-1;
@@ -394,6 +409,50 @@ void Editor::draw_map_grid(float elapsed, mouse_control_base mouse_controls){//r
         grim->Quads_SetColor(0.7f, 0.7f, 0.7f, 1);
         object_draw(&temp_object, elapsed, false);
     }
+
+
+    // --- Pass: Sector Overlay (Drawn AFTER all tiles and objects) ---
+    if (paint_tool_object.type == 7) { 
+        grim->System_SetState_Blending(true);
+        grim->Quads_SetRotation(0);
+        grim->Quads_SetSubset(0, 0, 1, 1); // Ensure we aren't drawing a tiny corner of the texture
+
+        for (int j = screen_start_y; j < screen_end_y; j++) {
+            for (int i = screen_start_x; i < screen_end_x; i++) {
+                auto& block = mod_to_edit->terrain_maps[edited_area].terrain_grid[j].terrain_blocks[i];
+
+                if (block.sector_preset_id > 0) {
+                    float draw_x = -camera_x + i * grid_size_zoom;
+                    float draw_y = -camera_y + j * grid_size_zoom;
+
+                    // --- MAIN-SECTOR RENDERING ---
+                    if (block.sector_preset_id > 0) {
+                        // If editing Main, draw full detail. If editing Sub, draw dimmed icon only.
+                        if (!editing_sub_layer) {
+                            draw_full_sector_info(draw_x, draw_y, block.sector_preset_id, block.sector_special_id, false);
+                        } else {
+                            draw_dimmed_icon(draw_x, draw_y, block.sector_preset_id, false);
+                        }
+                    }
+
+                    // --- SUB-SECTOR RENDERING ---
+                    if (block.subsector_preset_id > 0) {
+                        // If editing Sub, draw full detail. If editing Main, draw dimmed icon only.
+                        if (editing_sub_layer) {
+                            draw_full_sector_info(draw_x, draw_y, block.subsector_preset_id, block.subsector_special_id, true);
+                        } else {
+                            draw_dimmed_icon(draw_x, draw_y, block.subsector_preset_id, true);
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+    grim->Quads_SetRotation(0);
+    grim->Quads_SetColor(1, 1, 1, 1);
+
 
     //start selection box
     if((select_type==0)&&(paint_tool_object.type==0))
@@ -637,8 +696,11 @@ void Editor::draw_selector(float elapsed, mouse_control_base mouse_controls){//r
     case 6:
         items_amount=mod_to_edit->general_objects.size();
         break;
+    case 7:
+        items_amount=mod_to_edit->general_sector_presets.size();
+        break;
     }
-
+    
     int slot=0;
     string name_info="";
     string tooltip_info="";
@@ -668,11 +730,13 @@ void Editor::draw_selector(float elapsed, mouse_control_base mouse_controls){//r
                 paint_tool_object.rotation=0;
             }
         }
+        if(texture >= 0) {
 
-        resources->Texture_Set(texture);
-        grim->Quads_Begin();
-        grim->Quads_Draw(x*128, y*128-selector_spot, 128, 128);
-        grim->Quads_End();
+            resources->Texture_Set(texture);
+            grim->Quads_Begin();
+            grim->Quads_Draw(x*128, y*128-selector_spot, 128, 128);
+            grim->Quads_End();
+        }
 
         slot++;
     }
@@ -840,7 +904,94 @@ void Editor::draw_brush(mouse_control_base mouse_controls, float elapsed){
                 object_draw(&paint_tool_object,elapsed,true);
             }
             break;
-    }
+        case 7: // Sector Ghost Brush
+            {
+                // 1. Calculate grid position (same as your terrain logic)
+                int x_grid = (int)((camera_x + mouse_controls.mousex) / grid_size_zoom);
+                int y_grid = (int)((camera_y + mouse_controls.mousey) / grid_size_zoom);
+
+                float r = (float)((instance_id * 50) % 255) / 255.0f;
+                float g = (float)((instance_id * 80) % 255) / 255.0f;
+                float b = (float)((instance_id * 110) % 255) / 255.0f;
+
+                // Update the paint tool position for the engine
+                paint_tool_object.x = x_grid * grid_size_zoom;
+                paint_tool_object.y = y_grid * grid_size_zoom;
+
+                if (grim->Key_Click(KEY_D)) {
+                    instance_id++;
+                    if (instance_id > 255) instance_id = 1; // Wrap around at max unsigned char
+                }
+                if (grim->Key_Click(KEY_A)) {
+                    instance_id--;
+                    if (instance_id < 1) instance_id = 255; // Wrap around to max
+                }
+
+                if (grim->Key_Click(KEY_W)) {
+                    editing_sub_layer = true; // Switch to Sub-Sector
+                }
+                if (grim->Key_Click(KEY_S)) {
+                    editing_sub_layer = false; // Switch to Main-Sector
+                }
+
+                // --- UPDATE UI TEXT ---
+
+                float text_x = 20;
+                float text_y = screen_height - 100;
+                string name = "Sector Tool";
+                string info = (editing_sub_layer ? "Sub-Sector ID: " : "Main-Sector ID: ") + to_string(instance_id);
+
+                grim->Quads_SetRotation(0);
+                text_manager->write(-1, name, 1, text_x, text_y, screen_width, screen_height, 1, 1, 1, 1);
+                text_manager->write(-1, info, 1, text_x, text_y + 20, screen_width, screen_height, 1, 1, 1, 1);
+
+                // 2. Safety check: Is the selected preset valid?
+                int p_idx = paint_tool_object.number;
+                grim->Quads_SetColor(1.0f, 1.0f, 1.0f, 0.6f); 
+                if (p_idx >= 0 && p_idx < (int)mod_to_edit->general_sector_presets.size() && 
+                    !mod_to_edit->general_sector_presets[p_idx].dead) {
+                    
+                    // 3. Render the Ghost
+                    grim->Quads_SetRotation(0);
+                    grim->Quads_SetSubset(0, 0, 1, 1);
+                    grim->System_SetState_Blending(true);
+                    
+                    // Use the specific texture we loaded for this sector
+                   // 1. Draw the colored backing for the ghost
+                    resources->Texture_Set(spot_texture);
+                    grim->Quads_SetColor(r, g, b, 0.6f); // Preview is a bit more transparent
+                    grim->Quads_Begin();
+                    grim->Quads_SetRotation(0);
+                    grim->Quads_Draw(x_grid * grid_size_zoom - camera_x + (grid_size_zoom * 0.25f), 
+                                    y_grid * grid_size_zoom - camera_y + (grid_size_zoom * 0.25f), 
+                                    grid_size_zoom * 0.5f, grid_size_zoom * 0.5f);
+                    grim->Quads_End();
+
+                    // 2. Draw the icon ghost
+                    int p_idx = paint_tool_object.number;
+                    if (p_idx >= 0 && p_idx < (int)mod_to_edit->general_sector_presets.size()) {
+                        resources->Texture_Set(mod_to_edit->general_sector_presets[p_idx].texture);
+                        grim->Quads_SetColor(1.0f, 1.0f, 1.0f, 0.5f);
+                        grim->Quads_Begin();
+                        grim->Quads_Draw(x_grid * grid_size_zoom - camera_x + (grid_size_zoom * 0.3f), 
+                                        y_grid * grid_size_zoom - camera_y + (grid_size_zoom * 0.3f), 
+                                        grid_size_zoom * 0.4f, grid_size_zoom * 0.4f);
+                        grim->Quads_End();
+                    }
+                }
+                if (mouse_controls.mouse_left) {
+                  
+                    // We also pass paint_tool_object.number, but the function 
+                    // will check paint_tool_object.type to know it's a Sector.
+                    paint(x_grid, y_grid, paint_tool_object.number, -1);
+                }
+
+                if (!key_f && key_f2) {
+                    paint(x_grid, y_grid, paint_tool_object.number, -2);
+                }
+            }
+            break;
+        }
 
     /*if(texture>=0){
         grim->Quads_SetRotation(0);
@@ -927,6 +1078,51 @@ void Editor::find_object_type(int type, int number, bool *dead, string *name, st
             *size=mod_to_edit->general_objects[number].base_size*grid_size_zoom;
 
             break;
+       case 7: // Sectors
+            // 1. Boundary check to prevent crashes
+            if (number < 0 || number >= (int)mod_to_edit->general_sector_presets.size()) {
+                *dead = true;
+                return;
+            }
+
+            // 2. Check if the slot is empty
+            if (mod_to_edit->general_sector_presets[number].dead) {
+                *dead = true;
+                return;
+            }
+
+            // 3. Populate data safely
+            *dead = false;
+            *texture = mod_to_edit->general_sector_presets[number].texture;
+            *name = mod_to_edit->general_sector_presets[number].name;
+            *size = (float)grid_size_zoom; 
+
+            string tags_list = "Tags: ";
+    
+            auto& preset = mod_to_edit->general_sector_presets[number];
+
+            if (preset.default_tags.empty()) {
+                tags_list += "None";
+            } else {
+                for (size_t i = 0; i < preset.default_tags.size(); ++i) {
+                    int tag_id = preset.default_tags[i];
+
+                    // Safety check: Does this Tag ID exist in our general_tags list?
+                    if (tag_id >= 0 && tag_id < (int)mod_to_edit->general_tags.size() && !mod_to_edit->general_tags[tag_id].dead) {
+                        tags_list += mod_to_edit->general_tags[tag_id].name;
+                    } else {
+                        tags_list += "Unknown(" + to_string(tag_id) + ")";
+                    }
+
+                    // Add a comma if it's not the last tag in the list
+                    if (i < preset.default_tags.size() - 1) {
+                        tags_list += ", ";
+                    }
+                }
+            }
+
+            *tooltip = tags_list;
+            break;
     }
 
 }
@@ -956,6 +1152,8 @@ void Editor::object_draw(Mod::terrain_map_base::editor_object_base *object, floa
     float text_y=screen_height-100;
     string info;
     bool draw=true;
+
+
     switch(object->type){
         //item
         case 2:
@@ -1084,6 +1282,21 @@ void Editor::object_draw(Mod::terrain_map_base::editor_object_base *object, floa
                 if(object->size<0.1f)object->size=0.1f;
             }
             break;
+        case 7: // Sectors
+        {
+            // Display and change the Special ID (1-255)
+            info = (editing_sub_layer ? "Sub-Sector ID: " : "Main-Sector ID: ") + to_string(instance_id);
+
+            if (grim->Key_Click(KEY_D)) {
+                instance_id++;
+                if (instance_id > 255) instance_id = 1;
+            }
+            if (grim->Key_Click(KEY_A)) {
+                instance_id--;
+                if (instance_id < 1) instance_id = 255;
+            }
+        }
+        break;
     }
 
     //picture
@@ -1177,63 +1390,86 @@ void Editor::object_draw(Mod::terrain_map_base::editor_object_base *object, floa
     }
 }
 
-void Editor::paint(int x_grid, int y_grid, int terrain_type, int flood_fill){
-
-    if(terrain_type!=1)
-    if(flood_fill==terrain_type)
+void Editor::paint(int x_grid, int y_grid, int paint_id, int flood_fill) {
+    // 1. Map Boundary Check
+    if (y_grid < 0 || y_grid >= mod_to_edit->terrain_maps[edited_area].terrain_grid.size() ||
+        x_grid < 0 || x_grid >= mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks.size()) {
         return;
+    }
 
-    if((y_grid<mod_to_edit->terrain_maps[edited_area].terrain_grid.size())&&(y_grid>=0)&&(x_grid<mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks.size())&&(x_grid>=0)){
+    auto& block = mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid];
 
-        //asked for flood fill
-        if(flood_fill==-2){
-            if(terrain_type==1)
-                flood_fill=mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].no_random_items;
-            else
-                flood_fill=mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].terrain_type;
+    // --- SECTOR PAINTING (Global Category 7) ---
+    if (paint_tool_object.type == 7) {
+        
+        // Initialization: We must capture the EXACT state (Preset AND Special ID) of the starting tile
+        if (flood_fill == -2) {
+            // We use the Special ID as the primary search key for the spread
+            flood_fill = editing_sub_layer ? (int)block.subsector_special_id : (int)block.sector_special_id;
+            
+            // If the tile we clicked is already exactly what we are painting, stop.
+            int current_preset = editing_sub_layer ? (int)block.subsector_preset_id : (int)block.sector_preset_id;
+            if (flood_fill == instance_id && current_preset == paint_id) return; 
         }
 
-        //see if this terrain is the asked flood fill terrain
-        if(flood_fill>=0){
-            if(terrain_type==1){
-                if(flood_fill!=mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].no_random_items)
-                    return;
-            }
-            else{
-                if(flood_fill!=mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].terrain_type)
-                    return;
-            }
+        if (editing_sub_layer) {
+            // SPREAD CONDITION: 
+            // 1. Must match the Special ID we are replacing (flood_fill)
+            if (flood_fill >= 0 && (int)block.subsector_special_id != flood_fill) return;
+            
+            // 2. TERMINATION: Stop if this tile is already the new Preset AND new Instance ID
+            if ((int)block.subsector_special_id == instance_id && (int)block.subsector_preset_id == paint_id) return;
 
-            //paint with terrain
-            if(terrain_type!=1)
-                mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].terrain_type=terrain_type;
-            //paint with no random object
-            else{
-                if(mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].no_random_items==1)
-                    mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].no_random_items=0;
-                else mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].no_random_items=1;
-            }
+            block.subsector_preset_id = (unsigned char)paint_id;
+            block.subsector_special_id = (unsigned char)instance_id;
+        } else {
+            if (flood_fill >= 0 && (int)block.sector_special_id != flood_fill) return;
+            if ((int)block.sector_special_id == instance_id && (int)block.sector_preset_id == paint_id) return;
 
-            //ask flood fill for all nearby terrains
-            paint(x_grid-1,y_grid,terrain_type,flood_fill);
-            paint(x_grid+1,y_grid,terrain_type,flood_fill);
-            paint(x_grid,y_grid-1,terrain_type,flood_fill);
-            paint(x_grid,y_grid+1,terrain_type,flood_fill);
+            block.sector_preset_id = (unsigned char)paint_id;
+            block.sector_special_id = (unsigned char)instance_id;
         }
-        else{
 
-            //paint with terrain
-            if(terrain_type!=1)
-                mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].terrain_type=terrain_type;
-            //paint with no random object
-            else{
-                /*if(mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].no_random_items==1)
-                    mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].no_random_items=0;
-                else mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].no_random_items=1;*/
-                if(start_norandom==1)
-                    mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].no_random_items=0;
-                else mod_to_edit->terrain_maps[edited_area].terrain_grid[y_grid].terrain_blocks[x_grid].no_random_items=1;
+        // Recursive Spread
+        if (flood_fill >= 0) {
+            paint(x_grid - 1, y_grid, paint_id, flood_fill);
+            paint(x_grid + 1, y_grid, paint_id, flood_fill);
+            paint(x_grid, y_grid - 1, paint_id, flood_fill);
+            paint(x_grid, y_grid + 1, paint_id, flood_fill);
+        }
+        return; 
+    }
 
+    // --- TERRAIN PAINTING (Global Category 1) ---
+    if (paint_tool_object.type == 1) {
+        // Your original "No Random Items" vs "Normal Terrain" logic
+        if (paint_id != 1 && flood_fill == paint_id) return;
+
+        if (flood_fill == -2) {
+            flood_fill = (paint_id == 1) ? block.no_random_items : block.terrain_type;
+        }
+
+        if (flood_fill >= 0) {
+            if (paint_id == 1) {
+                if (flood_fill != block.no_random_items) return;
+            } else {
+                if (flood_fill != block.terrain_type) return;
+            }
+
+            if (paint_id != 1) block.terrain_type = paint_id;
+            else block.no_random_items = (block.no_random_items == 1) ? 0 : 1;
+
+            // Terrain Flood Fill Recursion
+            paint(x_grid - 1, y_grid, paint_id, flood_fill);
+            paint(x_grid + 1, y_grid, paint_id, flood_fill);
+            paint(x_grid, y_grid - 1, paint_id, flood_fill);
+            paint(x_grid, y_grid + 1, paint_id, flood_fill);
+        } else {
+            // Standard single-click paint
+            if (paint_id != 1) {
+                block.terrain_type = paint_id;
+            } else {
+                block.no_random_items = (start_norandom == 1) ? 0 : 1;
             }
         }
     }
@@ -1242,4 +1478,43 @@ void Editor::paint(int x_grid, int y_grid, int terrain_type, int flood_fill){
 void Editor::center_map(void){
     camera_x=(mod_to_edit->terrain_maps[edited_area].terrain_grid[0].terrain_blocks.size()*128*0.5f*zoom-screen_width/2);
     camera_y=(mod_to_edit->terrain_maps[edited_area].terrain_grid.size()*128*0.5f*zoom-screen_height/2);
+}
+
+void Editor::draw_full_sector_info(float x, float y, int preset_id, int special_id, bool is_sub) {
+    auto& preset = mod_to_edit->general_sector_presets[preset_id];
+    
+    // 1. Dynamic Color Background
+    float r = (float)((special_id * 50) % 255) / 255.0f;
+    float g = (float)((special_id * 80) % 255) / 255.0f;
+    float b = (float)((special_id * 110) % 255) / 255.0f;
+    
+    resources->Texture_Set(spot_texture);
+    grim->Quads_SetColor(r, g, b, 0.6f);
+    grim->Quads_Begin();
+    grim->Quads_Draw(x + (grid_size_zoom * 0.2f), y + (grid_size_zoom * 0.2f), grid_size_zoom * 0.6f, grid_size_zoom * 0.6f);
+    grim->Quads_End();
+
+    // 2. Icon & ID
+    resources->Texture_Set(preset.texture);
+    grim->Quads_SetColor(1, 1, 1, 0.9f);
+    grim->Quads_Begin();
+    grim->Quads_Draw(x + (grid_size_zoom * 0.3f), y + (grid_size_zoom * 0.3f), grid_size_zoom * 0.4f, grid_size_zoom * 0.4f);
+    grim->Quads_End();
+
+    // 3. Text (Name, ID, Tags)
+    text_manager->write(-1, preset.name, 0.45f * zoom, x + 5, y + 5, screen_width, screen_height, 1, 1, 1, 1);
+    text_manager->write(-1, to_string(special_id), 0.6f * zoom, x + (grid_size_zoom * 0.4f), y + (grid_size_zoom * 0.4f), screen_width, screen_height, 0, 1, 1, 1);
+
+    grim->Quads_SetSubset(0,0,1,1);
+}
+
+void Editor::draw_dimmed_icon(float x, float y, int preset_id, bool is_sub) {
+    // Shift position based on layer so they don't overlap
+    float offset = is_sub ? (grid_size_zoom * 0.6f) : 0.0f;
+    
+    resources->Texture_Set(mod_to_edit->general_sector_presets[preset_id].texture);
+    grim->Quads_SetColor(1, 1, 1, 0.2f); // Very faint alpha
+    grim->Quads_Begin();
+    grim->Quads_Draw(x + offset, y + offset, grid_size_zoom * 0.3f, grid_size_zoom * 0.3f);
+    grim->Quads_End();
 }

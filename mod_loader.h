@@ -15,6 +15,30 @@ protected:
 
 public:
 
+    //Sector tags
+    struct tag_base {
+        bool dead;
+        int identifier;
+        std::string name;
+    };
+
+    struct SectorPreset {
+        bool dead;                     // Used for vector index validation
+        int identifier;
+        int texture;
+        std::string name;
+        std::vector<int> default_tags; 
+    };
+
+    struct SectorInstance {
+    int preset_id;         // Points to the Blueprint (DNA)
+    int special_id;        // The "1" from your A-D keys
+    
+    // The current status of every tag this room has.
+    // Indexed by Tag ID for O(1) lookup speed.
+    std::vector<bool> active_tags;
+    };
+
     struct effect{
         int effect_number;
         float parameter1;
@@ -547,7 +571,13 @@ public:
             int terrain_type;
             //int AI_avoid;
             int no_random_items;
+            // Main Sector Layer (The Parent)
+            unsigned char sector_preset_id; 
+            unsigned char sector_special_id; 
 
+            // Subsector Layer (The Child)
+            unsigned char subsector_preset_id;
+            unsigned char subsector_special_id;
         };
         //terrain grid
         struct terrain_grid_row_base{
@@ -567,7 +597,8 @@ public:
 
         std::vector <terrain_grid_row_base> terrain_grid;
         std::vector <editor_object_base> map_objects;
-
+        std::vector<SectorInstance> sector_instances;
+        std::vector<SectorInstance> subsector_instances;
     };
 
     //dialogs
@@ -589,6 +620,9 @@ public:
         bool can_be_random;
     };
 
+
+    std::vector<tag_base> general_tags;
+    std::vector<SectorPreset> general_sector_presets;
     std::vector <general_race_base> general_races;//race info from file
     std::vector <std::string> difficulty_level_descriptions;
     std::vector <animation_base> animations;
@@ -615,6 +649,8 @@ public:
     debugger *debug;
     resource_handler *resources;
 
+    void load_tags(const std::string& filename);
+    void load_sector_presets(const std::string& filename);
     void print_effect_numbers(FILE *fil);
     void load_animation_info(const std::string& filename);//loads item info from file
     void load_light_info(const std::string& filename);//loads light info from file
@@ -637,7 +673,6 @@ public:
     void save_terrain_maps(std::string filename);
     void load_dialogs(const std::string& filename);
     void load_music(const std::string& filename);
-
     void load_mod(const std::string& mod, debugger *debugger, resource_handler *resources);
 
     //editor();//constructor

@@ -8,12 +8,12 @@ Base;//name---------------------------------------------------------------------
 		1;//light r amplitude
 		1;//light g amplitude
 		1;//light b amplitude
-		0.05;//light max r
-		0.05;//light max g
-		0.1;//light max b
-		0.05;//light min r
-		0.05;//light min g
-		0.1;//light min b
+		0.025;//light max r
+		0.025;//light max g
+		0.05;//light max b
+		0.025;//light min r
+		0.025;//light min g
+		0.05;//light min b
 	0;//night temperature
 	0;//day temperature
 	0.0;//maximum wind speed
@@ -34,3 +34,4 @@ Base;//name---------------------------------------------------------------------
 	start_of_props;
 	end_of_props;
 end_of_file;
+

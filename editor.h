@@ -15,6 +15,7 @@ class Editor
 {
 protected:
     float grid_size_zoom;
+    int font; // Add this line to store the font handle
     float zoom;
     resource_handler *resources;
     Engine *grim;
@@ -32,6 +33,9 @@ protected:
     //int paint_tool_number;
     //int paint_tool_type;
 
+    bool editing_sub_layer;  // Tracks if we are on Main or Sub layer
+    int instance_id;         // Reused for both layers: the ID from A-D keys
+
     int select_type;//0=paint_tool, 1=select object box, 2=move selected objects
     float select_start_x,select_start_y,select_end_x,select_end_y;
     std::vector <int> selected_objects;
@@ -43,7 +47,8 @@ protected:
 
     void draw_map_grid(float elapsed, mouse_control_base mouse_controls);
     void draw_selector(float elapsed, mouse_control_base mouse_controls);
-
+    void draw_full_sector_info(float x, float y, int preset_id, int special_id, bool is_sub);
+    void draw_dimmed_icon(float x, float y, int preset_id, bool is_sub);
 
     void show_selector(int type);
     void create_new_terrain_map(void);

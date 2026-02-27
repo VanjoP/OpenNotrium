@@ -56,7 +56,10 @@ int text_output::write(int font, const string& text, float size, float x0,float 
     while(true){
         if(a>=teksti_pituus)break;
             if((text[a]==' ')||(a==teksti_pituus-1)){
-                if(rivi*rivi_korkeus>y1-y0)return rivi;//lower edge, stop
+                if(rivi*rivi_korkeus > y1-y0){
+                    grim->Quads_End();
+                    return rivi;
+                };//lower edge, stop
 
                 if(x_cursor>rivin_pituus){//gone over end of line, change line
                     x_cursor=0;

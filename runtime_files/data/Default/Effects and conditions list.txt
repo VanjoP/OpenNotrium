@@ -142,3 +142,64 @@ Effect/Condition List
 	44 = Creature's bar parameter0 is more than parameter1 percent of maximum (value of 100=100%)
 	45 = Last weapon to hit creature was weapon type parameter0 (negative=weapon class), and the weapon hit in the previous parameter1 milliseconds
 	46 = Must have item class parameter0 amount parameter1 (use 0 for checking if the player doesn't have such an item)
+
+
+
+	1000;//interval in milliseconds ****NIGHT LIGHTS****
+			begin_conditions;
+				0;//condition------------------------------IT IS NIGHT
+					1008.000000;//condition parameter0
+					0.000000;//condition parameter1
+				39;//condition------------------------------IT IS NOT NIGHT LIGHT
+					2.000000;//condition parameter0
+					3.000000;//condition parameter1
+				47;//condition------------------------------HAS NIGHT LIGHTS TAG
+					1.000000;//condition parameter0
+					1.000000;//condition parameter1
+			end_conditions;
+			begin_effects;
+				7;//effect number----------------------TURN INTO LOW LIGHT
+					3.000000;//parameter1
+					0.250000;//parameter2
+					2.000000;//parameter3
+					0.000000;//parameter4
+				17;//effect number----------------------TURN NIGHT
+					3.000000;//parameter1
+					0.000000;//parameter2
+					2.000000;//parameter3
+					0.000000;//parameter4
+				14;//effect number----------------------PLAY LIGHT SWITCH SOUND
+					5.000000;//parameter1
+					1.000000;//parameter2
+					0.000000;//parameter3
+					0.000000;//parameter4
+			end_effects;
+		1000;//interval in milliseconds ****NO LIGHTS****
+			begin_conditions;
+				39;//condition------------------------------IT IS ON
+					2.000000;//condition parameter0
+					1.000000;//condition parameter1
+				47;//condition------------------------------NO LIGHTS TAG
+					0.000000;//condition parameter0
+					0.000000;//condition parameter1
+				47;//condition------------------------------NO NIGHT LIGHTS TAG
+					1.000000;//condition parameter0
+					0.000000;//condition parameter1
+			end_conditions;
+			begin_effects;
+				7;//effect number----------------------TURN INTO LOW LIGHT
+					-1.000000;//parameter1
+					0.250000;//parameter2
+					2.000000;//parameter3
+					0.000000;//parameter4
+				17;//effect number----------------------TURN OFF
+					1.000000;//parameter1
+					0.000000;//parameter2
+					2.000000;//parameter3
+					0.000000;//parameter4
+				14;//effect number----------------------PLAY LIGHT SWITCH SOUND
+					5.000000;//parameter1
+					1.000000;//parameter2
+					0.000000;//parameter3
+					0.000000;//parameter4
+			end_effects;

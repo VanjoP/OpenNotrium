@@ -8,6 +8,8 @@ Makefile
 # directories according to build instructions
 /build/
 /out/
+.vscode-extension/node_modules
+.vscode-extension/out
 
 # Mac system files
 .DS_Store

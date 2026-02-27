@@ -22,7 +22,7 @@ Engine *grim = NULL;
 game_engine *engine;
 //HHOOK hkb;
 int bug1=0,bug2=0,bug3=0;//debugging variables
-bool debugging=false;//debugging control
+bool debugging=true;//debugging control
 
 float turn_speed=0.009f*2;
 float movement_speed=0.35f;
@@ -411,9 +411,9 @@ bool game_engine::Frame(void)
 
 
     //debugging
-    if (grim->Key_Down(KEY_KP_SUBTRACT))
+    if (grim->Key_Down(KEY_O))
         debugging=false;
-    if (grim->Key_Down(KEY_KP_ADD))
+    if (grim->Key_Down(KEY_L))
         debugging=true;
 
     if ((grim->Key_Down(KEY_LALT) || grim->Key_Down(KEY_RALT)) && grim->Key_Click(KEY_G)) {
@@ -841,18 +841,72 @@ void game_engine::uninitialize_game(void){//uninitialize game
 
 void game_engine::render_map(void){//renders game map
 
-    //slowdown
-    if(debugging){
-        //TODO: crossplatformify
-/*		LONGLONG cur_time;        // current timer value
-        float slow_factor=4*0.001f*20;
-        QueryPerformanceCounter((LARGE_INTEGER *) &cur_time);
-        if(cur_time-last_time<slow_factor/time_factor){
-            //float time_to_do=10*plusmiinus-(time_now-time_at_this_frame);
-            while(cur_time-last_time<slow_factor/time_factor){
-                QueryPerformanceCounter((LARGE_INTEGER *) &cur_time);
+    if (debugging) {
+        static int last_logged_sid = -1;
+        static int last_logged_subsid = -1;
+
+        // 1. Get the tile the player is currently standing on
+        auto& tile = map_main->at_real(player_middle_x, player_middle_y);
+        int sid = tile.sector_id; 
+        int subsid = tile.subsector_id;
+
+        // 2. Only print if the Sector or Subsector ID has changed
+        if (sid != last_logged_sid || subsid != last_logged_subsid) {
+            printf("\n--- TILE DEBUG (x:%f, y:%f) ---\n", player_middle_x, player_middle_y);
+            
+            // --- MAIN SECTOR INFO ---
+            if (sid > 0) {
+                // Find the unique instance in the map's list
+                for (auto& inst : map_main->sector_instances) {
+                    if (inst.id == sid) {
+                        printf("[Main Sector] ID: %d | Name: %s | Preset: %d | Special: %d\n", 
+                            inst.id, inst.custom_name.c_str(), inst.preset_id, inst.special_id);
+                        
+                        printf("        Active Tags: ");
+                        bool any = false;
+                        for (int t = 0; t < (int)inst.active_tags.size(); t++) {
+                            if (inst.active_tags[t]) {
+                                printf("[%s] ", mod.general_tags[t].name.c_str()); 
+                                any = true;
+                            }
+                        }
+                        if (!any) printf("None");
+                        printf("\n");
+                        break;
+                    }
+                }
+            } else {
+                printf("[Main Sector] None\n");
             }
-        }*/
+
+            // --- SUBSECTOR INFO ---
+            if (subsid > 0) {
+                // Check subsector_instances (assuming you use a separate list or same logic)
+                for (auto& inst : map_main->sector_instances) { // Or subsector_instances if separate
+                    if (inst.id == subsid) {
+                        printf("[Sub-Sector]  ID: %d | Name: %s | Preset: %d | Special: %d\n", 
+                            inst.id, inst.custom_name.c_str(), inst.preset_id, inst.special_id);
+                        
+                        printf("        Active Tags: ");
+                        bool any = false;
+                        for (int t = 0; t < (int)inst.active_tags.size(); t++) {
+                            if (inst.active_tags[t]) {
+                                printf("[%s] ", mod.general_tags[t].name.c_str());
+                                any = true;
+                            }
+                        }
+                        if (!any) printf("None");
+                        printf("\n");
+                        break;
+                    }
+                }
+            } else {
+                printf("[Sub-Sector]  None\n");
+            }
+
+            last_logged_sid = sid;
+            last_logged_subsid = subsid;
+        }
     }
 
 //	playsound(footstep[randInt(0,3)],1,player_middle_x+mousex-screen_width/2,player_middle_y+mousey-screen_height/2,player_middle_x,player_middle_y);
@@ -1854,7 +1908,8 @@ void game_engine::load_particles(const string& filename){
             temp_particle.can_be_rotated=atoi(stripped_fgets(rivi,sizeof(rivi),fil));
             temp_particle.stop_when_hit_ground=atoi(stripped_fgets(rivi,sizeof(rivi),fil));
             temp_particle.blend_type=atoi(stripped_fgets(rivi,sizeof(rivi),fil));
-
+            temp_particle.affected_by_collisions = atoi(stripped_fgets(rivi, sizeof(rivi), fil));
+            temp_particle.is_lit = atoi(stripped_fgets(rivi, sizeof(rivi), fil));
 
             //if the identifier is bigger than current list size, increase list size
             temp_particle.dead=true;
@@ -6068,8 +6123,23 @@ void game_engine::calculate_particles(void){
             for(it=particles[a].particles_list[b].begin(); it!=particles[a].particles_list[b].end();){
 
                 (*it).time-=elapsed*game_speed;
-                (*it).x+=(*it).move_x*elapsed*game_speed;
-                (*it).y+=(*it).move_y*elapsed*game_speed;
+                float nx = (*it).x + (*it).move_x * elapsed * game_speed;
+                float ny = (*it).y + (*it).move_y * elapsed * game_speed;
+
+                if (particles[a].affected_by_collisions) {
+                    // Check if the new point hits an object (last param true = stops bullets/solid)
+                    if (point_will_collide(map_main, nx, ny, true)) {
+                        // Simple bounce: reverse velocity and dampen it
+                        (*it).move_x = -(*it).move_x * 0.5f;
+                        (*it).move_y = -(*it).move_y * 0.5f;
+                    } else {
+                        (*it).x = nx;
+                        (*it).y = ny;
+                    }
+                } else {
+                    (*it).x = nx;
+                    (*it).y = ny;
+                }
 
                 if((*it).time<0){
                     //blood stays on the floor for a while
@@ -6171,6 +6241,20 @@ void game_engine::draw_particles(int layer){//draws particles
                 if((*it).y-camera_y<-500){it=particles[a].particles_list[layer].erase(it);continue;}
                 if((*it).y-camera_y>screen_height+500){it=particles[a].particles_list[layer].erase(it);continue;}
 
+                if (particles[a].is_lit) {
+                    // Sample the light grid at this world position
+                    auto& grid = map_main->at_real(particle_x, particle_y);
+                    grim->Quads_SetColor(
+                        particles[a].r * grid.light_rgb[0], 
+                        particles[a].g * grid.light_rgb[1], 
+                        particles[a].b * grid.light_rgb[2], 
+                        particles[a].alpha
+                    );
+                } else {
+                    // Unlit (Full Bright)
+                    grim->Quads_SetColor(particles[a].r, particles[a].g, particles[a].b, particles[a].alpha);
+                }
+
                 if(time_changes_size){
                     if(particles[a].gets_smaller_by_time>0){
                         size=((*it).time/(*it).time_start)*particles[a].gets_smaller_by_time*particle_type_size;
@@ -6186,6 +6270,8 @@ void game_engine::draw_particles(int layer){//draws particles
                 if(unique_rotate){
                     grim->Quads_SetRotation((*it).rotate);
                 }
+
+
 
                 //draw
                 grim->Quads_Draw(-camera_x+particle_x-size*0.5f, -camera_y+particle_y-size*0.5f, size, size);
@@ -9297,8 +9383,58 @@ bool game_engine::run_effect(Mod::effect effect, creature_base *creature, int cr
                 }
             }
             break;
+        case 70:
+            // Effect 70: Modify Sector/Subsector Tag
+            // p1 = tag identifier
+            // p2 = action (0: Off, 1: On, 2: Toggle)
+            // p3 = layer target (0: Subsector only, 1: Sector only, 2: Sector First, 3: Subsector First)
 
-    }
+            auto& tile = map_main->at_real(x, y);
+            int tag_id = (int)effect.parameter1;
+            int action = (int)effect.parameter2;
+            int layer_mode = (int)effect.parameter3;
+
+            // Identify which instances to look for
+            int target_inst_id = -1;
+
+            if (layer_mode == 0) { // Subsector only
+                target_inst_id = tile.sector_id;
+            } 
+            else if (layer_mode == 1) { // Sector only
+                target_inst_id = tile.subsector_id;
+            } 
+            else if (layer_mode == 2) { // Sector First (fallback to sub)
+                target_inst_id = (tile.sector_id > 0) ? tile.sector_id : tile.subsector_id;
+            } 
+            else if (layer_mode == 3) { // Subsector First (fallback to sector)
+                target_inst_id = (tile.subsector_id > 0) ? tile.subsector_id : tile.sector_id;
+            }
+
+            // Apply the change if a valid instance is found
+            if (target_inst_id > 0) {
+                for (auto& inst : map_main->sector_instances) {
+                    if (inst.id == target_inst_id) {
+                        if (tag_id >= 0 && tag_id < (int)inst.active_tags.size()) {
+                            bool old_val = inst.active_tags[tag_id];
+                            
+                            if (action == 0)      inst.active_tags[tag_id] = false;
+                            else if (action == 1) inst.active_tags[tag_id] = true;
+                            else if (action == 2) inst.active_tags[tag_id] = !inst.active_tags[tag_id];
+
+                            // Debug log to confirm which specific room was changed
+                            if (debugging) {
+                                printf("[Effect 70] Room: %s | Tag %d: %d -> %d\n", 
+                                    inst.custom_name.c_str(), tag_id, old_val, (int)inst.active_tags[tag_id]);
+                            }
+                        }
+                        break; // Unique ID found, exit loop
+                    }
+                }
+            }
+            return_value = true;
+            break;
+            }
+
 
     //we've done something, best to rearrange the item list
     if(return_value&&arrange_needed)
@@ -11016,6 +11152,29 @@ void game_engine::load_game(int slot){
                 if(!temp_item.dead)
                     temp_map->items.push_back(temp_item);
             }
+
+            // int max_sid = 0;
+            // for (int a = 0; a < temp_map->sizex; a++) {
+            //     for (int b = 0; b < temp_map->sizey; b++) {
+            //         if (temp_map->at(a, b).sector_id > max_sid) max_sid = temp_map->at(a, b).sector_id;
+            //     }
+            // }
+
+        //    while (temp_map->sector_instances.size() < (size_t)max_sid) {
+        //     // 1. Use 'SectorInstance' because you are populating the live game map
+        //     SectorInstance si; 
+            
+        //     si.template_id = 0;
+            
+        //     // 2. Use '->' because temp_map is a pointer
+        //     si.custom_name = "Sector " + std::to_string(temp_map->sector_instances.size() + 1);
+            
+        //     // 3. 'general_tags' is inside the 'mod' object, not 'this' (game_engine)
+        //     si.active_tags.assign(mod.general_tags.size(), false);
+            
+        //     // 4. Use '->' for the pointer access here as well
+        //     temp_map->sector_instances.push_back(si);
+        // }
 
 
             temp_map->check_creatures();
@@ -13676,8 +13835,10 @@ void game_engine::create_maps(void){
         debug.debug_output("Distribute Map Editor terrains",Action::START,Logfile::STARTUP);
         for(a=0;a<sizex;a++){
             for(b=0;b<sizey;b++){
+                auto& source_block = mod.terrain_maps[mod.general_areas[map_type].terrain_map_number].terrain_grid[b].terrain_blocks[a];
                 if(mod.terrain_maps[mod.general_areas[map_type].terrain_map_number].terrain_grid[b].terrain_blocks[a].terrain_type>1){
-                    temp_map->at(a,b).terrain_type=mod.terrain_maps[mod.general_areas[map_type].terrain_map_number].terrain_grid[b].terrain_blocks[a].terrain_type;
+                    temp_map->at(a, b).terrain_type = source_block.terrain_type;                    
+                    // temp_map->at(a, b).sector_id = source_block.sector_id;
                 }
             }
         }
@@ -13773,6 +13934,15 @@ void game_engine::create_maps(void){
                 break;
             }
         }
+    //    temp_map->sector_instances.clear(); // Clear existing game instances
+    //     for (const auto& tpl : mod.terrain_maps[map_type].sector_instances) {
+    //         SectorInstance inst;
+    //         inst.preset_id = tpl.preset_id; 
+    //         inst.custom_name = tpl.custom_name;
+    //         inst.active_tags = tpl.active_tags; 
+            
+    //         temp_map->sector_instances.push_back(inst);
+    //     }
         debug.debug_output("Distribute Map Editor objects",Action::END,Logfile::STARTUP);
 
         //initialize terrain frames
@@ -13828,9 +13998,101 @@ void game_engine::create_maps(void){
         }
 
 
+        //Handle sectors
+        for (int y = 0; y < sizey; y++) {
+            for (int x = 0; x < sizex; x++) {
+                auto& source = mod.terrain_maps[map_type].terrain_grid[y].terrain_blocks[x];
+                auto& tile = temp_map->at(x, y);
 
+                // 1. FIRST: Handle Main Sector
+                int current_main_inst_id = 0;
+                if (source.sector_preset_id > 0 && source.sector_preset_id < (int)mod.general_sector_presets.size()) {
+                    auto& preset = mod.general_sector_presets[source.sector_preset_id];
+                    
+                    // Safety: Only proceed if the preset is valid (not a "dead" placeholder)
+                    if (!preset.dead) {
+                        int found_id = -1;
+                        // Search if we already created an instance for this specific room
+                        for (auto& inst : temp_map->sector_instances) {
+                            if (inst.preset_id == source.sector_preset_id && inst.special_id == source.sector_special_id) {
+                                found_id = inst.id;
+                                break;
+                            }
+                        }
 
+                        if (found_id == -1) {
+                            // Create new unique Main Sector record
+                            SectorInstance new_room;
+                            new_room.id = (int)temp_map->sector_instances.size() + 1;
+                            new_room.preset_id = source.sector_preset_id;
+                            new_room.special_id = source.sector_special_id;
+                            new_room.parent_sector_id = 0; // It's a parent
+                            new_room.custom_name = preset.name + " " + std::to_string(source.sector_special_id);
+                            
+                            // Initialize Tags from Preset Blueprint
+                            new_room.active_tags.assign(mod.general_tags.size(), false);
+                            for (int tag_id : preset.default_tags) {
+                                if (tag_id >= 0 && tag_id < (int)new_room.active_tags.size())
+                                    new_room.active_tags[tag_id] = true;
+                            }
 
+                            temp_map->sector_instances.push_back(new_room);
+                            tile.sector_id = new_room.id;
+                        } else {
+                            tile.sector_id = found_id;
+                        }
+                        current_main_inst_id = tile.sector_id; 
+                    }
+                }
+
+                // 2. SECOND: Handle Subsector
+                if (source.subsector_preset_id > 0 && source.subsector_preset_id < (int)mod.general_sector_presets.size()) {
+                    auto& sub_preset = mod.general_sector_presets[source.subsector_preset_id];
+                    
+                    if (!sub_preset.dead) {
+                        int found_sub_id = -1;
+
+                        // Search for an instance that matches Preset, Special, AND the Main Sector it sits in
+                        for (auto& inst : temp_map->sector_instances) {
+                            if (inst.preset_id == source.subsector_preset_id && 
+                                inst.special_id == source.subsector_special_id &&
+                                inst.parent_sector_id == current_main_inst_id) {
+                                found_sub_id = inst.id;
+                                break;
+                            }
+                        }
+
+                        if (found_sub_id == -1) {
+                            // Create a unique subsector instance linked to this parent room
+                            SectorInstance new_sub;
+                            new_sub.id = (int)temp_map->sector_instances.size() + 1;
+                            new_sub.preset_id = source.subsector_preset_id;
+                            new_sub.special_id = source.subsector_special_id;
+                            new_sub.parent_sector_id = current_main_inst_id;
+
+                            // Name uniquely: e.g., "Wing 1 - Office 1"
+                            std::string parent_name = "Global";
+                            if (current_main_inst_id > 0 && current_main_inst_id <= (int)temp_map->sector_instances.size()) {
+                                parent_name = temp_map->sector_instances[current_main_inst_id - 1].custom_name;
+                            }
+                            new_sub.custom_name = parent_name + " - " + sub_preset.name + " " + std::to_string(source.subsector_special_id);
+
+                            // Initialize tags
+                            new_sub.active_tags.assign(mod.general_tags.size(), false);
+                            for (int t_id : sub_preset.default_tags) {
+                                if (t_id >= 0 && t_id < (int)new_sub.active_tags.size())
+                                    new_sub.active_tags[t_id] = true;
+                            }
+
+                            temp_map->sector_instances.push_back(new_sub);
+                            tile.subsector_id = new_sub.id;
+                        } else {
+                            tile.subsector_id = found_sub_id;
+                        }
+                    }
+                }
+            }
+        }
 
 
         //initialize items
@@ -16053,6 +16315,42 @@ bool game_engine::check_condition(const Mod::condition& condition, const creatur
                 if(found)return false;
             }
         }
+    break;
+        // Condition 47: Check if current logical area has a specific tag
+        // p0 = tag identifier (e.g., 0 for LIGHTS)
+        // p1 = required state (0: Must be Off, 1: Must be On)
+    case 47:
+        {
+            if (map_main == NULL) return false;
+
+            auto& tile = map_main->at_real(x, y);
+            int tag_id = (int)condition.condition_parameter0;
+            int required_state = (int)condition.condition_parameter1;
+
+            // Determine the target instance using "Subsector First" logic
+            // This allows the condition to work whether the player is in a room or a vehicle
+            int target_inst_id = (tile.subsector_id > 0) ? tile.subsector_id : tile.sector_id;
+
+            if (target_inst_id > 0) {
+                // Search the map's unique instances
+                for (auto& inst : map_main->sector_instances) {
+                    if (inst.id == target_inst_id) {
+                        if (tag_id >= 0 && tag_id < (int)inst.active_tags.size()) {
+                            bool is_active = inst.active_tags[tag_id];
+                            
+                            // Return true only if the tag matches our requirement
+                            if (required_state == 1) return is_active;  // Must be On
+                            if (required_state == 0) return !is_active; // Must be Off
+                        }
+                        break; 
+                    }
+                }
+            }
+            
+            // If no sector exists at this tile, we treat all tags as "Off" (0)
+            return (required_state == 0);
+        }
+    break;
     }
 
     return true;

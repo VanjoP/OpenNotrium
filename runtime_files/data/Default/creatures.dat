@@ -45,12 +45,6 @@ Player;//name---------------------------------------
 	begin_timed_block
 	end_timed_block
 	begin_specialties
-	Light;//name-------------------
-		2;//number
-		4.000000;//parameter0
-		2.000000;//parameter1
-		0.050000;//parameter2
-		0.000000;//parameter3
 	end_specialties
 Toilet;//name--------------------------------------- **BATHROOM**
 	100;//identifier//{
@@ -2516,13 +2510,13 @@ Light;//name--------------------------------------- **LIGHTS**
 	begin_hit_block
 	end_hit_block
 	begin_timed_block
-		10000;//interval in milliseconds
+		1000;//interval in milliseconds  ****NORMAL LIGHTS****
 			begin_conditions;
-				0;//condition------------------------------IT IS DAY
-					1008.000000;//condition parameter0
-					1.000000;//condition parameter1
-				38;//condition------------------------------IT IS OFF
+				39;//condition------------------------------IT IS NOT ON
 					2.000000;//condition parameter0
+					2.000000;//condition parameter1
+				47;//condition------------------------------HAS LIGHTS TAG
+					0.000000;//condition parameter0
 					1.000000;//condition parameter1
 			end_conditions;
 			begin_effects;
@@ -2542,18 +2536,53 @@ Light;//name--------------------------------------- **LIGHTS**
 					0.000000;//parameter3
 					0.000000;//parameter4
 			end_effects;
-		10000;//interval in milliseconds
+		1000;//interval in milliseconds ****NIGHT LIGHTS****
 			begin_conditions;
 				0;//condition------------------------------IT IS NIGHT
 					1008.000000;//condition parameter0
 					0.000000;//condition parameter1
-				38;//condition------------------------------IT IS ON
+				39;//condition------------------------------IT IS NOT NIGHT LIGHT
 					2.000000;//condition parameter0
-					2.000000;//condition parameter1
+					3.000000;//condition parameter1
+				47;//condition------------------------------HAS NIGHT LIGHTS TAG
+					1.000000;//condition parameter0
+					1.000000;//condition parameter1
+				47;//condition------------------------------HAS NO LIGHTS TAG
+					0.000000;//condition parameter0
+					0.000000;//condition parameter1
 			end_conditions;
 			begin_effects;
 				7;//effect number----------------------TURN INTO LOW LIGHT
 					3.000000;//parameter1
+					0.250000;//parameter2
+					2.000000;//parameter3
+					0.000000;//parameter4
+				17;//effect number----------------------TURN NIGHT
+					3.000000;//parameter1
+					0.000000;//parameter2
+					2.000000;//parameter3
+					0.000000;//parameter4
+				14;//effect number----------------------PLAY LIGHT SWITCH SOUND
+					5.000000;//parameter1
+					1.000000;//parameter2
+					0.000000;//parameter3
+					0.000000;//parameter4
+			end_effects;
+		1000;//interval in milliseconds ****NO LIGHTS****
+			begin_conditions;
+				39;//condition------------------------------IT IS NOT OFF
+					2.000000;//condition parameter0
+					1.000000;//condition parameter1
+				47;//condition------------------------------NO LIGHTS TAG
+					0.000000;//condition parameter0
+					0.000000;//condition parameter1
+				47;//condition------------------------------NO NIGHT LIGHTS TAG
+					1.000000;//condition parameter0
+					0.000000;//condition parameter1
+			end_conditions;
+			begin_effects;
+				7;//effect number----------------------TURN INTO LOW LIGHT
+					-1.000000;//parameter1
 					0.250000;//parameter2
 					2.000000;//parameter3
 					0.000000;//parameter4
@@ -2582,12 +2611,12 @@ Light;//name--------------------------------------- **LIGHTS**
 			1.000000;//parameter1
 			1.000000;//parameter2
 			1.000000;//parameter3
-		Status;//description-------------------
+		Status;//description------------------- //1 = OFF, 2 = ON, 3 = NIGHT
 			0;//number
 			2.000000;//parameter0
 			0.000000;//parameter1
-			2.000000;//parameter2
-			2.000000;//parameter3
+			3.000000;//parameter2
+			3.000000;//parameter3
 		Light;//description-------------------
 			2;//number
 			2.000000;//parameter0

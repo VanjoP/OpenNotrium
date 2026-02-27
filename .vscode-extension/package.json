@@ -6,6 +6,7 @@
   "engines": {
     "vscode": "^1.50.0"
   },
+  "main": "./out/extension.js",
   "contributes": {
     "languages": [
       {
@@ -25,6 +26,18 @@
         "scopeName": "source.notrium",
         "path": "./syntaxes/notrium.tmLanguage.json"
       }
-    ]
+    ],
+    "activationEvents": [
+      "onLanguage:notrium"
+    ],
+    "main": "./out/extension.js"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.2",
+    "@types/vscode": "^1.109.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "npx tsc"
   }
 }

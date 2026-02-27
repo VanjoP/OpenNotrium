@@ -85,6 +85,8 @@ protected:
         int can_be_rotated;
         int stop_when_hit_ground;
         int blend_type;
+        int affected_by_collisions;
+        int is_lit;
 
         std::list <particle> particles_list[3];
     };
