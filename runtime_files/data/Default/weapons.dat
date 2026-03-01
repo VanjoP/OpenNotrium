@@ -162,8 +162,8 @@ Makeshift stun prod (Attack);//name---------------------------------------
 		27;//effect number-----------------------DROP LIGHT - TASER
 			10.000000;//parameter1
 			150.000000;//parameter2
-			0.200000;//parameter3
-			0.0500000;//parameter4
+			0.3000000;//parameter3
+			0.1000000;//parameter4
 		29;//effect number-----------------------Run Script "Check Makeshift Stun Prod Energy" [800]
 			800.000000;//parameter1
 			1.00000;//parameter2
@@ -176,11 +176,11 @@ Makeshift stun prod (Attack);//name---------------------------------------
 			0.000000;//parameter4
 	end_fire_effects;
 	begin_hit_effects;
-		27;//effect number-----------------------DROP LIGHT - TASER //TODO: STUN AND DAMAGE
+		27;//effect number-----------------------DROP LIGHT - TASER
 			10.000000;//parameter1
 			150.000000;//parameter2
-			0.200000;//parameter3
-			0.0500000;//parameter4
+			0.3000000;//parameter3
+			0.1000000;//parameter4
 	end_hit_effects;
 Makeshift stun gun;//name--------------------------------------- PRE-CHECK!
 	804;//identifier
@@ -244,8 +244,8 @@ Makeshift stun gun;//name---------------------------------------
 		27;//effect number-----------------------DROP LIGHT - TASER
 			10.000000;//parameter1
 			150.000000;//parameter2
-			0.200000;//parameter3
-			0.0500000;//parameter4
+			0.3000000;//parameter3
+			0.1000000;//parameter4
 		29;//effect number-----------------------Run Script "Check Makeshift Stun Gun Energy" [801]
 			801.000000;//parameter1
 			1.00000;//parameter2
@@ -258,11 +258,11 @@ Makeshift stun gun;//name---------------------------------------
 			0.000000;//parameter4
 	end_fire_effects;
 	begin_hit_effects;
-		27;//effect number-----------------------DROP LIGHT - TASER //TODO: STUN AND DAMAGE
+		27;//effect number-----------------------DROP LIGHT - TASER
 			10.000000;//parameter1
 			150.000000;//parameter2
-			0.200000;//parameter3
-			0.0500000;//parameter4
+			0.3000000;//parameter3
+			0.1000000;//parameter4
 	end_hit_effects;
 Metal rod;//name--------------------------------------- PRE-CHECK!
 	806;//identifier

@@ -795,10 +795,13 @@ void game_engine::initialize_game(void){//initialize game variables
     mouse_texture[2]=resources.load_texture("mouse2.png","Default");
     mapdot=resources.load_texture("mapdot.png","Default");
     black_texture=resources.load_texture("black.bmp","Default");
+    white_texture=resources.load_texture("white.bmp","Default");
     menu=resources.load_texture("menu.jpg","Default");
     bar_texture=resources.load_texture("bar.png","Default");
     carry_icon=resources.load_texture("carry_icon.png","Default");
     vision_texture_handle = resources.load_texture("vision_mask.png", "Default");
+    light_blob_texture = resources.load_texture("light3.png", "Default"); 
+    
 }
 
 void game_engine::uninitialize_game(void){//uninitialize game
@@ -1237,8 +1240,7 @@ void game_engine::render_map(void){//renders game map
         */
 
 
-
-    //calculate map lighting
+    // calculate map lighting
     debug.debug_output("Calculate Lights",Action::START,Logfile::FRAME);
     calculate_lights();
     debug.debug_output("Calculate Lights",Action::END,Logfile::FRAME);
@@ -1266,7 +1268,7 @@ void game_engine::render_map(void){//renders game map
 
     //lighting effects
     debug.debug_output("Draw Map Lights level 1",Action::START,Logfile::FRAME);
-    draw_lights(0);
+    // draw_lights(0);
     debug.debug_output("Draw Map Lights level 1",Action::END,Logfile::FRAME);
 
     //draw creatures
@@ -1311,8 +1313,10 @@ void game_engine::render_map(void){//renders game map
     debug.debug_output("Draw particles level 2",Action::END,Logfile::FRAME);
 
 
-    draw_realistic_shadows();
+    // draw_realistic_shadows();
     draw_vision_cone();
+   
+    draw_shadow_map_system();
 
     //draw pop-up text
     debug.debug_output("Draw Interface",Action::START,Logfile::FRAME);
@@ -1520,19 +1524,22 @@ void game_engine::draw_map_grid(void){//renders map grid
 
                 //if(map_main->at(i,j).terrain_type==k){
 
+                // grim->Quads_SetColorVertex(0, 1, 1, 1, 1);
+                // grim->Quads_SetColorVertex(1, 1, 1, 1, 1);
+                // grim->Quads_SetColorVertex(2, 1, 1, 1, 1);
+                // grim->Quads_SetColorVertex(3, 1, 1, 1, 1);
 
+                // //draw
+                // grim->Quads_SetColorVertex(0, map_main->at(i,j).light_rgb[0], map_main->at(i,j).light_rgb[1], map_main->at(i,j).light_rgb[2], 1);
 
-                //draw
-                grim->Quads_SetColorVertex(0, map_main->at(i,j).light_rgb[0], map_main->at(i,j).light_rgb[1], map_main->at(i,j).light_rgb[2], 1);
+                // // Vertex 1: Top-Right (i+1, j)
+                // grim->Quads_SetColorVertex(1, map_main->at(i+1,j).light_rgb[0], map_main->at(i+1,j).light_rgb[1], map_main->at(i+1,j).light_rgb[2], 1);
 
-                // Vertex 1: Top-Right (i+1, j)
-                grim->Quads_SetColorVertex(1, map_main->at(i+1,j).light_rgb[0], map_main->at(i+1,j).light_rgb[1], map_main->at(i+1,j).light_rgb[2], 1);
+                // // Vertex 2: Bottom-Right (i+1, j+1)
+                // grim->Quads_SetColorVertex(2, map_main->at(i+1,j+1).light_rgb[0], map_main->at(i+1,j+1).light_rgb[1], map_main->at(i+1,j+1).light_rgb[2], 1);
 
-                // Vertex 2: Bottom-Right (i+1, j+1)
-                grim->Quads_SetColorVertex(2, map_main->at(i+1,j+1).light_rgb[0], map_main->at(i+1,j+1).light_rgb[1], map_main->at(i+1,j+1).light_rgb[2], 1);
-
-                // Vertex 3: Bottom-Left (i, j+1)
-                grim->Quads_SetColorVertex(3, map_main->at(i,j+1).light_rgb[0], map_main->at(i,j+1).light_rgb[1], map_main->at(i,j+1).light_rgb[2], 1);
+                // // Vertex 3: Bottom-Left (i, j+1)
+                // grim->Quads_SetColorVertex(3, map_main->at(i,j+1).light_rgb[0], map_main->at(i,j+1).light_rgb[1], map_main->at(i,j+1).light_rgb[2], 1);
 
                 grim->Quads_Draw(-camera_x + i * 128, -camera_y + j * 128, 128, 128);
 
@@ -1753,40 +1760,21 @@ bool game_engine::draw_object(map_object *object, int layer,float object_x, floa
                 float cornersY[4] = { -s, -s,  s,  s };
 
                 // Set up blending for the texture
-if(mod.general_objects[object->type].transparent == 1) 
-    grim->System_SetState_Blending(true);
-else 
-    grim->System_SetState_Blending(false);
+                if(mod.general_objects[object->type].transparent == 1) 
+                    grim->System_SetState_Blending(true);
+                else 
+                    grim->System_SetState_Blending(false);
 
-resources.Texture_Set(mod.general_objects[object->type].animation_frames[object->current_animation_frame].texture);
-grim->Quads_Begin();
+                resources.Texture_Set(mod.general_objects[object->type].animation_frames[object->current_animation_frame].texture);
+                grim->Quads_SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+                grim->Quads_Begin();
 
-// 1. Calculate World Light for each corner independently
-for (int v = 0; v < 4; v++) {
-    // Determine where this specific corner is on the map right now
-    float worldX = (object_x + size * 0.5f) + (cornersX[v] * cosR - cornersY[v] * sinR);
-    float worldY = (object_y + size * 0.5f) + (cornersX[v] * sinR + cornersY[v] * cosR);
+               
 
-    // Sample grid indices
-    int gi = static_cast<int>(worldX / 128.0f);
-    int gj = static_cast<int>(worldY / 128.0f);
-
-    // Clamp indices to prevent crashes
-    if (gi < 0) gi = 0; if (gi > map_main->sizex - 1) gi = map_main->sizex - 1;
-    if (gj < 0) gj = 0; if (gj > map_main->sizey - 1) gj = map_main->sizey - 1;
-
-    // Apply the floor light from this corner's location to the vertex
-    grim->Quads_SetColorVertex(v, 
-        map_main->at(gi, gj).light_rgb[0], 
-        map_main->at(gi, gj).light_rgb[1], 
-        map_main->at(gi, gj).light_rgb[2], 
-        transparency);
-}
-
-// 2. Draw using standard rotation so the facing is correct
-grim->Quads_SetRotation(object->rotation);
-grim->Quads_Draw(-camera_x + object_x, -camera_y + object_y, size, size);
-grim->Quads_End();
+                // 2. Draw using standard rotation so the facing is correct
+                grim->Quads_SetRotation(object->rotation);
+                grim->Quads_Draw(-camera_x + object_x, -camera_y + object_y, size, size);
+                grim->Quads_End();
 
 
 
@@ -1852,18 +1840,19 @@ bool game_engine::draw_item(map_object *object, int layer,float object_x, float 
 
     grim->System_SetState_Blending(true);
     resources.Texture_Set(mod.general_items[object->type].texture);
+    grim->Quads_SetColor(1.0f, 1.0f, 1.0f, 1.0f);
     grim->Quads_Begin();
     
-    for(int v = 0; v < 4; v++) {
-        // Clamp to map boundaries
-        int fi = std::max(0, std::min(gi[v], map_main->sizex - 1));
-        int fj = std::max(0, std::min(gj[v], map_main->sizey - 1));
+    // for(int v = 0; v < 4; v++) {
+    //     // Clamp to map boundaries
+    //     int fi = std::max(0, std::min(gi[v], map_main->sizex - 1));
+    //     int fj = std::max(0, std::min(gj[v], map_main->sizey - 1));
         
-        grim->Quads_SetColorVertex(v, 
-            map_main->at(fi, fj).light_rgb[0], 
-            map_main->at(fi, fj).light_rgb[1], 
-            map_main->at(fi, fj).light_rgb[2], 1.0f);
-    }
+    //     grim->Quads_SetColorVertex(v, 
+    //         map_main->at(fi, fj).light_rgb[0], 
+    //         map_main->at(fi, fj).light_rgb[1], 
+    //         map_main->at(fi, fj).light_rgb[2], 1.0f);
+    // }
 
     grim->Quads_SetRotation(object->rotation);
     grim->Quads_Draw(-camera_x + object_x, -camera_y + object_y, size, size);
@@ -2013,11 +2002,6 @@ void game_engine::draw_map_creatures(int layer) { // draws the creatures
     grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
     grim->System_SetState_BlendDst(grBLEND_INVSRCALPHA);
 
-    // Minimum light for player
-    float minimum_light = 0.5f;
-    if (map_main->creature[0].light[0] < minimum_light) map_main->creature[0].light[0] = minimum_light;
-    if (map_main->creature[0].light[1] < minimum_light) map_main->creature[0].light[1] = minimum_light;
-    if (map_main->creature[0].light[2] < minimum_light) map_main->creature[0].light[2] = minimum_light;
 
     grim->System_SetState_Blending(true);
 
@@ -2112,26 +2096,8 @@ void game_engine::draw_map_creatures(int layer) { // draws the creatures
                         }
                     }
 
-                    //set light
-                    if(map_main->creature[creature].light[0]>1){
-                        float kerroin=(1.0f)/map_main->creature[creature].light[0];
-                        map_main->creature[creature].light[0]=map_main->creature[creature].light[0]*kerroin;
-                        map_main->creature[creature].light[1]=map_main->creature[creature].light[1]*kerroin;
-                        map_main->creature[creature].light[2]=map_main->creature[creature].light[2]*kerroin;
-                    }
-                    if(map_main->creature[creature].light[1]>1){
-                        float kerroin=(1.0f)/map_main->creature[creature].light[1];
-                        map_main->creature[creature].light[0]=map_main->creature[creature].light[0]*kerroin;
-                        map_main->creature[creature].light[1]=map_main->creature[creature].light[1]*kerroin;
-                        map_main->creature[creature].light[2]=map_main->creature[creature].light[2]*kerroin;
-                    }
-                    if(map_main->creature[creature].light[2]>1){
-                        float kerroin=(1.0f)/map_main->creature[creature].light[2];
-                        map_main->creature[creature].light[0]=map_main->creature[creature].light[0]*kerroin;
-                        map_main->creature[creature].light[1]=map_main->creature[creature].light[1]*kerroin;
-                        map_main->creature[creature].light[2]=map_main->creature[creature].light[2]*kerroin;
-                    }
-                    grim->Quads_SetColor(map_main->creature[creature].light[0],map_main->creature[creature].light[1],map_main->creature[creature].light[2],map_main->creature[creature].alpha);
+                    
+                   grim->Quads_SetColor(1.0f, 1.0f, 1.0f, map_main->creature[creature].alpha);
 
                 // ---------------------------------------------------------
                 // START DRAWING SECTION
@@ -2143,7 +2109,7 @@ void game_engine::draw_map_creatures(int layer) { // draws the creatures
                     grim->Quads_Begin();
                     
                     // APPLY SMOOTH LIGHTING ONCE FOR ALL NPC PARTS
-                    apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, creature);
+                    // apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, creature);
 
                     // legs
                     if (map_main->creature[creature].animation[2] >= 0) {
@@ -2174,7 +2140,7 @@ void game_engine::draw_map_creatures(int layer) { // draws the creatures
                     // draw legs
                     resources.Texture_Set(mod.general_creatures[map_main->creature[creature].type].texture);
                     grim->Quads_Begin();
-                    apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, 0);
+                    // apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, 0);
                     if (map_main->creature[creature].animation[2] >= 0) {
                         find_texture_coordinates(map_main->creature[creature].animation[2] - 4, &x0, &y0, &x1, &y1, 4);
                         grim->Quads_SetSubset(x0, y0, x1, y1);
@@ -2194,7 +2160,7 @@ void game_engine::draw_map_creatures(int layer) { // draws the creatures
                     }
                     resources.Texture_Set(texture);
                     grim->Quads_Begin();
-                    apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, 0); // Player is always index 0
+                    // apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, 0); // Player is always index 0
                     find_texture_coordinates(frame, &x0, &y0, &x1, &y1, 4);
                     grim->Quads_SetSubset(x0, y0, x1, y1);
                     grim->Quads_SetRotation(map_main->creature[creature].rotation + (map_main->creature[creature].animation[2] - 7) * 0.04f);
@@ -2204,7 +2170,7 @@ void game_engine::draw_map_creatures(int layer) { // draws the creatures
                     // draw head
                     resources.Texture_Set(mod.general_creatures[map_main->creature[creature].type].texture);
                     grim->Quads_Begin();
-                    apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, 0); // Player is always index 0
+                    // apply_smooth_lighting(creature_x, creature_y, size, map_main->creature[creature].alpha, 0); // Player is always index 0
                     if (map_main->creature[creature].animation[0] >= 0) {
                         find_texture_coordinates(map_main->creature[creature].animation[0], &x0, &y0, &x1, &y1, 4);
                         grim->Quads_SetSubset(x0, y0, x1, y1);
@@ -4999,56 +4965,56 @@ void game_engine::calculate_quick_keys(bool only_inventory){
 // }
 
 
-void game_engine::draw_lights(int layer){//draws light effects (flashlight, explosions
-    int i,j;
-    float light_x,light_y;
-    grim->System_SetState_Blending(true);
-    grim->Quads_SetSubset(0,0,1,1);
-    grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
-    grim->System_SetState_BlendDst(grBLEND_ONE);
+// void game_engine::draw_lights(int layer){//draws light effects (flashlight, explosions
+//     int i,j;
+//     float light_x,light_y;
+//     grim->System_SetState_Blending(true);
+//     grim->Quads_SetSubset(0,0,1,1);
+//     grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
+//     grim->System_SetState_BlendDst(grBLEND_ONE);
 
 
-    for(j=0;j<mod.general_lights.size();j++){
-        if(mod.general_lights[j].dead)continue;
-        resources.Texture_Set(mod.general_lights[j].texture);
+//     for(j=0;j<mod.general_lights.size();j++){
+//         if(mod.general_lights[j].dead)continue;
+//         resources.Texture_Set(mod.general_lights[j].texture);
 
-        //resources.Texture_Set(temp_texture_number);
+//         //resources.Texture_Set(temp_texture_number);
 
-        grim->Quads_Begin();
-        for(i=0;i<map_main->lights.size();i++){
-            if(map_main->lights[i].dead)continue;
-            if(map_main->lights[i].type!=j)continue;
-
-
-            light_x=map_main->lights[i].x;
-            light_y=map_main->lights[i].y;
+//         grim->Quads_Begin();
+//         for(i=0;i<map_main->lights.size();i++){
+//             if(map_main->lights[i].dead)continue;
+//             if(map_main->lights[i].type!=j)continue;
 
 
-
-
-            //it still might not need to be drawn
-            float size=map_main->lights[i].size*128;
-            if(-camera_x+light_x<-size*1.415f)continue;
-            if(-camera_x+light_x>screen_width+size*1.415f)continue;
-            if(-camera_y+light_y<-size*1.415f)continue;
-            if(-camera_y+light_y>screen_height+size*1.415f)continue;
+//             light_x=map_main->lights[i].x;
+//             light_y=map_main->lights[i].y;
 
 
 
-            //draw
-            grim->Quads_SetColor(map_main->lights[i].r,map_main->lights[i].g,map_main->lights[i].b,map_main->lights[i].transparency);
-            grim->Quads_SetRotation(map_main->lights[i].rotation);
-            grim->Quads_Draw(
-                -camera_x+light_x+map_main->lights[i].size*128*0.5f-map_main->lights[i].pulse*map_main->lights[i].size*128*0.5f
-                , -camera_y+light_y+map_main->lights[i].size*128*0.5f-map_main->lights[i].pulse*map_main->lights[i].size*128*0.5f
-                , size*(map_main->lights[i].pulse)
-                , size*(map_main->lights[i].pulse)
-                );
 
-        }
-        grim->Quads_End();
-    }
-}
+//             //it still might not need to be drawn
+//             float size=map_main->lights[i].size*128;
+//             if(-camera_x+light_x<-size*1.415f)continue;
+//             if(-camera_x+light_x>screen_width+size*1.415f)continue;
+//             if(-camera_y+light_y<-size*1.415f)continue;
+//             if(-camera_y+light_y>screen_height+size*1.415f)continue;
+
+
+
+//             //draw
+//             grim->Quads_SetColor(map_main->lights[i].r,map_main->lights[i].g,map_main->lights[i].b,map_main->lights[i].transparency);
+//             grim->Quads_SetRotation(map_main->lights[i].rotation);
+//             grim->Quads_Draw(
+//                 -camera_x+light_x+map_main->lights[i].size*128*0.5f-map_main->lights[i].pulse*map_main->lights[i].size*128*0.5f
+//                 , -camera_y+light_y+map_main->lights[i].size*128*0.5f-map_main->lights[i].pulse*map_main->lights[i].size*128*0.5f
+//                 , size*(map_main->lights[i].pulse)
+//                 , size*(map_main->lights[i].pulse)
+//                 );
+
+//         }
+//         grim->Quads_End();
+//     }
+// }
 
 
 void game_engine::load_setup(const char *filename){//loads setup from file
@@ -5129,29 +5095,29 @@ void game_engine::save_setup(const char *filename){//saves setup to file
 
     fclose(fil);
 
-}
+ }
 
-float game_engine::calculate_flashlight(float c_x,float c_y, float rotation, float t_x, float t_y,float *distance,float *angle){//returns the light value using the flashlight
+// float game_engine::calculate_flashlight(float c_x,float c_y, float rotation, float t_x, float t_y,float *distance,float *angle){//returns the light value using the flashlight
 
-    //calculate light
-    //per distance
-    *distance=sqr(t_x-c_x)+sqr(t_y-c_y);
-    //float light=1-0.00000000003f*sqr(*distance);
-    float light=1-0.00000000004f*(sqr(sqr(t_x-c_x))+sqr(sqr(t_y-c_y)));
-    //per angle
-    if(light>0){
-        float dq=-atan2(t_x-c_x,t_y-c_y);
-        float temp1=rotation;
-        if(rotation-dq>pi)temp1=temp1-pi*2;
-        if(dq-rotation>pi)dq=dq-pi*2;
-        *angle=(float)fabs(dq-temp1);
-        //*angle=(float)fabs(temp1-dq);
-        light=light*sqr(*angle)*0.2f;
-    }
-    if(light<0)light=0;
+//     //calculate light
+//     //per distance
+//     *distance=sqr(t_x-c_x)+sqr(t_y-c_y);
+//     //float light=1-0.00000000003f*sqr(*distance);
+//     float light=1-0.00000000004f*(sqr(sqr(t_x-c_x))+sqr(sqr(t_y-c_y)));
+//     //per angle
+//     if(light>0){
+//         float dq=-atan2(t_x-c_x,t_y-c_y);
+//         float temp1=rotation;
+//         if(rotation-dq>pi)temp1=temp1-pi*2;
+//         if(dq-rotation>pi)dq=dq-pi*2;
+//         *angle=(float)fabs(dq-temp1);
+//         //*angle=(float)fabs(temp1-dq);
+//         light=light*sqr(*angle)*0.2f;
+//     }
+//     if(light<0)light=0;
 
-    return light;
-}
+//     return light;
+// }
 
 
 bullet game_engine::shoot(int from_creature, int side,int type, float startx,float starty,float angle)//fire a bullet
@@ -5663,401 +5629,68 @@ void game_engine::text_manager.draw_line(float x,float y, float x2, float y2, fl
     grim->Quads_End();
 }*/
 
-void game_engine::calculate_lights(void){//calculates all the map lighting
+void game_engine::calculate_lights(void) {
+    // 1. CALCULATE GLOBAL DAYLIGHT
+    int climate = map_main->climate_number;
+    static float internal_timer = 0; 
+    internal_timer += elapsed; // Accumulate time locally
+    
+    // Original math for R, G, B oscillations
+    daylight[0] = sin(day_timer / mod.general_climates[climate].light_oscillate_time * pi * 2 - mod.general_climates[climate].light_phase_r - pi / 4) * mod.general_climates[climate].light_amplitude_r + 0.5f;
+    daylight[1] = sin(day_timer / mod.general_climates[climate].light_oscillate_time * pi * 2 - mod.general_climates[climate].light_phase_g - pi / 4) * mod.general_climates[climate].light_amplitude_g + 0.5f;
+    daylight[2] = sin(day_timer / mod.general_climates[climate].light_oscillate_time * pi * 2 - mod.general_climates[climate].light_phase_b - pi / 4) * mod.general_climates[climate].light_amplitude_b + 0.5f;
 
-    int i,a,b,c;
-
-    //near_fire=false;
-
-    float c_x,c_y;
-    float distance,angle;
-    float light_value,size;
-
-
-    //daylight
-    {
-
-        daylight[0]=sin(day_timer/mod.general_climates[map_main->climate_number].light_oscillate_time*pi*2-mod.general_climates[map_main->climate_number].light_phase_r-pi/4)*mod.general_climates[map_main->climate_number].light_amplitude_r+0.5f;
-        daylight[1]=sin(day_timer/mod.general_climates[map_main->climate_number].light_oscillate_time*pi*2-mod.general_climates[map_main->climate_number].light_phase_g-pi/4)*mod.general_climates[map_main->climate_number].light_amplitude_g+0.5f;
-        daylight[2]=sin(day_timer/mod.general_climates[map_main->climate_number].light_oscillate_time*pi*2-mod.general_climates[map_main->climate_number].light_phase_b-pi/4)*mod.general_climates[map_main->climate_number].light_amplitude_b+0.5f;
-
-        //night
-        if(daylight[0]<mod.general_climates[map_main->climate_number].light_min_r)daylight[0]=mod.general_climates[map_main->climate_number].light_min_r;
-        if(daylight[1]<mod.general_climates[map_main->climate_number].light_min_g)daylight[1]=mod.general_climates[map_main->climate_number].light_min_g;
-        if(daylight[2]<mod.general_climates[map_main->climate_number].light_min_b)daylight[2]=mod.general_climates[map_main->climate_number].light_min_b;
-
-        //day
-        if(daylight[0]>mod.general_climates[map_main->climate_number].light_max_r)daylight[0]=mod.general_climates[map_main->climate_number].light_max_r;
-        if(daylight[1]>mod.general_climates[map_main->climate_number].light_max_g)daylight[1]=mod.general_climates[map_main->climate_number].light_max_g;
-        if(daylight[2]>mod.general_climates[map_main->climate_number].light_max_b)daylight[2]=mod.general_climates[map_main->climate_number].light_max_b;
-
-        /*daylight[0]=sincos.table_sin(day_timer/day_speed*pi*2)*0.5f*2+0.5f;
-        daylight[1]=daylight[0]-0.3f;
-        daylight[2]=daylight[0]-0.3f;
-
-        //night
-        if(daylight[0]<0.0f)daylight[0]=0.0f;
-        if(daylight[1]<0.0f)daylight[1]=0.0f;
-        if(daylight[2]<0.2f)daylight[2]=0.2f;
-        //day
-        if(daylight[0]>0.7f)daylight[0]=0.7f;
-        if(daylight[1]>0.4f)daylight[1]=0.4f;
-        if(daylight[2]>0.4f)daylight[2]=0.4f;*/
+    // Clamp to Climate minimums/maximums
+    for (int i = 0; i < 3; i++) {
+        if (daylight[i] < mod.general_climates[climate].light_min_r) daylight[i] = mod.general_climates[climate].light_min_r;
+        if (daylight[i] > mod.general_climates[climate].light_max_r) daylight[i] = mod.general_climates[climate].light_max_r;
     }
 
+    // 2. UPDATE ACTIVE LIGHT TIMERS & PULSES
+    // This makes sure flares eventually die and fires flicker
+    for (int i = 0; i < (int)map_main->lights.size(); i++) {
+        auto& l = map_main->lights[i];
+        if (l.dead) continue;
 
-    //all lights in the scene start at 0
-    int draw_start_x=(int)(camera_x/grid_size)-3;
-    int draw_start_y=(int)(camera_y/grid_size)-3;
-    int draw_end_x=draw_start_x+(int)(screen_width/grid_size)+6;
-    int draw_end_y=draw_start_y+(int)(screen_height/grid_size)+6;
-    /*if(draw_start_x<0)border_visible=true;
-    if(draw_start_y<0)border_visible=true;
-    if(draw_end_x>=map_main->sizex)border_visible=true;
-    if(draw_end_y>=map_main->sizey)border_visible=true;*/
-
-    if(draw_start_x<0)draw_start_x=0;
-    if(draw_end_x>map_main->sizex)draw_end_x=map_main->sizex;
-    if(draw_start_y<0)draw_start_y=0;
-    if(draw_end_y>map_main->sizey)draw_end_y=map_main->sizey;
-
-
-
-    for(a=draw_start_x;a<draw_end_x;a++){
-        for(b=draw_start_y;b<draw_end_y;b++){
-            //zero object light
-            //if(map_main->at(a,b).total_objects>0)
-            for(c=0;c<map_main->at(a,b).objects.size();c++){
-                map_main->object[map_main->at(a,b).objects[c]].light_level[0]=daylight[0]+light_addition[0][2]+mod.terrain_types[map_main->at(a,b).terrain_type].base_r;
-                map_main->object[map_main->at(a,b).objects[c]].light_level[1]=daylight[1]+light_addition[1][2]+mod.terrain_types[map_main->at(a,b).terrain_type].base_g;
-                map_main->object[map_main->at(a,b).objects[c]].light_level[2]=daylight[2]+light_addition[2][2]+mod.terrain_types[map_main->at(a,b).terrain_type].base_b;
+        // 1. LIFETIME (.time)
+        // If it's not infinite (-1), count it down.
+        if (l.time > 0) {
+            l.time -= elapsed;
+            if (l.time <= 0) { 
+                l.dead = true; 
+                continue; 
             }
-            //zero item light
-            for(c=0;c<map_main->at(a,b).items.size();c++){
-                map_main->items[map_main->at(a,b).items[c]].light_level[0]=daylight[0]+light_addition[0][1]+mod.terrain_types[map_main->at(a,b).terrain_type].base_r;
-                map_main->items[map_main->at(a,b).items[c]].light_level[1]=daylight[1]+light_addition[1][1]+mod.terrain_types[map_main->at(a,b).terrain_type].base_g;
-                map_main->items[map_main->at(a,b).items[c]].light_level[2]=daylight[2]+light_addition[2][1]+mod.terrain_types[map_main->at(a,b).terrain_type].base_b;
+        }
 
+        // 2. GET THE TEMPLATE (mod.general_lights)
+        auto& L_temp = mod.general_lights[l.type];
+
+        // 3. PULSE MATH (.pulse & .pulse_phase)
+            if (L_temp.pulsating > 0) {
+                l.pulse = 1.0f + sincos.table_sin(internal_timer * L_temp.pulsating + l.pulse_phase) * 0.04f;
+            } else {
+                l.pulse = 1.0f; // Force 1.0 if not pulsating
             }
-            //zero map light (or 1 for lava)
-            /*if(has_terrain_effect(map_main,map_main->at(a,b).terrain_type,3,&parameter0,&parameter1)){
-                map_main->at(a,b).light_rgb[0]=1+light_addition[0][0];
-                map_main->at(a,b).light_rgb[1]=1+light_addition[1][0];
-                map_main->at(a,b).light_rgb[2]=1+light_addition[2][0];
+            if (l.pulse < 0.1f) l.pulse = 1.0f;
+
+        // 4. PARTICLE SPAWNING
+        if (L_temp.particle >= 0 && !paused) {
+            // This is the probability check: it spawns based on flash_speed vs frame time
+            int chance = (int)(L_temp.particle_flash_speed / (elapsed * l.size));
+            if (chance < 1) chance = 1; // Safety
+
+            if (randInt(0, chance) == 0) {
+                // Random position within the light's radius
+                float px = l.x + randDouble(l.size * general_object_size * 0.3f, l.size * general_object_size * 0.7f);
+                float py = l.y + randDouble(l.size * general_object_size * 0.3f, l.size * general_object_size * 0.7f);
+                
+                // Spawn the particle (Layer 1)
+                make_particle(L_temp.particle, 1, L_temp.particle_time + randInt(-250, 250), 
+                              px, py, randDouble(-0.01f, 0.01f), randDouble(-0.01f, 0.01f), -1);
             }
-            else*/{
-                map_main->at(a,b).light_rgb[0]=daylight[0]+light_addition[0][0]+mod.terrain_types[map_main->at(a,b).terrain_type].base_r;
-                map_main->at(a,b).light_rgb[1]=daylight[1]+light_addition[1][0]+mod.terrain_types[map_main->at(a,b).terrain_type].base_g;
-                map_main->at(a,b).light_rgb[2]=daylight[2]+light_addition[2][0]+mod.terrain_types[map_main->at(a,b).terrain_type].base_b;
-            }
-
-            //zero creature lights
-            if(map_main->at(a,b).total_creatures>0)
-            for (c=0; c<map_main->at(a,b).total_creatures; c++){
-                map_main->creature[map_main->at(a,b).creatures[c]].light[0]=daylight[0]+light_addition[0][3]+mod.terrain_types[map_main->at(a,b).terrain_type].base_r;
-                map_main->creature[map_main->at(a,b).creatures[c]].light[1]=daylight[1]+light_addition[1][3]+mod.terrain_types[map_main->at(a,b).terrain_type].base_g;
-                map_main->creature[map_main->at(a,b).creatures[c]].light[2]=daylight[2]+light_addition[2][3]+mod.terrain_types[map_main->at(a,b).terrain_type].base_b;
-            }
-
-
-
         }
     }
-
-    //goggles on green
-    /*if(goggles_active==1){
-        for(a=draw_start_x;a<draw_end_x;a++){
-            for(b=draw_start_y;b<draw_end_y;b++){
-
-
-                float light_wave=sincos.table_sin(day_timer*30)*0.01f+0.99f;
-
-
-                //zero object light
-                if(map_main->at(a,b).total_objects>0)
-                for(c=0;c<map_main->at(a,b).total_objects;c++){
-                    map_main->object[map_main->at(a,b).objects[c]].light_level[0]=0.2f;
-                    map_main->object[map_main->at(a,b).objects[c]].light_level[1]=light_wave;
-                    map_main->object[map_main->at(a,b).objects[c]].light_level[2]=0.2f;
-                }
-                //zero item light
-                for(c=0;c<map_main->at(a,b).items.size();c++){
-                    map_main->items[map_main->at(a,b).items[c]].light_level[0]=0.5f;
-                    map_main->items[map_main->at(a,b).items[c]].light_level[1]=light_wave;
-                    map_main->items[map_main->at(a,b).items[c]].light_level[2]=0.5f;
-
-                }
-                //zero map light
-                map_main->at(a,b).light_rgb[0]=0.4f;
-                map_main->at(a,b).light_rgb[1]=0.7f;
-                map_main->at(a,b).light_rgb[2]=0.4f;
-
-                //zero creature lights
-                if(map_main->at(a,b).total_creatures>0)
-                for (c=0; c<map_main->at(a,b).total_creatures; c++){
-                    map_main->creature[map_main->at(a,b).creatures[c]].light[0]=0.6f;
-                    map_main->creature[map_main->at(a,b).creatures[c]].light[1]=1;
-                    map_main->creature[map_main->at(a,b).creatures[c]].light[2]=0.6f;
-                }
-            }
-        }
-    }*/
-
-    //calculate all lights
-    for(i=0;i<map_main->lights.size();i++){
-        if(map_main->lights[i].dead){
-            //map_main->lights.erase(map_main->lights.begin() + i);
-            delete_light(map_main,i);
-            i--;
-            continue;
-        }
-        //time
-        if(map_main->lights[i].time!=-1){
-            map_main->lights[i].time=map_main->lights[i].time-elapsed*game_speed;
-            if(map_main->lights[i].time<0)map_main->lights[i].dead=true;
-        }
-
-
-
-
-        //the texture is visible by default
-        //map_main->lights[i].visible=true;
-
-        //flashlight
-        if(mod.general_lights[map_main->lights[i].type].type==0){
-
-
-            int alku_x=(int)(map_main->lights[i].x2/grid_size-map_main->lights[i].size*3)-2;
-            int alku_y=(int)(map_main->lights[i].y2/grid_size-map_main->lights[i].size*3)-2;
-            int loppu_x=(int)(map_main->lights[i].x2/grid_size+map_main->lights[i].size*3)+2;
-            int loppu_y=(int)(map_main->lights[i].y2/grid_size+map_main->lights[i].size*3)+2;
-
-            //not visible
-            if(alku_x>screen_end_x){continue;}
-            if(alku_y>screen_end_y){continue;}
-            if(loppu_x<screen_start_x){continue;}
-            if(loppu_y<screen_start_y){continue;}
-
-            //not all should be calculated
-            if(alku_x<screen_start_x-2)alku_x=screen_start_x-2;
-            if(alku_y<screen_start_y-2)alku_y=screen_start_y-2;
-            if(loppu_x>screen_end_x+2)loppu_x=screen_end_x+2;
-            if(loppu_y>screen_end_y+2)loppu_y=screen_end_y+2;
-
-            if(alku_x<0)alku_x=0;
-            if(loppu_x>map_main->sizex)loppu_x=map_main->sizex;
-            if(alku_y<0)alku_y=0;
-            if(loppu_y>map_main->sizey)loppu_y=map_main->sizey;
-
-
-
-
-            for(a=alku_x;a<loppu_x;a++){
-                for(b=alku_y;b<loppu_y;b++){
-                    //objects
-                    //if(map_main->at(a,b).total_objects>0)
-                    for(c=0;c<map_main->at(a,b).objects.size();c++){
-                        size=map_main->object[map_main->at(a,b).objects[c]].size*general_object_size;
-                        c_x=map_main->object[map_main->at(a,b).objects[c]].x+size*0.5f;
-                        c_y=map_main->object[map_main->at(a,b).objects[c]].y+size*0.5f;
-                        //if(border_visible)fix_coordinates(&c_x,&c_y);
-                        light_value=mod.general_lights[map_main->lights[i].type].intensity*calculate_flashlight(map_main->lights[i].x2,map_main->lights[i].y2,map_main->lights[i].rotation,c_x,c_y,&distance,&angle);
-                        map_main->object[map_main->at(a,b).objects[c]].light_level[0]+=light_value*map_main->lights[i].r*light_level;
-                        map_main->object[map_main->at(a,b).objects[c]].light_level[1]+=light_value*map_main->lights[i].g*light_level;
-                        map_main->object[map_main->at(a,b).objects[c]].light_level[2]+=light_value*map_main->lights[i].b*light_level;
-                    }
-                    //items
-                    for(c=0;c<map_main->at(a,b).items.size();c++){
-                        size=map_main->items[map_main->at(a,b).items[c]].size*general_object_size;
-                        c_x=map_main->items[map_main->at(a,b).items[c]].x+size*0.5f;
-                        c_y=map_main->items[map_main->at(a,b).items[c]].y+size*0.5f;
-                        //if(border_visible)fix_coordinates(&c_x,&c_y);
-                        light_value=mod.general_lights[map_main->lights[i].type].intensity*calculate_flashlight(map_main->lights[i].x2,map_main->lights[i].y2,map_main->lights[i].rotation,c_x,c_y,&distance,&angle);
-                        map_main->items[map_main->at(a,b).items[c]].light_level[0]+=light_value*map_main->lights[i].r*light_level;
-                        map_main->items[map_main->at(a,b).items[c]].light_level[1]+=light_value*map_main->lights[i].g*light_level;
-                        map_main->items[map_main->at(a,b).items[c]].light_level[2]+=light_value*map_main->lights[i].b*light_level;
-                    }
-                    //grid
-                    c_x=a*128.0f;
-                    c_y=b*128.0f;
-                    if(border_visible)fix_coordinates(&c_x,&c_y);
-                    light_value=mod.general_lights[map_main->lights[i].type].intensity*calculate_flashlight(map_main->lights[i].x2,map_main->lights[i].y2,map_main->lights[i].rotation,c_x,c_y,&distance,&angle);
-                    map_main->at(a,b).light_rgb[0]+=light_value*map_main->lights[i].r*light_level;
-                    map_main->at(a,b).light_rgb[1]+=light_value*map_main->lights[i].g*light_level;
-                    map_main->at(a,b).light_rgb[2]+=light_value*map_main->lights[i].b*light_level;
-                    //creatures
-                    if(map_main->at(a,b).total_creatures>0)
-                    for (c=0; c<map_main->at(a,b).total_creatures; c++){
-                        if(map_main->at(a,b).creatures[c]==0)continue;//doesn't affect player
-                        c_x=map_main->creature[map_main->at(a,b).creatures[c]].x;
-                        c_y=map_main->creature[map_main->at(a,b).creatures[c]].y;
-                        //if(border_visible)fix_coordinates(&c_x,&c_y);
-                        light_value=mod.general_lights[map_main->lights[i].type].intensity*calculate_flashlight(map_main->lights[i].x2,map_main->lights[i].y2,map_main->lights[i].rotation,c_x,c_y,&distance,&angle);
-                        map_main->creature[map_main->at(a,b).creatures[c]].light[0]+=light_value*map_main->lights[i].r*creature_light_value;
-                        map_main->creature[map_main->at(a,b).creatures[c]].light[1]+=light_value*map_main->lights[i].g*creature_light_value;
-                        map_main->creature[map_main->at(a,b).creatures[c]].light[2]+=light_value*map_main->lights[i].b*creature_light_value;
-                    }
-                }
-            }
-        }
-        //omni
-        if(mod.general_lights[map_main->lights[i].type].type==1){
-
-
-            int alku_x=(int)(map_main->lights[i].x2/grid_size-map_main->lights[i].size*4)-2;
-            int alku_y=(int)(map_main->lights[i].y2/grid_size-map_main->lights[i].size*4)-2;
-            int loppu_x=(int)(map_main->lights[i].x2/grid_size+map_main->lights[i].size*4)+2;
-            int loppu_y=(int)(map_main->lights[i].y2/grid_size+map_main->lights[i].size*4)+2;
-
-            //not visible
-            if(alku_x>screen_end_x){continue;}
-            if(alku_y>screen_end_y){continue;}
-            if(loppu_x<screen_start_x){continue;}
-            if(loppu_y<screen_start_y){continue;}
-
-            //not all should be calculated
-            if(alku_x<screen_start_x-2)alku_x=screen_start_x-2;
-            if(alku_y<screen_start_y-2)alku_y=screen_start_y-2;
-            if(loppu_x>screen_end_x+2)loppu_x=screen_end_x+2;
-            if(loppu_y>screen_end_y+2)loppu_y=screen_end_y+2;
-
-            if(alku_x<0)alku_x=0;
-            if(loppu_x>map_main->sizex)loppu_x=map_main->sizex;
-            if(alku_y<0)alku_y=0;
-            if(loppu_y>map_main->sizey)loppu_y=map_main->sizey;
-
-
-
-
-            //float distance=sqr(map_main->lights[i].x-c_x)+sqr(map_main->lights[i].y-c_y);
-            for(a=alku_x;a<loppu_x;a++){
-                for(b=alku_y;b<loppu_y;b++){
-
-                    float intensity=(map_main->lights[i].size*0.75f+0.25f);
-
-
-                    //objects
-                    //if(map_main->at(a,b).total_objects>0)
-                    for(c=0;c<map_main->at(a,b).objects.size();c++){
-                        size=map_main->object[map_main->at(a,b).objects[c]].size*general_object_size;
-                        c_x=map_main->object[map_main->at(a,b).objects[c]].x+size*0.5f;
-                        c_y=map_main->object[map_main->at(a,b).objects[c]].y+size*0.5f;
-                        //fix_coordinates(&c_x,&c_y);
-                        //light_value=map_main->lights[i].size*map_main->lights[i].pulse*(1-0.00000000004f*(sqr(sqr(map_main->lights[i].x2-c_x))+sqr(sqr(map_main->lights[i].y2-c_y))));
-                        light_value=intensity*map_main->lights[i].pulse*(mod.general_lights[map_main->lights[i].type].intensity-0.00000000004f*(sqr(sqr(map_main->lights[i].x2-c_x))+sqr(sqr(map_main->lights[i].y2-c_y))));
-                        if(light_value>0){
-                            map_main->object[map_main->at(a,b).objects[c]].light_level[0]+=light_value*map_main->lights[i].r;
-                            map_main->object[map_main->at(a,b).objects[c]].light_level[1]+=light_value*map_main->lights[i].g;
-                            map_main->object[map_main->at(a,b).objects[c]].light_level[2]+=light_value*map_main->lights[i].b;
-                        }
-                    }
-                    //items
-                    for(c=0;c<map_main->at(a,b).items.size();c++){
-                        size=map_main->items[map_main->at(a,b).items[c]].size*general_object_size;
-                        c_x=map_main->items[map_main->at(a,b).items[c]].x+size*0.5f;
-                        c_y=map_main->items[map_main->at(a,b).items[c]].y+size*0.5f;
-                        //fix_coordinates(&c_x,&c_y);
-                        light_value=intensity*map_main->lights[i].pulse*(mod.general_lights[map_main->lights[i].type].intensity-0.00000000004f*(sqr(sqr(map_main->lights[i].x2-c_x))+sqr(sqr(map_main->lights[i].y2-c_y))));
-                        if(light_value>0){
-                            map_main->items[map_main->at(a,b).items[c]].light_level[0]+=light_value*map_main->lights[i].r;
-                            map_main->items[map_main->at(a,b).items[c]].light_level[1]+=light_value*map_main->lights[i].g;
-                            map_main->items[map_main->at(a,b).items[c]].light_level[2]+=light_value*map_main->lights[i].b;
-                        }
-                    }
-                    //grid
-                    c_x=(a)*grid_size+grid_size*0.5f;
-                    c_y=(b)*grid_size+grid_size*0.5f;
-                    light_value=intensity*map_main->lights[i].pulse*(mod.general_lights[map_main->lights[i].type].intensity-0.00000000004f*(sqr(sqr(map_main->lights[i].x2-c_x))+sqr(sqr(map_main->lights[i].y2-c_y))));
-                    if(light_value>0){
-                        map_main->at(a,b).light_rgb[0]+=light_value*map_main->lights[i].r*light_level;
-                        map_main->at(a,b).light_rgb[1]+=light_value*map_main->lights[i].g*light_level;
-                        map_main->at(a,b).light_rgb[2]+=light_value*map_main->lights[i].b*light_level;
-                    }
-                    //creatures
-                    for (c=0; c<map_main->at(a,b).total_creatures; c++){
-                        size=mod.general_creatures[map_main->creature[map_main->at(a,b).creatures[c]].type].size*map_main->creature[map_main->at(a,b).creatures[c]].size*general_creature_size;
-                        c_x=map_main->creature[map_main->at(a,b).creatures[c]].x+size*0.5f;
-                        c_y=map_main->creature[map_main->at(a,b).creatures[c]].y+size*0.5f;
-                        //fix_coordinates(&c_x,&c_y);
-                        light_value=intensity*map_main->lights[i].pulse*(mod.general_lights[map_main->lights[i].type].intensity-0.00000000001f*4*(sqr(sqr(map_main->lights[i].x2-c_x))+sqr(sqr(map_main->lights[i].y2-c_y))));
-                        if(light_value>0){
-                            map_main->creature[map_main->at(a,b).creatures[c]].light[0]+=light_value*map_main->lights[i].r*light_level;
-                            map_main->creature[map_main->at(a,b).creatures[c]].light[1]+=light_value*map_main->lights[i].g*light_level;
-                            map_main->creature[map_main->at(a,b).creatures[c]].light[2]+=light_value*map_main->lights[i].b*light_level;
-                        }
-                    }
-                }
-            }
-
-        }
-
-        //pulsating
-        if(mod.general_lights[map_main->lights[i].type].pulsating>0){
-            map_main->lights[i].pulse=1+sincos.table_sin(time_from_beginning*mod.general_lights[map_main->lights[i].type].pulsating+map_main->lights[i].pulse_phase)*0.04f*randDouble(0.0f,1.01f);
-        }
-        if(mod.general_lights[map_main->lights[i].type].particle>=0){
-            if(!paused)
-            if(randInt(0,mod.general_lights[map_main->lights[i].type].particle_flash_speed/(elapsed*map_main->lights[i].size))==0){
-                make_particle(mod.general_lights[map_main->lights[i].type].particle,1,mod.general_lights[map_main->lights[i].type].particle_time+randInt(-250,250),map_main->lights[i].x+randDouble(map_main->lights[i].size*general_object_size*0.3f,map_main->lights[i].size*general_object_size*(1-0.3f)),map_main->lights[i].y+randDouble(map_main->lights[i].size*general_object_size*0.3f,map_main->lights[i].size*general_object_size*(1-0.3f)),randDouble(-0.01f,0.01f),randDouble(-0.01f,0.01f));
-                //if(randInt(0,5)==0)
-                //	playsound(fire_sound,randDouble(0.6f,1.0f),map_main->lights[i].x,map_main->lights[i].y,player_middle_x,player_middle_y);
-            }
-
-        }
-    }
-
-    //grids are not too bright
-    for(a=draw_start_x;a<draw_end_x;a++){
-        for(b=draw_start_y;b<draw_end_y;b++){
-            //object lights not too brigh
-            //if(map_main->at(a,b).total_objects>0)
-            for(c=0;c<map_main->at(a,b).objects.size();c++){
-                if(map_main->object[map_main->at(a,b).objects[c]].light_level[0]>1)map_main->object[map_main->at(a,b).objects[c]].light_level[0]=1;
-                if(map_main->object[map_main->at(a,b).objects[c]].light_level[1]>1)map_main->object[map_main->at(a,b).objects[c]].light_level[1]=1;
-                if(map_main->object[map_main->at(a,b).objects[c]].light_level[2]>1)map_main->object[map_main->at(a,b).objects[c]].light_level[2]=1;
-
-                if(map_main->object[map_main->at(a,b).objects[c]].light_level[0]<0)map_main->object[map_main->at(a,b).objects[c]].light_level[0]=0;
-                if(map_main->object[map_main->at(a,b).objects[c]].light_level[1]<0)map_main->object[map_main->at(a,b).objects[c]].light_level[1]=0;
-                if(map_main->object[map_main->at(a,b).objects[c]].light_level[2]<0)map_main->object[map_main->at(a,b).objects[c]].light_level[2]=0;
-
-            }
-            //item lights not too brigh
-            for(c=0;c<map_main->at(a,b).items.size();c++){
-                if(map_main->items[map_main->at(a,b).items[c]].light_level[0]>1)map_main->items[map_main->at(a,b).items[c]].light_level[0]=1;
-                if(map_main->items[map_main->at(a,b).items[c]].light_level[1]>1)map_main->items[map_main->at(a,b).items[c]].light_level[1]=1;
-                if(map_main->items[map_main->at(a,b).items[c]].light_level[2]>1)map_main->items[map_main->at(a,b).items[c]].light_level[2]=1;
-
-                if(map_main->items[map_main->at(a,b).items[c]].light_level[0]<0)map_main->items[map_main->at(a,b).items[c]].light_level[0]=0;
-                if(map_main->items[map_main->at(a,b).items[c]].light_level[1]<0)map_main->items[map_main->at(a,b).items[c]].light_level[1]=0;
-                if(map_main->items[map_main->at(a,b).items[c]].light_level[2]<0)map_main->items[map_main->at(a,b).items[c]].light_level[2]=0;
-
-            }
-            //creature lights not too brigh
-            //if(map_main->at(a,b).total_creatures>0)
-            for (c=0; c<map_main->at(a,b).total_creatures; c++){
-                if(map_main->creature[map_main->at(a,b).creatures[c]].light[0]>1)map_main->creature[map_main->at(a,b).creatures[c]].light[0]=1;
-                if(map_main->creature[map_main->at(a,b).creatures[c]].light[1]>1)map_main->creature[map_main->at(a,b).creatures[c]].light[1]=1;
-                if(map_main->creature[map_main->at(a,b).creatures[c]].light[2]>1)map_main->creature[map_main->at(a,b).creatures[c]].light[2]=1;
-
-                if(map_main->creature[map_main->at(a,b).creatures[c]].light[0]<0)map_main->creature[map_main->at(a,b).creatures[c]].light[0]=0;
-                if(map_main->creature[map_main->at(a,b).creatures[c]].light[1]<0)map_main->creature[map_main->at(a,b).creatures[c]].light[1]=0;
-                if(map_main->creature[map_main->at(a,b).creatures[c]].light[2]<0)map_main->creature[map_main->at(a,b).creatures[c]].light[2]=0;
-
-            }
-
-            //grid not too bright
-            if(map_main->at(a,b).light_rgb[0]>1)map_main->at(a,b).light_rgb[0]=1;
-            if(map_main->at(a,b).light_rgb[1]>1)map_main->at(a,b).light_rgb[1]=1;
-            if(map_main->at(a,b).light_rgb[2]>1)map_main->at(a,b).light_rgb[2]=1;
-
-            if(map_main->at(a,b).light_rgb[0]<0)map_main->at(a,b).light_rgb[0]=0;
-            if(map_main->at(a,b).light_rgb[1]<0)map_main->at(a,b).light_rgb[1]=0;
-            if(map_main->at(a,b).light_rgb[2]<0)map_main->at(a,b).light_rgb[2]=0;
-
-        }
-    }
-
-
+    // We strictly avoid looping through every tile here to save CPU
 }
 
 //map coordinate checker
@@ -17012,13 +16645,12 @@ void game_engine::set_bar(creature_base *creature, unsigned int bar, float value
 }
 
 void game_engine::carry_light(map *edit_map, creature_base *creature, int light){
-
     float size=mod.general_creatures[creature->type].size*creature->size*general_creature_size;
 
     switch(mod.general_lights[edit_map->lights[light].type].type){
 
-    //flashlight
-    case 0:
+        //flashlight
+        case 0:
         //hands
         if(creature->light_attached_to==0)
             edit_map->lights[light].rotation=creature->rotation;
@@ -17046,7 +16678,6 @@ void game_engine::carry_light(map *edit_map, creature_base *creature, int light)
 
     }
 }
-
 
 void game_engine::delete_light(map *edit_map, int light){
 
@@ -17883,148 +17514,150 @@ void game_engine::find_suggested_camera_position(float *suggested_camera_x, floa
         *suggested_camera_y = attach_camera_parameter2 - screen_height / 2.0f;
     }
 }
-void game_engine::draw_realistic_shadows() {
-    float px = player_middle_x;
-    float py = player_middle_y;
-    float shadow_dist = 4000.0f; 
 
-    // Global Shadow State Setup
-    grim->System_SetState_Blending(true);
-    grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
-    grim->System_SetState_BlendDst(grBLEND_INVSRCALPHA);
-    grim->Quads_SetColor(0.0f, 0.0f, 0.0f, 1.0f); // Solid Black
-    resources.Texture_Set(black_texture);
-    grim->Quads_SetRotation(0);
-    grim->Quads_SetSubset(0, 0, 1, 1);
+// void game_engine::draw_realistic_shadows() {
+//     float px = player_middle_x;
+//     float py = player_middle_y;
+//     float shadow_dist = 4000.0f; 
 
-    int range = 12; 
-    int sx = std::max(0, (int)(px / 128) - range);
-    int sy = std::max(0, (int)(py / 128) - range);
-    int ex = std::min((int)map_main->sizex - 1, (int)(px / 128) + range);
-    int ey = std::min((int)map_main->sizey - 1, (int)(py / 128) + range);
+//     // Global Shadow State Setup
+//     grim->System_SetState_Blending(true);
+//     grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
+//     grim->System_SetState_BlendDst(grBLEND_INVSRCALPHA);
+//     grim->Quads_SetColor(0.0f, 0.0f, 0.0f, 1.0f); // Solid Black
+//     resources.Texture_Set(black_texture);
+//     grim->Quads_SetRotation(0);
+//     grim->Quads_SetSubset(0, 0, 1, 1);
 
-    // Lambda to handle the math so we don't duplicate code for Objects and Items
-    auto process_caster = [&](int type, float obj_x, float obj_y, float obj_s, float obj_rot) {
-        if (type < 0 || type >= (int)mod.general_objects.size()) return;
-        if (!mod.general_objects[type].blocks_vision) return;
+//     int range = 12; 
+//     int sx = std::max(0, (int)(px / 128) - range);
+//     int sy = std::max(0, (int)(py / 128) - range);
+//     int ex = std::min((int)map_main->sizex - 1, (int)(px / 128) + range);
+//     int ey = std::min((int)map_main->sizey - 1, (int)(py / 128) + range);
 
-        float obj_size = obj_s * general_object_size;
-        float ox = obj_x + obj_size * 0.5f;
-        float oy = obj_y + obj_size * 0.5f;
-        int coll_type = mod.general_objects[type].collision_type;
+//     // Lambda to handle the math so we don't duplicate code for Objects and Items
+//     auto process_caster = [&](int type, float obj_x, float obj_y, float obj_s, float obj_rot) {
+//         if (type < 0 || type >= (int)mod.general_objects.size()) return;
+//         if (!mod.general_objects[type].blocks_vision) return;
 
-        // --- CASE 1: CIRCLE COLLISION ---
-        if (coll_type == 0) {
-            float radius = (obj_size * mod.general_objects[type].collision_parameter0) * 0.5f;
-            if (radius <= 0) return;
-            float dx = ox - px, dy = oy - py;
-            float dist_sq = dx * dx + dy * dy;
-            if (dist_sq <= radius * radius) return;
+//         float obj_size = obj_s * general_object_size;
+//         float ox = obj_x + obj_size * 0.5f;
+//         float oy = obj_y + obj_size * 0.5f;
+//         int coll_type = mod.general_objects[type].collision_type;
 
-            float angle_to_center = atan2(dy, dx);
+//         // --- CASE 1: CIRCLE COLLISION ---
+//         if (coll_type == 0) {
+//             float radius = (obj_size * mod.general_objects[type].collision_parameter0) * 0.5f;
+//             if (radius <= 0) return;
+//             float dx = ox - px, dy = oy - py;
+//             float dist_sq = dx * dx + dy * dy;
+//             if (dist_sq <= radius * radius) return;
+
+//             float angle_to_center = atan2(dy, dx);
             
-            // 1. REDUCE WIDTH: Lowered from 1.3f to 0.7f (adjust as needed)
-            float angle_offset = 0.9f; 
+//             // 1. REDUCE WIDTH: Lowered from 1.3f to 0.7f (adjust as needed)
+//             float angle_offset = 0.9f; 
             
-            // 2. MOVE FURTHER AWAY: How many pixels to push the shadow start point back
-            float shadow_push = 1.5f; 
+//             // 2. MOVE FURTHER AWAY: How many pixels to push the shadow start point back
+//             float shadow_push = 1.5f; 
 
-            // Calculate initial points on the circle circumference
-            float x1 = ox + cos(angle_to_center + angle_offset) * radius;
-            float y1 = oy + sin(angle_to_center + angle_offset) * radius;
-            float x2 = ox + cos(angle_to_center - angle_offset) * radius;
-            float y2 = oy + sin(angle_to_center - angle_offset) * radius;
+//             // Calculate initial points on the circle circumference
+//             float x1 = ox + cos(angle_to_center + angle_offset) * radius;
+//             float y1 = oy + sin(angle_to_center + angle_offset) * radius;
+//             float x2 = ox + cos(angle_to_center - angle_offset) * radius;
+//             float y2 = oy + sin(angle_to_center - angle_offset) * radius;
 
-            // Apply the "push" to move the start of the shadow away from the player
-            float vx1 = x1 - px, vy1 = y1 - py;
-            float vx2 = x2 - px, vy2 = y2 - py;
-            float len1 = sqrt(vx1 * vx1 + vy1 * vy1);
-            float len2 = sqrt(vx2 * vx2 + vy2 * vy2);
+//             // Apply the "push" to move the start of the shadow away from the player
+//             float vx1 = x1 - px, vy1 = y1 - py;
+//             float vx2 = x2 - px, vy2 = y2 - py;
+//             float len1 = sqrt(vx1 * vx1 + vy1 * vy1);
+//             float len2 = sqrt(vx2 * vx2 + vy2 * vy2);
 
-            // Normalize and offset the start points
-            if (len1 > 0) { x1 += (vx1 / len1) * shadow_push; y1 += (vy1 / len1) * shadow_push; }
-            if (len2 > 0) { x2 += (vx2 / len2) * shadow_push; y2 += (vy2 / len2) * shadow_push; }
+//             // Normalize and offset the start points
+//             if (len1 > 0) { x1 += (vx1 / len1) * shadow_push; y1 += (vy1 / len1) * shadow_push; }
+//             if (len2 > 0) { x2 += (vx2 / len2) * shadow_push; y2 += (vy2 / len2) * shadow_push; }
 
-            // Project to the far distance
-            float ex1 = x1 + (vx1 / len1) * shadow_dist;
-            float ey1 = y1 + (vy1 / len1) * shadow_dist;
-            float ex2 = x2 + (vx2 / len2) * shadow_dist;
-            float ey2 = y2 + (vy2 / len2) * shadow_dist;
+//             // Project to the far distance
+//             float ex1 = x1 + (vx1 / len1) * shadow_dist;
+//             float ey1 = y1 + (vy1 / len1) * shadow_dist;
+//             float ex2 = x2 + (vx2 / len2) * shadow_dist;
+//             float ey2 = y2 + (vy2 / len2) * shadow_dist;
 
-            grim->Quads_Begin();
-            grim->Quads_Draw4V(x1 - camera_x, y1 - camera_y, x2 - camera_x, y2 - camera_y, 
-                            ex2 - camera_x, ey2 - camera_y, ex1 - camera_x, ey1 - camera_y);
-            grim->Quads_End();
-        }
-        // --- CASE 2: POLYGON COLLISION ---
-        else if (coll_type == 1) {
-            int poly_idx = mod.general_objects[type].collision_parameter0;
-            if (poly_idx < 0 || poly_idx >= (int)mod.polygons.size()) return;
+//             grim->Quads_Begin();
+//             grim->Quads_Draw4V(x1 - camera_x, y1 - camera_y, x2 - camera_x, y2 - camera_y, 
+//                             ex2 - camera_x, ey2 - camera_y, ex1 - camera_x, ey1 - camera_y);
+//             grim->Quads_End();
+//         }
+//         // --- CASE 2: POLYGON COLLISION ---
+//         else if (coll_type == 1) {
+//             int poly_idx = mod.general_objects[type].collision_parameter0;
+//             if (poly_idx < 0 || poly_idx >= (int)mod.polygons.size()) return;
 
-            float coll_scale = mod.general_objects[type].collision_parameter1;
-            auto& poly = mod.polygons[poly_idx];
-            float sinR = sincos.table_sin(obj_rot);
-            float cosR = sincos.table_cos(obj_rot);
+//             float coll_scale = mod.general_objects[type].collision_parameter1;
+//             auto& poly = mod.polygons[poly_idx];
+//             float sinR = sincos.table_sin(obj_rot);
+//             float cosR = sincos.table_cos(obj_rot);
 
-            for (unsigned int a = 0; a < poly.points.size() - 1; a++) {
-                float px1 = poly.points[a].x * obj_size * coll_scale * 0.95f; // shrink
-                float py1 = poly.points[a].y * obj_size * coll_scale * 0.95f;
-                float px2 = poly.points[a+1].x * obj_size * coll_scale * 0.95f;
-                float py2 = poly.points[a+1].y * obj_size * coll_scale * 0.95f;
+//             for (unsigned int a = 0; a < poly.points.size() - 1; a++) {
+//                 float px1 = poly.points[a].x * obj_size * coll_scale * 0.95f; // shrink
+//                 float py1 = poly.points[a].y * obj_size * coll_scale * 0.95f;
+//                 float px2 = poly.points[a+1].x * obj_size * coll_scale * 0.95f;
+//                 float py2 = poly.points[a+1].y * obj_size * coll_scale * 0.95f;
 
-                float x1 = cosR * px1 + sinR * py1 + ox;
-                float y1 = sinR * px1 - cosR * py1 + oy;
-                float x2 = cosR * px2 + sinR * py2 + ox;
-                float y2 = sinR * px2 - cosR * py2 + oy;
+//                 float x1 = cosR * px1 + sinR * py1 + ox;
+//                 float y1 = sinR * px1 - cosR * py1 + oy;
+//                 float x2 = cosR * px2 + sinR * py2 + ox;
+//                 float y2 = sinR * px2 - cosR * py2 + oy;
 
-                float midX = (x1 + x2) * 0.5f;
-                float midY = (y1 + y2) * 0.5f;
+//                 float midX = (x1 + x2) * 0.5f;
+//                 float midY = (y1 + y2) * 0.5f;
                 
-                if ((midX - ox) * (midX - px) + (midY - oy) * (midY - py) > 0) {
-                    float nx = -(y2 - y1), ny = (x2 - x1);
-                    float len = sqrt(nx*nx + ny*ny);
-                    if (len > 0) {
-                        nx /= len; ny /= len;
-                        if (point_will_collide(map_main, midX + nx * 5.0f, midY + ny * 5.0f, true)) continue;
-                    }
+//                 if ((midX - ox) * (midX - px) + (midY - oy) * (midY - py) > 0) {
+//                     float nx = -(y2 - y1), ny = (x2 - x1);
+//                     float len = sqrt(nx*nx + ny*ny);
+//                     if (len > 0) {
+//                         nx /= len; ny /= len;
+//                         if (point_will_collide(map_main, midX + nx * 5.0f, midY + ny * 5.0f, true)) continue;
+//                     }
 
-                    float ex1 = x1 + (x1 - px) * shadow_dist;
-                    float ey1 = y1 + (y1 - py) * shadow_dist;
-                    float ex2 = x2 + (x2 - px) * shadow_dist;
-                    float ey2 = y2 + (y2 - py) * shadow_dist;
-                    float cp = (x2 - x1) * (py - y1) - (y2 - y1) * (px - x1);
+//                     float ex1 = x1 + (x1 - px) * shadow_dist;
+//                     float ey1 = y1 + (y1 - py) * shadow_dist;
+//                     float ex2 = x2 + (x2 - px) * shadow_dist;
+//                     float ey2 = y2 + (y2 - py) * shadow_dist;
+//                     float cp = (x2 - x1) * (py - y1) - (y2 - y1) * (px - x1);
 
-                    grim->Quads_Begin();
-                    if (cp > 0) grim->Quads_Draw4V(x1 - camera_x, y1 - camera_y, ex1 - camera_x, ey1 - camera_y, ex2 - camera_x, ey2 - camera_y, x2 - camera_x, y2 - camera_y);
-                    else grim->Quads_Draw4V(x2 - camera_x, y2 - camera_y, ex2 - camera_x, ey2 - camera_y, ex1 - camera_x, ey1 - camera_y, x1 - camera_x, y1 - camera_y);
-                    grim->Quads_End();
-                }
-            }
-        }
-    };
+//                     grim->Quads_Begin();
+//                     if (cp > 0) grim->Quads_Draw4V(x1 - camera_x, y1 - camera_y, ex1 - camera_x, ey1 - camera_y, ex2 - camera_x, ey2 - camera_y, x2 - camera_x, y2 - camera_y);
+//                     else grim->Quads_Draw4V(x2 - camera_x, y2 - camera_y, ex2 - camera_x, ey2 - camera_y, ex1 - camera_x, ey1 - camera_y, x1 - camera_x, y1 - camera_y);
+//                     grim->Quads_End();
+//                 }
+//             }
+//         }
+//     };
 
-    // Correct Loop: Use map_main->at() to get grid points
-    for (int i = sx; i <= ex; i++) {
-        for (int j = sy; j <= ey; j++) {
-            auto& grid_pt = map_main->at(i, j);
+//     // Correct Loop: Use map_main->at() to get grid points
+//     for (int i = sx; i <= ex; i++) {
+//         for (int j = sy; j <= ey; j++) {
+//             auto& grid_pt = map_main->at(i, j);
 
-            // Process Standard Objects
-            for (auto& idx : grid_pt.objects) {
-                map_object& o = map_main->object[idx];
-                if (!o.dead) process_caster(o.type, o.x, o.y, o.size, o.rotation);
-            }
+//             // Process Standard Objects
+//             for (auto& idx : grid_pt.objects) {
+//                 map_object& o = map_main->object[idx];
+//                 if (!o.dead) process_caster(o.type, o.x, o.y, o.size, o.rotation);
+//             }
 
-            // Process Items (Plot Objects / Doors)
-            for (auto& idx : grid_pt.items) {
-                item& it = map_main->items[idx];
-                // Only plot objects (base_type 0) should cast these shadows
-                if (!it.dead && it.base_type == 0) {
-                    process_caster(it.type, it.x, it.y, it.size, it.rotation);
-                }
-            }
-        }
-    }
-}
+//             // Process Items (Plot Objects / Doors)
+//             for (auto& idx : grid_pt.items) {
+//                 item& it = map_main->items[idx];
+//                 // Only plot objects (base_type 0) should cast these shadows
+//                 if (!it.dead && it.base_type == 0) {
+//                     process_caster(it.type, it.x, it.y, it.size, it.rotation);
+//                 }
+//             }
+//         }
+//     }
+// }
+
 void game_engine::draw_map_grid_small(map *map_to_edit, int texture, int texture2){//renders map grid
 
     if(can_draw_map){
@@ -18063,6 +17696,738 @@ void game_engine::draw_map_grid_small(map *map_to_edit, int texture, int texture
             grim->System_SetRenderTarget(-1);
         }
     }
-
-
 }
+
+void game_engine::draw_shadow_map_system()
+{
+    const float LIGHT_UNIT_SCALE = 128.0f; 
+
+    // ==========================================
+    // PASS 1: PLAYER VISION MASK (Line of Sight)
+    // ==========================================
+    glBindFramebuffer(GL_FRAMEBUFFER, grim->vision_fbo);
+    glViewport(0, 0, screen_width, screen_height);
+    glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+    
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f); 
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    grim->System_SetState_BlendSrc(grBLEND_ZERO);
+    grim->System_SetState_BlendDst(grBLEND_INVSRCCOLOR);
+    resources.Texture_Set(white_texture);
+    grim->Quads_SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+    draw_shadow_geometry(player_middle_x, player_middle_y, 1500.0f); 
+
+
+    // ==========================================
+    // PASS 2: THE DARKNESS (Light Accumulator)
+    // ==========================================
+    glBindFramebuffer(GL_FRAMEBUFFER, grim->light_fbo);
+    glViewport(0, 0, screen_width, screen_height);
+    glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+    
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); 
+    glClear(GL_COLOR_BUFFER_BIT);
+
+
+    // ==========================================
+    // PASS 3: RENDER ALL MAP LIGHTS 
+    // ==========================================
+    // We added sourceX/sourceY to separate the "Shadow Origin" from the "Texture Center"
+    auto render_single_light = [&](float drawX, float drawY, float sourceX, float sourceY, float radius, int tex_id, float r, float g, float b, float a, float rot) {
+        glBindFramebuffer(GL_FRAMEBUFFER, grim->scratch_fbo);
+        glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
+        grim->System_SetState_BlendDst(grBLEND_ONE); 
+        
+        grim->Quads_SetRotation(rot);
+        grim->Quads_SetSubset(0, 0, 1, 1);
+        grim->Quads_SetColor(r, g, b, a);
+        resources.Texture_Set(tex_id);
+        
+        float draw_size = radius * 2.0f;
+        grim->Quads_Begin();
+            // Draw the texture offset to drawX, drawY
+            grim->Quads_Draw(drawX - camera_x - radius, drawY - camera_y - radius, draw_size, draw_size);
+        grim->Quads_End();
+
+        grim->Quads_SetRotation(0); 
+        grim->System_SetState_BlendSrc(grBLEND_ZERO);
+        grim->System_SetState_BlendDst(grBLEND_INVSRCCOLOR);
+        resources.Texture_Set(white_texture);
+        grim->Quads_SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+        
+        // Cast shadows from the ORIGIN (sourceX/sourceY), not the texture center!
+        // We pass radius * 2.0f to ensure the shadow geometry stretches to the end of the flashlight beam.
+        draw_shadow_geometry(sourceX, sourceY, radius);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, grim->light_fbo);
+        grim->System_SetState_BlendSrc(grBLEND_ONE);
+        grim->System_SetState_BlendDst(grBLEND_ONE); 
+        glBindTexture(GL_TEXTURE_2D, grim->scratch_texture);
+        grim->Quads_SetSubset(0, 1, 1, 0); 
+        grim->Quads_SetColor(1, 1, 1, 1);
+        grim->Quads_Begin(); grim->Quads_Draw(0, 0, screen_width, screen_height); grim->Quads_End();
+    };
+
+    for (int i = 0; i < (int)map_main->lights.size(); i++) {
+        auto& L_inst = map_main->lights[i];
+        if (L_inst.dead) continue;
+
+        auto& L_template = mod.general_lights[L_inst.type];
+        float sz = L_inst.size * L_template.intensity * LIGHT_UNIT_SCALE * L_inst.pulse;
+        float radius = sz / 2.0f;
+
+        float sourceX = L_inst.x2;
+        float sourceY = L_inst.y2;
+        float drawX = sourceX;
+        float drawY = sourceY;
+        float draw_rot = 0.0f;
+
+        // --- Flashlight offset logic ---
+        if (L_template.type == 0) { // 0 = Flashlight
+            float rot = L_inst.rotation;
+            float forward_amount = radius - 80.0f; 
+            if (forward_amount < 0.0f) forward_amount = 0.0f;
+
+            float forwardX = cos(rot - pi/2);
+            float forwardY = sin(rot - pi/2);
+            
+            // Push the texture center forward by 'radius' so the base connects to the player
+            // 'pi/2' offsets the standard Notrium facing angle.
+            
+            drawX += forwardX * forward_amount;
+            drawY += forwardY * forward_amount;
+            draw_rot = rot;
+        }
+
+        // Expanded culling check to account for the offset
+        if (drawX < camera_x - radius || drawX > camera_x + screen_width + radius ||
+            drawY < camera_y - radius || drawY > camera_y + screen_height + radius) {
+            continue;
+        }
+
+        render_single_light(drawX, drawY, sourceX, sourceY, radius, L_template.texture, L_inst.r, L_inst.g, L_inst.b, L_template.a, draw_rot);
+    }
+
+
+    // ==========================================
+    // PASS 4: HIDE LIGHTS BEHIND WALLS
+    // ==========================================
+    glBindFramebuffer(GL_FRAMEBUFFER, grim->light_fbo);
+    grim->System_SetState_BlendSrc(grBLEND_ZERO);
+    grim->System_SetState_BlendDst(grBLEND_SRCCOLOR); 
+    glBindTexture(GL_TEXTURE_2D, grim->vision_texture);
+    
+    grim->Quads_SetSubset(0, 1, 1, 0); 
+    grim->Quads_SetColor(1, 1, 1, 1);
+    grim->Quads_Begin();
+        grim->Quads_Draw(0, 0, screen_width, screen_height);
+    grim->Quads_End();
+
+
+    // ==========================================
+    // PASS 5: RENDER DARKNESS TO SCREEN
+    // ==========================================
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, screen_width, screen_height); 
+    glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+
+    grim->System_SetState_BlendSrc(grBLEND_ZERO);
+    grim->System_SetState_BlendDst(grBLEND_SRCCOLOR);
+    glBindTexture(GL_TEXTURE_2D, grim->light_texture);
+    
+    grim->Quads_SetSubset(0, 1, 1, 0);
+    grim->Quads_SetColor(1, 1, 1, 1);
+    grim->Quads_Begin();
+        grim->Quads_Draw(0, 0, screen_width, screen_height);
+    grim->Quads_End();
+
+
+   // ==========================================
+    // PASS 6: MASKED ADDITIVE GLOWS
+    // ==========================================
+    glBindFramebuffer(GL_FRAMEBUFFER, grim->scratch_fbo);
+    glViewport(0, 0, screen_width, screen_height); 
+    glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+    
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
+    grim->System_SetState_BlendDst(grBLEND_ONE); 
+
+    for (int i = 0; i < (int)map_main->lights.size(); i++) {
+        auto& L_inst = map_main->lights[i];
+        if (L_inst.dead) continue;
+
+        auto& L_template = mod.general_lights[L_inst.type];
+        if (L_template.softness >= 1.0f) continue;
+
+        // 1. Get the unscaled BASE size and radius (Exactly like Pass 3)
+        float base_sz = L_inst.size * L_template.intensity * LIGHT_UNIT_SCALE * L_inst.pulse;
+        float base_radius = base_sz / 2.0f;
+
+        // 2. Get the SCALED size and radius for the inner glow
+        float visual_scale = 1.0f - L_template.softness;
+        float scaled_sz = base_sz * visual_scale;
+        float scaled_radius = scaled_sz / 2.0f;
+
+        float drawX = L_inst.x2;
+        float drawY = L_inst.y2;
+        float draw_rot = 0.0f;
+
+        // Apply flashlight offset logic
+        if (L_template.type == 0) { 
+            float rot = L_inst.rotation;
+            
+            // USE BASE_RADIUS HERE SO IT MATCHES PASS 3 EXACTLY
+            float forward_amount = base_radius - 80.0f; 
+            if (forward_amount < 0.0f) forward_amount = 0.0f;
+            
+            float forwardX = cos(rot - pi/2);
+            float forwardY = sin(rot - pi/2);
+
+            drawX += forwardX * forward_amount;
+            drawY += forwardY * forward_amount;
+            
+            // Fixed typo: Match Pass 3 rotation
+            draw_rot = rot;
+        }
+
+        // Culling (use base_radius to ensure it matches Pass 3's culling)
+        if (drawX < camera_x - base_radius || drawX > camera_x + screen_width + base_radius ||
+            drawY < camera_y - base_radius || drawY > camera_y + screen_height + base_radius) {
+            continue;
+        }
+        grim->Quads_SetSubset(0, 0, 1, 1);
+        grim->Quads_SetRotation(draw_rot);
+        float alpha_val = L_template.a * visual_scale * 0.4f; 
+        grim->Quads_SetColor(L_inst.r, L_inst.g, L_inst.b, alpha_val); 
+        
+        resources.Texture_Set(L_template.texture);
+        grim->Quads_Begin();
+            // DRAW using scaled_sz and scaled_radius, but anchored to the correct drawX/drawY!
+            grim->Quads_Draw(drawX - camera_x - scaled_radius, drawY - camera_y - scaled_radius, scaled_sz, scaled_sz);
+        grim->Quads_End();
+        grim->Quads_SetRotation(0);
+    }
+
+    // 6B: Multiply the Glows by Player Vision
+    grim->System_SetState_BlendSrc(grBLEND_ZERO);
+    grim->System_SetState_BlendDst(grBLEND_SRCCOLOR); 
+    glBindTexture(GL_TEXTURE_2D, grim->vision_texture);
+    
+    grim->Quads_SetSubset(0, 1, 1, 0); 
+    grim->Quads_SetColor(1, 1, 1, 1);
+    grim->Quads_Begin();
+        grim->Quads_Draw(0, 0, screen_width, screen_height);
+    grim->Quads_End();
+
+    // 6C: Add the perfectly masked glows to the main screen!
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, screen_width, screen_height); 
+    glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+
+    grim->System_SetState_BlendSrc(grBLEND_ONE); 
+    grim->System_SetState_BlendDst(grBLEND_ONE); 
+    glBindTexture(GL_TEXTURE_2D, grim->scratch_texture);
+    
+    grim->Quads_SetSubset(0, 1, 1, 0);
+    grim->Quads_SetColor(1, 1, 1, 1);
+    grim->Quads_Begin();
+        grim->Quads_Draw(0, 0, screen_width, screen_height);
+    grim->Quads_End();
+
+    // --- 7: RESET ENGINE BLENDING ---
+    grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
+    grim->System_SetState_BlendDst(grBLEND_INVSRCALPHA);
+}
+
+// void game_engine::draw_shadow_map_system()
+// {
+//     const float LIGHT_UNIT_SCALE = 128.0f; 
+
+//     // ==========================================
+//     // PASS 1: PLAYER VISION MASK (Line of Sight)
+//     // ==========================================
+//     glBindFramebuffer(GL_FRAMEBUFFER, grim->vision_fbo);
+//     glViewport(0, 0, screen_width, screen_height);
+//     glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+    
+//     glClearColor(1.0f, 1.0f, 1.0f, 1.0f); 
+//     glClear(GL_COLOR_BUFFER_BIT);
+
+//     grim->System_SetState_BlendSrc(grBLEND_ZERO);
+//     grim->System_SetState_BlendDst(grBLEND_INVSRCCOLOR);
+//     resources.Texture_Set(white_texture);
+//     grim->Quads_SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+//     draw_shadow_geometry(player_middle_x, player_middle_y, 1500.0f); 
+
+
+//     // ==========================================
+//     // PASS 2: THE DARKNESS (Light Accumulator)
+//     // ==========================================
+//     glBindFramebuffer(GL_FRAMEBUFFER, grim->light_fbo);
+//     glViewport(0, 0, screen_width, screen_height);
+//     glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+    
+//     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); 
+//     glClear(GL_COLOR_BUFFER_BIT);
+
+
+//     // ==========================================
+//     // PASS 3: RENDER ALL MAP LIGHTS 
+//     // ==========================================
+//     // We added sourceX/sourceY to separate the "Shadow Origin" from the "Texture Center"
+//     auto render_single_light = [&](float drawX, float drawY, float sourceX, float sourceY, float radius, int tex_id, float r, float g, float b, float a, float rot) {
+//         glBindFramebuffer(GL_FRAMEBUFFER, grim->scratch_fbo);
+//         glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+//         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//         glClear(GL_COLOR_BUFFER_BIT);
+
+//         grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
+//         grim->System_SetState_BlendDst(grBLEND_ONE); 
+        
+//         grim->Quads_SetRotation(rot);
+//         grim->Quads_SetSubset(0, 0, 1, 1);
+//         grim->Quads_SetColor(r, g, b, a);
+//         resources.Texture_Set(tex_id);
+        
+//         float draw_size = radius * 2.0f;
+//         grim->Quads_Begin();
+//             // Draw the texture offset to drawX, drawY
+//             grim->Quads_Draw(drawX - camera_x - radius, drawY - camera_y - radius, draw_size, draw_size);
+//         grim->Quads_End();
+
+//         grim->Quads_SetRotation(0); 
+//         grim->System_SetState_BlendSrc(grBLEND_ZERO);
+//         grim->System_SetState_BlendDst(grBLEND_INVSRCCOLOR);
+//         resources.Texture_Set(white_texture);
+//         grim->Quads_SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+        
+//         // Cast shadows from the ORIGIN (sourceX/sourceY), not the texture center!
+//         // We pass radius * 2.0f to ensure the shadow geometry stretches to the end of the flashlight beam.
+//         draw_shadow_geometry(sourceX, sourceY, radius);
+
+//         glBindFramebuffer(GL_FRAMEBUFFER, grim->light_fbo);
+//         grim->System_SetState_BlendSrc(grBLEND_ONE);
+//         grim->System_SetState_BlendDst(grBLEND_ONE); 
+//         glBindTexture(GL_TEXTURE_2D, grim->scratch_texture);
+//         grim->Quads_SetSubset(0, 1, 1, 0); 
+//         grim->Quads_SetColor(1, 1, 1, 1);
+//         grim->Quads_Begin(); grim->Quads_Draw(0, 0, screen_width, screen_height); grim->Quads_End();
+//     };
+
+//     for (int i = 0; i < (int)map_main->lights.size(); i++) {
+//         auto& L_inst = map_main->lights[i];
+//         if (L_inst.dead) continue;
+
+//         auto& L_template = mod.general_lights[L_inst.type];
+//         float sz = L_inst.size * L_template.intensity * LIGHT_UNIT_SCALE * L_inst.pulse;
+//         float radius = sz / 2.0f;
+
+//         float sourceX = L_inst.x2;
+//         float sourceY = L_inst.y2;
+//         float drawX = sourceX;
+//         float drawY = sourceY;
+//         float draw_rot = 0.0f;
+
+//         // --- Flashlight offset logic ---
+//         if (L_template.type == 0) { // 0 = Flashlight
+//             float rot = L_inst.rotation;
+//             float forward_amount = radius - 80.0f; 
+//             if (forward_amount < 0.0f) forward_amount = 0.0f;
+
+//             float forwardX = cos(rot - pi/2);
+//             float forwardY = sin(rot - pi/2);
+            
+//             // Push the texture center forward by 'radius' so the base connects to the player
+//             // 'pi/2' offsets the standard Notrium facing angle.
+            
+//             drawX += forwardX * forward_amount;
+//             drawY += forwardY * forward_amount;
+//             draw_rot = rot;
+//         }
+
+//         // Expanded culling check to account for the offset
+//         if (drawX < camera_x - radius || drawX > camera_x + screen_width + radius ||
+//             drawY < camera_y - radius || drawY > camera_y + screen_height + radius) {
+//             continue;
+//         }
+
+//         render_single_light(drawX, drawY, sourceX, sourceY, radius, L_template.texture, L_inst.r, L_inst.g, L_inst.b, L_template.a, draw_rot);
+//     }
+
+
+//     // ==========================================
+//     // PASS 4: HIDE LIGHTS BEHIND WALLS
+//     // ==========================================
+//     glBindFramebuffer(GL_FRAMEBUFFER, grim->light_fbo);
+//     grim->System_SetState_BlendSrc(grBLEND_ZERO);
+//     grim->System_SetState_BlendDst(grBLEND_SRCCOLOR); 
+//     glBindTexture(GL_TEXTURE_2D, grim->vision_texture);
+    
+//     grim->Quads_SetSubset(0, 1, 1, 0); 
+//     grim->Quads_SetColor(1, 1, 1, 1);
+//     grim->Quads_Begin();
+//         grim->Quads_Draw(0, 0, screen_width, screen_height);
+//     grim->Quads_End();
+
+
+//     // ==========================================
+//     // PASS 5: RENDER DARKNESS TO SCREEN
+//     // ==========================================
+//     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//     glViewport(0, 0, screen_width, screen_height); 
+//     glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+
+//     grim->System_SetState_BlendSrc(grBLEND_ZERO);
+//     grim->System_SetState_BlendDst(grBLEND_SRCCOLOR);
+//     glBindTexture(GL_TEXTURE_2D, grim->light_texture);
+    
+//     grim->Quads_SetSubset(0, 1, 1, 0);
+//     grim->Quads_SetColor(1, 1, 1, 1);
+//     grim->Quads_Begin();
+//         grim->Quads_Draw(0, 0, screen_width, screen_height);
+//     grim->Quads_End();
+
+
+//    // ==========================================
+//     // PASS 6: MASKED ADDITIVE GLOWS
+//     // ==========================================
+//     glBindFramebuffer(GL_FRAMEBUFFER, grim->scratch_fbo);
+//     glViewport(0, 0, screen_width, screen_height); 
+//     glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+    
+//     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//     glClear(GL_COLOR_BUFFER_BIT);
+
+//     grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
+//     grim->System_SetState_BlendDst(grBLEND_ONE); 
+
+//     for (int i = 0; i < (int)map_main->lights.size(); i++) {
+//         auto& L_inst = map_main->lights[i];
+//         if (L_inst.dead) continue;
+
+//         auto& L_template = mod.general_lights[L_inst.type];
+//         if (L_template.softness >= 1.0f) continue;
+
+//         // 1. Get the unscaled BASE size and radius (Exactly like Pass 3)
+//         float base_sz = L_inst.size * L_template.intensity * LIGHT_UNIT_SCALE * L_inst.pulse;
+//         float base_radius = base_sz / 2.0f;
+
+//         // 2. Get the SCALED size and radius for the inner glow
+//         float visual_scale = 1.0f - L_template.softness;
+//         float scaled_sz = base_sz * visual_scale;
+//         float scaled_radius = scaled_sz / 2.0f;
+
+//         float drawX = L_inst.x2;
+//         float drawY = L_inst.y2;
+//         float draw_rot = 0.0f;
+
+//         // Apply flashlight offset logic
+//         if (L_template.type == 0) { 
+//             float rot = L_inst.rotation;
+            
+//             // USE BASE_RADIUS HERE SO IT MATCHES PASS 3 EXACTLY
+//             float forward_amount = base_radius - 80.0f; 
+//             if (forward_amount < 0.0f) forward_amount = 0.0f;
+            
+//             float forwardX = cos(rot - pi/2);
+//             float forwardY = sin(rot - pi/2);
+
+//             drawX += forwardX * forward_amount;
+//             drawY += forwardY * forward_amount;
+            
+//             // Fixed typo: Match Pass 3 rotation
+//             draw_rot = rot;
+//         }
+
+//         // Culling (use base_radius to ensure it matches Pass 3's culling)
+//         if (drawX < camera_x - base_radius || drawX > camera_x + screen_width + base_radius ||
+//             drawY < camera_y - base_radius || drawY > camera_y + screen_height + base_radius) {
+//             continue;
+//         }
+//         grim->Quads_SetSubset(0, 0, 1, 1);
+//         grim->Quads_SetRotation(draw_rot);
+//         float alpha_val = L_template.a * visual_scale * 0.4f; 
+//         grim->Quads_SetColor(L_inst.r, L_inst.g, L_inst.b, alpha_val); 
+        
+//         resources.Texture_Set(L_template.texture);
+//         grim->Quads_Begin();
+//             // DRAW using scaled_sz and scaled_radius, but anchored to the correct drawX/drawY!
+//             grim->Quads_Draw(drawX - camera_x - scaled_radius, drawY - camera_y - scaled_radius, scaled_sz, scaled_sz);
+//         grim->Quads_End();
+//         grim->Quads_SetRotation(0);
+//     }
+
+//     // 6B: Multiply the Glows by Player Vision
+//     grim->System_SetState_BlendSrc(grBLEND_ZERO);
+//     grim->System_SetState_BlendDst(grBLEND_SRCCOLOR); 
+//     glBindTexture(GL_TEXTURE_2D, grim->vision_texture);
+    
+//     grim->Quads_SetSubset(0, 1, 1, 0); 
+//     grim->Quads_SetColor(1, 1, 1, 1);
+//     grim->Quads_Begin();
+//         grim->Quads_Draw(0, 0, screen_width, screen_height);
+//     grim->Quads_End();
+
+//     // 6C: Add the perfectly masked glows to the main screen!
+//     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//     glViewport(0, 0, screen_width, screen_height); 
+//     glMatrixMode(GL_PROJECTION); glLoadIdentity(); glOrtho(0, screen_width, screen_height, 0, -2, 2); glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+
+//     grim->System_SetState_BlendSrc(grBLEND_ONE); 
+//     grim->System_SetState_BlendDst(grBLEND_ONE); 
+//     glBindTexture(GL_TEXTURE_2D, grim->scratch_texture);
+    
+//     grim->Quads_SetSubset(0, 1, 1, 0);
+//     grim->Quads_SetColor(1, 1, 1, 1);
+//     grim->Quads_Begin();
+//         grim->Quads_Draw(0, 0, screen_width, screen_height);
+//     grim->Quads_End();
+
+//     // --- 7: RESET ENGINE BLENDING ---
+//     grim->System_SetState_BlendSrc(grBLEND_SRCALPHA);
+//     grim->System_SetState_BlendDst(grBLEND_INVSRCALPHA);
+// }
+
+void game_engine::draw_shadow_geometry(float lightX, float lightY, float radius) {
+   float shadow_dist = radius * 2.0f;
+    // resources.Texture_Set(black_texture); 
+    // // Match the darkness level of the mask
+    // grim->Quads_SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+    int range = (int)(radius / 128.0f) + 1;
+    int sx = std::max(0, (int)(lightX / 128) - range);
+    int sy = std::max(0, (int)(lightY / 128) - range);
+    int ex = std::min((int)map_main->sizex - 1, (int)(lightX / 128) + range);
+    int ey = std::min((int)map_main->sizey - 1, (int)(lightY / 128) + range);
+
+    auto cast_shadow = [&](int type, float obj_x, float obj_y, float obj_s, float obj_rot) {
+        if (type < 0 || !mod.general_objects[type].blocks_vision) return;
+
+        float obj_size = obj_s * general_object_size;
+        float ox = obj_x + obj_size * 0.5f;
+        float oy = obj_y + obj_size * 0.5f;
+        int coll_type = mod.general_objects[type].collision_type;
+
+        // --- 1. CIRCLE SHADOW LOGIC (Type 0) ---
+        if (coll_type == 0) {
+            float radius = (obj_size * mod.general_objects[type].collision_parameter0) * 0.5f;
+            float dx = ox - lightX;
+            float dy = oy - lightY;
+            float dist_sq = dx * dx + dy * dy;
+            
+            if (dist_sq <= radius * radius) return; // Light inside the circle
+
+            float angle_to_center = atan2(dy, dx);
+            // Calculate the angular width of the shadow based on the circle's size
+            float angle_offset = asin(radius / sqrt(dist_sq)); 
+
+            // Find the two tangent points on the perimeter
+            float x1 = ox + cos(angle_to_center + angle_offset) * radius;
+            float y1 = oy + sin(angle_to_center + angle_offset) * radius;
+            float x2 = ox + cos(angle_to_center - angle_offset) * radius;
+            float y2 = oy + sin(angle_to_center - angle_offset) * radius;
+
+            // Project points away from light source
+            float vx1 = x1 - lightX; float vy1 = y1 - lightY;
+            float vx2 = x2 - lightX; float vy2 = y2 - lightY;
+            float len1 = sqrt(vx1 * vx1 + vy1 * vy1);
+            float len2 = sqrt(vx2 * vx2 + vy2 * vy2);
+
+            // Shift start points slightly to keep the circle object itself visible
+            float shift = 2.0f;
+            float sx1 = x1 + (vx1 / len1) * shift; float sy1 = y1 + (vy1 / len1) * shift;
+            float sx2 = x2 + (vx2 / len2) * shift; float sy2 = y2 + (vy2 / len2) * shift;
+
+            grim->Quads_Begin();
+                grim->Quads_Draw4V(
+                    sx1 - camera_x, sy1 - camera_y, 
+                    sx2 - camera_x, sy2 - camera_y, 
+                    sx2 + (vx2 / len2) * shadow_dist - camera_x, sy2 + (vy2 / len2) * shadow_dist - camera_y, 
+                    sx1 + (vx1 / len1) * shadow_dist - camera_x, sy1 + (vy1 / len1) * shadow_dist - camera_y
+                );
+            grim->Quads_End();
+        } 
+
+        // --- 2. POLYGON SHADOW LOGIC (Type 1 - Walls/Houses) ---
+        else if (coll_type == 1) {
+            int p_idx = mod.general_objects[type].collision_parameter0;
+            auto& poly = mod.polygons[p_idx];
+            float scale = mod.general_objects[type].collision_parameter1;
+            float sR = sincos.table_sin(obj_rot);
+            float cR = sincos.table_cos(obj_rot);
+
+            for (size_t a = 0; a < poly.points.size() - 1; a++) {
+                float x1 = cR*(poly.points[a].x * obj_size * scale) + sR*(poly.points[a].y * obj_size * scale) + ox;
+                float y1 = sR*(poly.points[a].x * obj_size * scale) - cR*(poly.points[a].y * obj_size * scale) + oy;
+                float x2 = cR*(poly.points[a+1].x * obj_size * scale) + sR*(poly.points[a+1].y * obj_size * scale) + ox;
+                float y2 = sR*(poly.points[a+1].x * obj_size * scale) - cR*(poly.points[a+1].y * obj_size * scale) + oy;
+
+                float midX = (x1 + x2) * 0.5f;
+                float midY = (y1 + y2) * 0.5f;
+                float nx = -(y2 - y1); float ny = (x2 - x1);
+                float nLen = sqrt(nx*nx + ny*ny);
+                if (nLen > 0) { nx /= nLen; ny /= nLen; }
+
+                // BACK-FACE FILTER: Only project from the "dark side" of the wall
+                if (((midX - lightX) * nx + (midY - lightY) * ny) < 0) continue; 
+
+                // CONNECTIVITY CHECK: Skip edges that are flush against another wall
+                if (point_will_collide(map_main, midX + nx * 5.0f, midY + ny * 5.0f, true)) continue;
+
+                float dx1 = x1 - lightX; float dy1 = y1 - lightY;
+                float dx2 = x2 - lightX; float dy2 = y2 - lightY;
+                float len1 = sqrt(dx1*dx1 + dy1*dy1) + 0.01f;
+                float len2 = sqrt(dx2*dx2 + dy2*dy2) + 0.01f;
+
+                // Push start points back slightly to keep the wall visible
+                float shift = 2.0f;
+                float sx1 = x1 + (dx1 / len1) * shift; float sy1 = y1 + (dy1 / len1) * shift;
+                float sx2 = x2 + (dx2 / len2) * shift; float sy2 = y2 + (dy2 / len2) * shift;
+
+                grim->Quads_Begin();
+                    grim->Quads_Draw4V(
+                        sx1 - camera_x, sy1 - camera_y, 
+                        sx2 - camera_x, sy2 - camera_y, 
+                        x2 + (dx2/len2)*shadow_dist - camera_x, y2 + (dy2/len2)*shadow_dist - camera_y, 
+                        x1 + (dx1/len1)*shadow_dist - camera_x, y1 + (dy1/len1)*shadow_dist - camera_y
+                    );
+                grim->Quads_End();
+            }
+        }
+    };
+
+    // Run the processor for objects and plot items in the grid
+    for (int i = sx; i <= ex; i++) {
+        for (int j = sy; j <= ey; j++) {
+            auto& grid_pt = map_main->at(i, j);
+            for (auto& idx : grid_pt.objects) cast_shadow(map_main->object[idx].type, map_main->object[idx].x, map_main->object[idx].y, map_main->object[idx].size, map_main->object[idx].rotation);
+            for (auto& idx : grid_pt.items) if (map_main->items[idx].base_type == 0) cast_shadow(map_main->items[idx].type, map_main->items[idx].x, map_main->items[idx].y, map_main->items[idx].size, map_main->items[idx].rotation);
+        }
+    }
+}
+
+// void game_engine::draw_shadow_geometry(float px, float py) {
+//     float shadow_dist = 4000.0f; 
+//     int range = 12; 
+//     int sx = std::max(0, (int)(px / 128) - range);
+//     int sy = std::max(0, (int)(py / 128) - range);
+//     int ex = std::min((int)map_main->sizex - 1, (int)(px / 128) + range);
+//     int ey = std::min((int)map_main->sizey - 1, (int)(py / 128) + range);
+
+//     // We are drawing into the Light Mask FBO, so we use solid black
+//     resources.Texture_Set(black_texture);
+//     grim->Quads_SetColor(0.0f, 0.0f, 0.0f, 1.0f); 
+
+//     auto process_caster = [&](int type, float obj_x, float obj_y, float obj_s, float obj_rot) {
+//         if (type < 0 || type >= (int)mod.general_objects.size()) return;
+//         if (!mod.general_objects[type].blocks_vision) return;
+
+//         float obj_size = obj_s * general_object_size;
+//         float ox = obj_x + obj_size * 0.5f;
+//         float oy = obj_y + obj_size * 0.5f;
+//         int coll_type = mod.general_objects[type].collision_type;
+
+//         // --- CIRCLE COLLISION ---
+//         if (coll_type == 0) {
+//             float radius = (obj_size * mod.general_objects[type].collision_parameter0) * 0.5f;
+//             float dx = ox - px, dy = oy - py;
+//             if (dx * dx + dy * dy <= radius * radius) return;
+
+//             float angle_to_center = atan2(dy, dx);
+//             float angle_offset = 0.9f; 
+//             float shadow_push = 1.5f; 
+
+//             float x1 = ox + cos(angle_to_center + angle_offset) * radius;
+//             float y1 = oy + sin(angle_to_center + angle_offset) * radius;
+//             float x2 = ox + cos(angle_to_center - angle_offset) * radius;
+//             float y2 = oy + sin(angle_to_center - angle_offset) * radius;
+
+//             float vx1 = x1 - px, vy1 = y1 - py;
+//             float vx2 = x2 - px, vy2 = y2 - py;
+//             float len1 = sqrt(vx1 * vx1 + vy1 * vy1);
+//             float len2 = sqrt(vx2 * vx2 + vy2 * vy2);
+            
+//             if (len1 > 0) { x1 += (vx1/len1)*shadow_push; y1 += (vy1/len1)*shadow_push; }
+//             if (len2 > 0) { x2 += (vx2/len2)*shadow_push; y2 += (vy2/len2)*shadow_push; }
+
+//             grim->Quads_Begin();
+//             grim->Quads_Draw4V(x1 - camera_x, y1 - camera_y, 
+//                                x2 - camera_x, y2 - camera_y, 
+//                                x2 + (vx2/len2) * shadow_dist - camera_x, y2 + (vy2/len2) * shadow_dist - camera_y, 
+//                                x1 + (vx1/len1) * shadow_dist - camera_x, y1 + (vy1/len1) * shadow_dist - camera_y);
+//             grim->Quads_End();
+//         } 
+//         // --- POLYGON COLLISION (WALLS/HOUSES) ---
+//         else if (coll_type == 1) {
+//             int poly_idx = mod.general_objects[type].collision_parameter0;
+//             auto& poly = mod.polygons[poly_idx];
+//             float sinR = sincos.table_sin(obj_rot);
+//             float cosR = sincos.table_cos(obj_rot);
+
+//             for (unsigned int a = 0; a < poly.points.size() - 1; a++) {
+//                 // Polygon segments in world space
+//                 float x1 = cosR*(poly.points[a].x * obj_size) + sinR*(poly.points[a].y * obj_size) + ox;
+//                 float y1 = sinR*(poly.points[a].x * obj_size) - cosR*(poly.points[a].y * obj_size) + oy;
+//                 float x2 = cosR*(poly.points[a+1].x * obj_size) + sinR*(poly.points[a+1].y * obj_size) + ox;
+//                 float y2 = sinR*(poly.points[a+1].x * obj_size) - cosR*(poly.points[a+1].y * obj_size) + oy;
+
+//                 float midX = (x1 + x2) * 0.5f;
+//                 float midY = (y1 + y2) * 0.5f;
+                
+//                 // BACKFACE CULLING: Only edges facing the player cast shadows
+//                 if (((midX - ox) * (midX - px) + (midY - oy) * (midY - py)) > 0) {
+                    
+//                     // --- FEATURE RESTORED: EDGE CONNECTION CHECK ---
+//                     // Calculate normal to see if this edge is "connected" to another wall
+//                     float nx = -(y2 - y1), ny = (x2 - x1);
+//                     float len = sqrt(nx * nx + ny * ny);
+//                     if (len > 0) {
+//                         nx /= len; ny /= len;
+//                         // Check slightly "behind" the wall segment. If it hits another solid, don't cast shadow
+//                         if (point_will_collide(map_main, midX + nx * 5.0f, midY + ny * 5.0f, true)) continue;
+//                     }
+
+//                     float ex1 = x1 + (x1 - px) * shadow_dist;
+//                     float ey1 = y1 + (y1 - py) * shadow_dist;
+//                     float ex2 = x2 + (x2 - px) * shadow_dist;
+//                     float ey2 = y2 + (y2 - py) * shadow_dist;
+                    
+//                     // DYNAMIC WINDING ORDER (using cross-product)
+//                     float cp = (x2 - x1) * (py - y1) - (y2 - y1) * (px - x1);
+
+//                     grim->Quads_Begin();
+//                     if (cp > 0) {
+//                         grim->Quads_Draw4V(x1 - camera_x, y1 - camera_y, ex1 - camera_x, ey1 - camera_y, 
+//                                            ex2 - camera_x, ey2 - camera_y, x2 - camera_x, y2 - camera_y);
+//                     } else {
+//                         grim->Quads_Draw4V(x2 - camera_x, y2 - camera_y, ex2 - camera_x, ey2 - camera_y, 
+//                                            ex1 - camera_x, ey1 - camera_y, x1 - camera_x, y1 - camera_y);
+//                     }
+//                     grim->Quads_End();
+//                 }
+//             }
+//         }
+//     };
+
+//     // Correct Grid loop
+//     for (int i = sx; i <= ex; i++) {
+//         for (int j = sy; j <= ey; j++) {
+//             auto& grid_pt = map_main->at(i, j);
+//             for (auto& idx : grid_pt.objects) {
+//                 if (!map_main->object[idx].dead) process_caster(map_main->object[idx].type, map_main->object[idx].x, map_main->object[idx].y, map_main->object[idx].size, map_main->object[idx].rotation);
+//             }
+//             for (auto& idx : grid_pt.items) {
+//                 if (!map_main->items[idx].dead && map_main->items[idx].base_type == 0) 
+//                     process_caster(map_main->items[idx].type, map_main->items[idx].x, map_main->items[idx].y, map_main->items[idx].size, map_main->items[idx].rotation);
+//             }
+//         }
+//     }
+// }

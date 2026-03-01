@@ -45,6 +45,12 @@ Player;//name---------------------------------------
 	begin_timed_block
 	end_timed_block
 	begin_specialties
+		Flashlight;//description
+			2;//number
+			4.000000;//parameter0
+			1.000000;//parameter1
+			1.000000;//parameter2
+			0.000000;//parameter3
 	end_specialties
 Toilet;//name--------------------------------------- **BATHROOM**
 	100;//identifier//{
@@ -760,6 +766,12 @@ LCD;//name--------------------------------------- **FURNITURE**
 			0.000000;//parameter1
 			120.000000;//parameter2
 			120.000000;//parameter3
+		Screen Glow;//description
+			2;//number
+			4.000000;//parameter0
+			0.300000;//parameter1
+			0.300000;//parameter2
+			0.000000;//parameter3
 	end_specialties
 Drinks vending machine;//name--------------------------------------- **FURNITURE**
 	303;//identifier//{
@@ -2522,7 +2534,7 @@ Light;//name--------------------------------------- **LIGHTS**
 			begin_effects;
 				7;//effect number----------------------TURN INTO REGULAR LIGHT
 					2.000000;//parameter1
-					0.250000;//parameter2
+					6.000000;//parameter2
 					2.000000;//parameter3
 					0.000000;//parameter4
 				17;//effect number----------------------TURN ON
@@ -2554,7 +2566,7 @@ Light;//name--------------------------------------- **LIGHTS**
 			begin_effects;
 				7;//effect number----------------------TURN INTO LOW LIGHT
 					3.000000;//parameter1
-					0.250000;//parameter2
+					4.000000;//parameter2
 					2.000000;//parameter3
 					0.000000;//parameter4
 				17;//effect number----------------------TURN NIGHT
@@ -2583,7 +2595,7 @@ Light;//name--------------------------------------- **LIGHTS**
 			begin_effects;
 				7;//effect number----------------------TURN INTO LOW LIGHT
 					-1.000000;//parameter1
-					0.250000;//parameter2
+					0.000000;//parameter2
 					2.000000;//parameter3
 					0.000000;//parameter4
 				17;//effect number----------------------TURN OFF
@@ -2617,12 +2629,6 @@ Light;//name--------------------------------------- **LIGHTS**
 			0.000000;//parameter1
 			3.000000;//parameter2
 			3.000000;//parameter3
-		Light;//description-------------------
-			2;//number
-			2.000000;//parameter0
-			0.250000;//parameter1
-			1.000000;//parameter2
-			2.000000;//parameter3
 	end_specialties
 (SPAWN) Water cooler;//name--------------------------------------- **SPAWNERS**
 	10000;//identifier//{

@@ -332,6 +332,7 @@ public:
         //float particle_size;
         float particle_time;
         float intensity;
+        float softness;
     };
 
     //base structure for loading plot object info

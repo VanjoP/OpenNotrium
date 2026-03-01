@@ -1469,6 +1469,7 @@ void Mod::load_light_info(const string& filename){//loads light info from file
             temp_light.b=atof(stripped_fgets(rivi,sizeof(rivi),fil));
             temp_light.a=atof(stripped_fgets(rivi,sizeof(rivi),fil));
             temp_light.intensity=atof(stripped_fgets(rivi,sizeof(rivi),fil));
+            temp_light.softness = atof(stripped_fgets(rivi, sizeof(rivi), fil));
             temp_light.particle=atoi(stripped_fgets(rivi,sizeof(rivi),fil));
             temp_light.particle_flash_speed=atof(stripped_fgets(rivi,sizeof(rivi),fil));
             //temp_light.particle_size=atof(stripped_fgets(rivi,sizeof(rivi),fil));

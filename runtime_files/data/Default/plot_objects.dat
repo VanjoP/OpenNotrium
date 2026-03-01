@@ -1857,11 +1857,11 @@ Door Opening Lights;//name--------------------------------------- **DOOR HELPERS
 			begin_conditions;
 			end_conditions;
 			begin_effects;
-				27;//effect number----------------------Drop Yellow Light
+				27;//effect number----------------------Drop green Light
 					100.000000;//parameter1
 					1000.000000;//parameter2
-					0.100000;//parameter3
-					0.100000;//parameter4
+					1.000000;//parameter3
+					1.000000;//parameter4
 			end_effects;
 	end_effects_block;
 	end_of_file;

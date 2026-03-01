@@ -1,4 +1,7 @@
-#include "SDL_opengl.h"
+#ifndef BLENDSTATE_H
+#define BLENDSTATE_H
+
+#include <GL/glew.h>
 
 //typedef
 enum BlendState
@@ -12,7 +15,7 @@ enum BlendState
     grBLEND_INVSRCALPHA			= GL_ONE_MINUS_SRC_ALPHA,
     grBLEND_DESTALPHA			= GL_DST_ALPHA,
     grBLEND_INVDESTALPHA		= GL_ONE_MINUS_DST_ALPHA,
-    grBLEND_DESTCOLOR			= GL_DST_COLOR,
+    grBLEND_DSTCOLOR			= GL_DST_COLOR,
     grBLEND_INVDESTCOLOR		= GL_ONE_MINUS_DST_COLOR,
     grBLEND_SRCALPHASAT			= GL_SRC_ALPHA_SATURATE,
 //	grBLEND_BOTHSRCALPHA		= 12,
@@ -20,3 +23,5 @@ enum BlendState
 //
 //	grBLEND_FORCE16BIT			= (1 << 15)
 };
+
+#endif

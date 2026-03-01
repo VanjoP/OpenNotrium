@@ -8,6 +8,7 @@ Omni light;//name-------
 	1;//blue color component
 	0.5;//alpha color component
 	1;//light intensity
+	1;//light softness
 	-1;//flash particle (-1=nothing)
 		0;//flashing speed
 		0;//particle life time   
@@ -21,6 +22,7 @@ Sleep particle effect;//name-------
 	0.0;//blue color component
 	0.0;//alpha color component
 	0.2;//light intensity
+	1;//light softness
 	7;//flash particle (-1=nothing)
 		200;//flashing speed
 		5000;//particle life time  
@@ -32,8 +34,9 @@ Ceeling light;//name-------
 	0.95;//red color component
 	0.95;//green color component
 	0.75;//blue color component
-	0.4;//alpha color component
-	2.5;//light intensity
+	0.8;//alpha color component
+	1;//light intensity
+	0.5;//light softness
 	-1;//flash particle (-1=nothing)
 		0;//flashing speed
 		0;//particle life time   
@@ -46,7 +49,8 @@ Ceeling light low;//name-------
 	0.15;//green color component
 	0.45;//blue color component
 	0.4;//alpha color component
-	2.5;//light intensity
+	1;//light intensity
+	1;//light softness
 	-1;//flash particle (-1=nothing)
 		0;//flashing speed
 		0;//particle life time   
@@ -54,12 +58,13 @@ Flashlight;//name-------
 	4;//identifier
 	light0.png;//texture
 	0;//type, 0=flashlight, 1=omni
-	1;//pulse speed
+	0;//pulse speed
 	0.8;//red color component
 	0.8;//green color component
 	1;//blue color component
-	0.15;//alpha color component
-	1.0;//light intensity
+	0.6;//alpha color component
+	5.0;//light intensity
+	0.2;//light softness
 	-1;//flash particle (-1=nothing)
 		0;//flashing speed
 		0;//particle life time    
@@ -72,7 +77,8 @@ Taser;//name-------
 	0.15;//green color component
 	0.85;//blue color component
 	0.8;//alpha color component
-	1;//light intensity
+	2.5;//light intensity
+	0.15;//light softness
 	20;//flash particle (-1=nothing)
 		20;//flashing speed
 		150;//particle life time   
@@ -85,7 +91,8 @@ Door Green Omni;//name-------
 	0.95;//green color component
 	0.0;//blue color component
 	0.5;//alpha color component
-	0.2;//light intensity
+	0.4;//light intensity
+	0.2;//light softness
 	-1;//flash particle (-1=nothing)
 		0;//flashing speed
 		0;//particle life time  
@@ -99,6 +106,7 @@ Door Yellow Omni;//name-------
 	0.5;//blue color component
 	0.5;//alpha color component
 	0.2;//light intensity
+	1;//light softness
 	-1;//flash particle (-1=nothing)
 		0;//flashing speed
 		0;//particle life time  
@@ -112,6 +120,7 @@ Door Blue Omni;//name-------
 	0.6;//blue color component
 	0.5;//alpha color component
 	0.2;//light intensity
+	1;//light softness
 	-1;//flash particle (-1=nothing)
 		0;//flashing speed
 		0;//particle life time  
@@ -125,6 +134,7 @@ Door Red Omni;//name-------
 	0.0;//blue color component
 	0.5;//alpha color component
 	0.2;//light intensity
+	1;//light softness
 	-1;//flash particle (-1=nothing)
 		0;//flashing speed
 		0;//particle life time  

@@ -325,6 +325,7 @@ protected:
     //int electric_texture;
     int item_view;
     int black_texture;
+    int white_texture;
     //int combine_screen;
     //int detector_display;
     int menu;
@@ -334,6 +335,8 @@ protected:
     int credits_texture;
     int carry_icon;
     int vision_texture_handle;
+    int light_blob_texture;      // The loaded gradient file (The "Brush")
+
 
     //pop-up
     float pop_up_x,pop_up_y;//location for the computer
@@ -491,7 +494,11 @@ protected:
     void calculate_quick_keys(bool only_inventory);
     void draw_vision_cone();
     void draw_realistic_shadows();
-
+    void draw_shadow_map_system();    
+    // struct ShadowEdge { float x1, y1, x2, y2; };
+    // void get_shadow_geometry(std::vector<ShadowEdge>& edges, float centerX, float centerY, float radius);
+    void draw_shadow_geometry(float px, float py, float radius); // <--- Add this declaration
+    void draw_solid_wall_geometry();
 public:
 
     debugger debug;
@@ -539,11 +546,11 @@ public:
     void creature_actions_loop(void);//calculates the creature actions and animation
     bool creature_actions(int creature, bool visible);//calculates the creature actions and animation
     void player_controls(int control_type);//check and control the player input
-    void draw_lights(int layer);//draws light effects (flashlight, explosions
+    // void draw_lights(int layer);//draws light effects (flashlight, explosions
     //void flash_light(void);//handles the flashlight
     void load_setup(const char *filename);
     void save_setup(const char *filename);
-    float calculate_flashlight(float c_x,float c_y,float rotation, float t_x, float t_y,float *distance,float *angle);//returns the light value using the flashlight
+    // float calculate_flashlight(float c_x,float c_y,float rotation, float t_x, float t_y,float *distance,float *angle);//returns the light value using the flashlight
     bullet shoot(int from_creature, int side,int type, float startx,float starty,float angle);//fire a bullet
     void calculate_bullets(void);//calculates bullet flight
     void draw_bullets(void);//draws bullets

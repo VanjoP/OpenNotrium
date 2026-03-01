@@ -122,7 +122,7 @@ Metal Pillar;//name---------------------------------------  **WALLS**
   0;//collision detection type, -1=none, 0=circle radius parameter0, 1=polygon parameter0 from polygons.dat size parameter1
   1.000000;//collision detection parameter0
   -1.000000;//collision detection parameter1
-  1;//Block vision. If 1, enemies and player cannot see other creatures through it. Use sparingly, this slows the AI down.
+  0;//Block vision. If 1, enemies and player cannot see other creatures through it. Use sparingly, this slows the AI down.
   1;//Stops bullets. Use sparingly as this can slow the game down a lot.
 Wall glass;//name---------------------------------------  **WALLS**
   202;//identifier//{

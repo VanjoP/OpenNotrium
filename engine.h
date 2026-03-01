@@ -8,6 +8,7 @@
 #include <vector>
 #include "keys.h"
 #include "blendstate.h"
+#include <GL/glew.h> 
 
 typedef
 bool (*ProgramCallback)(void);
@@ -29,6 +30,7 @@ class EngineTexture {
 public:
     std::string name;
     GLuint opengl_id;
+    GLuint fbo;
     int width,height;
     bool draw_flipped; //needed to account for the difference in origin location
     bool deleted;
@@ -77,6 +79,14 @@ class Engine
     int createNewTexture(const std::string& name, int width, int height);
     void startFrame();
 public:
+
+    GLuint vision_fbo;      // The container for the mask
+    GLuint vision_texture;  // The actual mask (The "Canvas")
+    GLuint light_fbo;      // The container for the mask
+    GLuint light_texture;  // The actual mask (The "Canvas")
+    // 3. The Temporary Workspace
+    GLuint scratch_fbo;
+    GLuint scratch_texture;
     Engine();
 
     /// no engine copying
@@ -132,6 +142,7 @@ public:
     * Sets active render target. This can be screen (value -1) or a texture (texture handle integer).
     */
     bool System_SetRenderTarget(int tex_id = -1);
+    bool System_SetRenderTarget2(int tex_id = -1);
 
     /**
     * Clears current render target with given color. Render target can be the screen or a texture. Use System_SetRenderTarget method to set active render target.
@@ -197,6 +208,8 @@ public:
     * Returns the amount of milliseconds the program has been running. Might wrap around after ~ 50 or 25 days.
     */
     long Time_GetTicks();
+
+
 };
 
 #endif

@@ -1384,9 +1384,35 @@ void Editor::object_draw(Mod::terrain_map_base::editor_object_base *object, floa
             }
         }
         if(object->rotation>pi*2)
-            object->rotation-=pi*2;
+            {object->rotation-=pi*2;}
         if(object->rotation<0)
-            object->rotation+=pi*2;
+            {object->rotation+=pi*2;}
+        // --- NEW: DRAW DIRECTION ARROW ---
+        // We define the "Forward" point based on the current rotation
+        // In this engine, rotation 0 usually points UP or RIGHT. 
+        // Using -pi/2 adjustment to align with standard Notrium facing.
+        float arrow_length = 64.0f * zoom;
+        float center_x = object->x * zoom - camera_x;
+        float center_y = object->y * zoom - camera_y;
+
+        float dir_x = center_x + cos(object->rotation - pi/2.0f) * arrow_length;
+        float dir_y = center_y + sin(object->rotation - pi/2.0f) * arrow_length;
+
+        // Draw a line from center to the direction point
+        // Parameters: x1, y1, x2, y2, width, alpha1, alpha2, r, g, b
+        text_manager->draw_line(center_x, center_y, dir_x, dir_y, 3.0f, 1.0f, 0.2f, 1.0f, 1.0f, 0.0f);
+
+        // Optional: Draw a small crossbar at the tip to make it look like an arrowhead
+        float head_angle = 0.5f; // radians
+        float head_size = 15.0f * zoom;
+        
+        float tip_x1 = dir_x - cos(object->rotation - pi/2.0f + head_angle) * head_size;
+        float tip_y1 = dir_y - sin(object->rotation - pi/2.0f + head_angle) * head_size;
+        float tip_x2 = dir_x - cos(object->rotation - pi/2.0f - head_angle) * head_size;
+        float tip_y2 = dir_y - sin(object->rotation - pi/2.0f - head_angle) * head_size;
+
+        text_manager->draw_line(dir_x, dir_y, tip_x1, tip_y1, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f);
+        text_manager->draw_line(dir_x, dir_y, tip_x2, tip_y2, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f);
     }
 }
 

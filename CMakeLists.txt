@@ -9,7 +9,7 @@ find_package(SDL2 2.0 REQUIRED)
 find_package(SDL2_mixer 2.0 REQUIRED)
 find_package(SDL2_image 2.0 REQUIRED)
 find_package(PhysFS REQUIRED)
-find_package(PhysFS REQUIRED)
+find_package(GLEW REQUIRED)
 
 file(GLOB OpenNotrium_sources *.cpp)
 
@@ -17,14 +17,16 @@ include_directories(
     ${SDL2_INCLUDE_DIR}
     ${SDL2_MIXER_INCLUDE_DIRS}
     ${SDL2_IMAGE_INCLUDE_DIRS}
-    ${PHYSFS_INCLUDE_DIR})
+    ${PHYSFS_INCLUDE_DIR}
+    ${GLEW_INCLUDE_DIRS})
 
 link_libraries(
     ${OPENGL_LIBRARY}
     ${SDL2_LIBRARY}
     ${SDL2_MIXER_LIBRARIES}
     ${SDL2_IMAGE_LIBRARIES}
-    ${PHYSFS_LIBRARY})
+    ${PHYSFS_LIBRARY}
+    GLEW::GLEW )
 
 # Add C++11 support flags to GCC
 include(CheckCXXCompilerFlag)

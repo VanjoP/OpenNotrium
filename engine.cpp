@@ -1,9 +1,15 @@
 #include "engine.h"
+#include <GL/glew.h>
+
+#define SDL_VIDEO_OPENGL 1
+#define NO_SDL_GLEXT
+
 #include <SDL.h>
 #include <SDL_image.h>
 #include "func.h"
 #include <physfs.h>
 #include <memory>
+
 
 Engine::Engine()
 :   window(nullptr)
@@ -158,6 +164,10 @@ void Engine::System_Initiate(const char *argv0){
     }
 
     this->glcontext = SDL_GL_CreateContext(window);
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        printf("GLEW init failed: %s\n", glewGetErrorString(err));
+    }
 
     System_GrabInput();
 
@@ -165,6 +175,66 @@ void Engine::System_Initiate(const char *argv0){
     PHYSFS_setSaneConfig("monkkonen","notrium",nullptr,0,0); //Perhaps we should allow packages here. Not now.
 
     setup_opengl();
+// ==========================================
+    // FBO 1: PLAYER VISION / MASK
+    // ==========================================
+    glGenTextures(1, &this->vision_texture); 
+    glBindTexture(GL_TEXTURE_2D, this->vision_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glGenFramebuffers(1, &this->vision_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, this->vision_fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->vision_texture, 0);
+
+    GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if(fboStatus != GL_FRAMEBUFFER_COMPLETE){
+        printf("Player Vision FBO not complete! Status: 0x%x\n", fboStatus);
+    }
+
+    // ==========================================
+    // FBO 2: MOUSE LIGHT / WORLD LIGHTS
+    // ==========================================
+    glGenTextures(1, &this->light_texture); 
+    glBindTexture(GL_TEXTURE_2D, this->light_texture);
+    // Note: Using the exact same dimensions and format as the first FBO
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glGenFramebuffers(1, &this->light_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, this->light_fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->light_texture, 0);
+
+    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if(fboStatus != GL_FRAMEBUFFER_COMPLETE){
+        printf("Mouse Light FBO not complete! Status: 0x%x\n", fboStatus);
+    }
+
+    // ==========================================
+    // FBO 2: TEMPORARY WORKSPACE FOR LIGHTS
+    // ==========================================
+    glGenTextures(1, &this->scratch_texture); 
+    glBindTexture(GL_TEXTURE_2D, this->scratch_texture);
+    // Note: Using the exact same dimensions and format as the first FBO
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glGenFramebuffers(1, &this->scratch_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, this->scratch_fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->scratch_texture, 0);
+
+    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if(fboStatus != GL_FRAMEBUFFER_COMPLETE){
+        printf("Workspace FBO not complete! Status: 0x%x\n", fboStatus);
+    }
+
+
+    // Unbind FBO so normal rendering can resume to the screen
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+
     startFrame();
 }
 
@@ -359,6 +429,39 @@ bool Engine::System_SetRenderTarget(int tex_id){
     Quads_Begin();
     Quads_Draw(0,0,tex->width,tex->height);
     Quads_End();
+
+    render_target = tex_id;
+    return true;
+}
+
+bool Engine::System_SetRenderTarget2(int tex_id)
+{
+    if (tex_id == -1)
+    {
+        // backbuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glViewport(0, 0, width, height);
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0, width, height, 0, -2, 2);
+        glMatrixMode(GL_MODELVIEW);
+
+        render_target = -1;
+        return true;
+    }
+
+    EngineTexture* tex = &textures[tex_id];
+
+    glBindFramebuffer(GL_FRAMEBUFFER, tex->fbo);
+
+    glViewport(0, 0, tex->width, tex->height);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, tex->width, tex->height, 0, -2, 2);
+    glMatrixMode(GL_MODELVIEW);
 
     render_target = tex_id;
     return true;

@@ -5,7 +5,7 @@ rsync -u out/data/Default/terrain_maps.dat runtime_files/data/Default/terrain_ma
 
 # 2. Sync from 'runtime' to 'out' ONLY if you edited the text file manually
 rsync -u runtime_files/data/Default/terrain_maps.dat out/data/Default/terrain_maps.dat
-----
+#----
 # 1. Ensure the 'out' directory exists
 mkdir -p out
 
