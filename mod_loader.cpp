@@ -1284,7 +1284,7 @@ void Mod::load_climate_info(const string& filename){//loads climate info from fi
             temp_climate.identifier=atoi(stripped_fgets(rivi,sizeof(rivi),fil));
             string tempstring="Load climate number";
             //tempstring+=itoa(temp_climate.identifier,temprivi,10);
-            sprintf(temprivi,"%d",temp_climate.identifier);
+            snprintf(temprivi, 5000,"%d",temp_climate.identifier);
             tempstring += temprivi;
             debug->debug_output(tempstring,Action::START,Logfile::STARTUP);
 
@@ -1397,7 +1397,7 @@ void Mod::load_climate_info(const string& filename){//loads climate info from fi
 
             tempstring="Load climate number";
             //tempstring+=itoa(temp_climate.identifier,temprivi,10);
-            sprintf(temprivi,"%d",temp_climate.identifier);
+            snprintf(temprivi, 5000,"%d",temp_climate.identifier);
             tempstring+=temprivi;
             debug->debug_output(tempstring,Action::END,Logfile::STARTUP);
         }

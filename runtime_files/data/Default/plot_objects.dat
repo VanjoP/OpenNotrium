@@ -484,7 +484,7 @@ Sleep system tick;//name---------------------------------------
 					0.000000;//parameter4
 				65;//effect number ------------FIRE WEAPON (HELPER) Drink water from source) //TODO: WEAPON IS FIRED FROM WRONG DIRECTION
 					1000.000000;//parameter1
-					2.000000;//parameter2
+					1.000000;//parameter2
 					0.000000;//parameter3
 					0.000000;//parameter4
 			end_effects;

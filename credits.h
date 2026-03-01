@@ -11,4 +11,4 @@
         " Eduardo Pinho "
 
 #define COPYRIGHT "Copyright (c) 2008 Vincent Verhoeven -" \
-    " Portions Copyright (c) 2003 Ville Mönkkönen "
+    " Portions Copyright (c) 2003 Ville M\xF6nkk\xF6nen "

@@ -1769,7 +1769,7 @@ Cubicle wall;//name--------------------------------------- **FURNITURE**
 			30.000000;//parameter3
 	end_specialties
 Water cooler;//name--------------------------------------- **FURNITURE**
-	310;//identifier//{
+	310;//identifier
 	1;//class
 	creature_water_cooler.png;//texture
 	0;//draw layer
@@ -1860,12 +1860,12 @@ Water cooler;//name--------------------------------------- **FURNITURE**
 	end_death_block
 	begin_hit_block
 		begin_conditions;
-			45;//condition number----------------------MUST BE HIT BY "DRINK WATER FROM SOURCE" WEAPON
+			48;//condition number----------------------MUST BE HIT BY "DRINK WATER FROM SOURCE" WEAPON
 				1000.000000;//condition parameter0
 				0.000000;//condition parameter1
 			3;//condition number----------------------MUST HAVE AT LEAST SOME WATER LEFT
 				1.000000;//condition parameter0
-				25.000001;//condition parameter1
+				1.000000;//condition parameter1
 		end_conditions;
 			begin_effects;
 				14;//effect number----------------------PLAY SOUND "DRINK"
@@ -1873,18 +1873,18 @@ Water cooler;//name--------------------------------------- **FURNITURE**
 					2.000000;//parameter2
 					0.000000;//parameter3
 					0.000000;//parameter4	
-				16;//effect number----------------------ADD ITEM: 250x "TOKEN: Hydration Intake"
+				16;//effect number----------------------ADD ITEM: 500x "TOKEN: Hydration Intake"
 					2000.000000;//parameter1
-					250.000000;//parameter2
+					500.000000;//parameter2
 					0.000000;//parameter3
 					0.000000;//parameter4	
-				44;//effect number----------------------INCREASE FULLNESS: 25
-					25.000000;//parameter1
+				44;//effect number----------------------INCREASE FULLNESS: 50
+					50.000000;//parameter1
 					0.000000;//parameter2
 					3.000000;//parameter3
 					0.000000;//parameter4	
 				4;//effect number----------------------DECREASE CREATURES WATER LEVEL
-					-25.000000;//parameter1
+					-1.000000;//parameter1
 					1.000000;//parameter2
 					1.000000;//parameter3
 					0.000000;//parameter4
@@ -2717,74 +2717,6 @@ Light;//name--------------------------------------- **LIGHTS**
 			0.000000;//parameter1
 			3.000000;//parameter2
 			3.000000;//parameter3
-	end_specialties
-(SPAWN) Water cooler;//name--------------------------------------- **SPAWNERS**
-	10000;//identifier//{
-	1;//class
-	creature_water_cooler.png;//texture
-	0;//draw layer
-	-1;//corpse item number in items.dat, -1=nothing, -2=whole corpse vanishes when dead
-	0;//corpse item amount
-	0;//attack type, 0=shooting attack, 1=close combat
-	-1;//particle to show on radar, -1=none
-	0;//primary AI tactic from AI_tactic.dat
-	0;//secondary AI tactic from AI_tactic.dat
-	-1;//footstep particle from particles.dat
-	0;//die after how many seconds, 0=doesn't die
-	-1;//eat item number from items.dat, -1=nothing
-	1.000000;//creature size
-	4.000000;//creature weight (affects pushing)# 
-	0.000000;//maximum movement speed
-	0.000000;//$minimum movement speed
-	0.000000;//leg animation speed
-	0.000000;//turn speed
-	0.000000;//inertia level (acceleration/deceleration)
-	0;//hide when behind walls
-	0;//weapon number
-	0.000000;//weapon_x
-	0.000000;//weapon_y
-	0;//blood particle
-	1;//bars visible when player hovers mouse on top
-	1.000000;//death animation speed
-	0;//creature can move from area to another
-	0.000000;//AI hear range
-	0.000000;//AI see range
-	0.000000;//AI see angle
-	begin_footstep_sounds
-	end_footstep_sounds
-	begin_hit_sounds
-	end_hit_sounds
-	begin_die_sounds
-	end_die_sounds
-	begin_eat_block
-	end_eat_block
-	begin_death_block
-	end_death_block
-	begin_hit_block
-	end_hit_block
-	begin_init_block
-	end_init_block
-	begin_timed_block
-	end_timed_block
-	begin_specialties
-		No AI;//description-------------------
-			5;//number
-			0.000000;//parameter0
-			0.000000;//parameter1
-			0.000000;//parameter2
-			0.000000;//parameter3
-		Water level;//description------------------- 
-			0;//number
-			1.000000;//parameter0
-			0.000000;//parameter1
-			2000.100000;//parameter2
-			2000.100000;//parameter3
-		Health;//description------------------- 
-			0;//number
-			0.000000;//parameter0
-			0.000000;//parameter1
-			50.000000;//parameter2
-			50.000000;//parameter3
 	end_specialties
 end_of_file;
 

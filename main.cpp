@@ -5353,10 +5353,16 @@ void game_engine::calculate_bullets(void){
                     bool immune=false;
                     for(b=0;b<mod.general_creatures[map_main->creature[collisions[a].subtype].type].specialties.size();b++){
                         if(mod.general_creatures[map_main->creature[collisions[a].subtype].type].specialties[b].number==1){
-                            if(mod.general_weapons[(*it).type].weapon_class==mod.general_creatures[map_main->creature[collisions[a].subtype].type].specialties[b].parameter0)
+                            if(mod.general_weapons[(*it).type].weapon_class==mod.general_creatures[map_main->creature[collisions[a].subtype].type].specialties[b].parameter0) {
+
                                 if(mod.general_creatures[map_main->creature[collisions[a].subtype].type].specialties[b].parameter1==0)
+                                {
                                     immune=true;
-                                else damage_multiplier=mod.general_creatures[map_main->creature[collisions[a].subtype].type].specialties[b].parameter1;
+                                }
+                                else {
+                                    damage_multiplier=mod.general_creatures[map_main->creature[collisions[a].subtype].type].specialties[b].parameter1;
+                                }
+                            }
                         }
                     }
                     if(immune)continue;
@@ -6601,7 +6607,7 @@ void game_engine::draw_pop_up(void){
                         if((distance<sqr(max_draw_distance))||(show_on_type==2)){
 
                             float alpha;
-                            if((show_on_type==1)){
+                            if(show_on_type==1){
                                 alpha=1-sqrtf(distance)/(max_draw_distance);
                                 if(alpha<0)alpha=0;
                             }
@@ -6668,7 +6674,7 @@ void game_engine::draw_pop_up(void){
 
                 if(inventory_slot>=0){
                     //itoa(inventory[active_inventory].player_items[inventory_slot].amount,temprivi,10);
-                    sprintf(temprivi,"%d",inventory[active_inventory].player_items[inventory_slot].amount);
+                    snprintf(temprivi, 5000,"%d",inventory[active_inventory].player_items[inventory_slot].amount);
 
                     tempstring="Ammo:";
                     tempstring+=temprivi;
@@ -6913,7 +6919,7 @@ void game_engine::calculate_items(void){
                                 if(map_main->items[item].amount>1){
                                     tempstring+=" (";
                                     //tempstring+=itoa(map_main->items[item].amount,temprivi,10);
-                                    sprintf(temprivi,"%d",map_main->items[item].amount);
+                                    snprintf(temprivi, 5000,"%d",map_main->items[item].amount);
                                     tempstring+=temprivi;
                                     tempstring+=")";
                                 }
@@ -7030,7 +7036,7 @@ bool game_engine::give_item(int item_number, int amount, float time, bool arrang
     if(amount<0){
         //find the item with this identifier
         for(a=0;a<inventory[active_inventory].player_items.size();a++){
-            if((inventory[active_inventory].player_items[a].item==item_number)){
+            if(inventory[active_inventory].player_items[a].item==item_number){
                 //if there are enough items
                 if(inventory[active_inventory].player_items[a].amount+amount<0)
                     return false;
@@ -8769,7 +8775,7 @@ bool game_engine::run_effect(Mod::effect effect, creature_base *creature, int cr
                         pop_up_mode=1;
                     }
                 }
-                if((effect.parameter1==0)){
+                if(effect.parameter1==0){
                     combine_item=-1;
                     pop_up_mode=1;
                 }
@@ -9251,7 +9257,7 @@ void game_engine::draw_item_view(void){
             }
             if(inventory_entry.amount>1){
                 //itoa(inventory_entry.amount,temprivi2,10);
-                sprintf(temprivi2,"%d",inventory_entry.amount);
+                snprintf(temprivi2,100,"%d",inventory_entry.amount);
                 tempstring+=" (";
                 tempstring+=temprivi2;
                 tempstring+=")";
@@ -9261,7 +9267,7 @@ void game_engine::draw_item_view(void){
 
             //weight
             //itoa(mod.general_items[inventory_entry.item].weight*inventory_entry.amount,temprivi,10);
-            sprintf(temprivi,"%d",(int)(mod.general_items[inventory_entry.item].weight*inventory_entry.amount));
+            snprintf(temprivi, 5000,"%d",(int)(mod.general_items[inventory_entry.item].weight*inventory_entry.amount));
             text_manager.write_line(font,item_dialog_x+item_list_x,item_dialog_y+item_list_y+rivi*rivi_korkeus,temprivi,1);
 
 
@@ -9846,7 +9852,7 @@ void game_engine::draw_text_view(void){
     //log entry number
     text_manager.write_line(font,item_dialog_x+129, item_dialog_y+17,"Log Entry ",1);
     //itoa(current_showing_entry+1,temprivi,10);
-    sprintf(temprivi,"%d",current_showing_entry+1);
+    snprintf(temprivi, 5000,"%d",current_showing_entry+1);
     text_manager.write_line(font,item_dialog_x+218, item_dialog_y+17,temprivi,1);
 
 
@@ -9924,7 +9930,7 @@ bool game_engine::show_journal(int day, int race){
         //stardate date
         if(date_type==0){
             //itoa(day+start_date,temprivi,10);
-            sprintf(temprivi,"%d",day+start_date);
+            snprintf(temprivi, 5000,"%d",day+start_date);
             log_text+=temprivi;
         }
         //calendar date
@@ -9943,20 +9949,20 @@ bool game_engine::show_journal(int day, int race){
             int Year = 100 * ( n - 49 ) + i + l;
 
             //itoa(Day,temprivi,10);
-            sprintf(temprivi,"%d",Day);
+            snprintf(temprivi, 5000,"%d",Day);
             log_text+=temprivi;
             log_text+="/";
             //itoa(Month,temprivi,10);
-            sprintf(temprivi,"%d",Month);
+            snprintf(temprivi, 5000,"%d",Month);
             log_text+=temprivi;
             log_text+="/";
             //itoa(Year,temprivi,10);
-            sprintf(temprivi,"%d",Year);
+            snprintf(temprivi, 5000,"%d",Year);
             log_text+=temprivi;
         }
         log_text+=" (Day ";
         //itoa(day+1,temprivi,10);
-        sprintf(temprivi,"%d",day+1);
+        snprintf(temprivi, 5000,"%d",day+1);
         log_text+=temprivi;
         log_text+=") \\ ";//linefeed
 
@@ -10409,7 +10415,7 @@ void game_engine::save_game(int slot){
         char rivi[300];
 
         //itoa(slot,temprivi,10);
-        sprintf(temprivi,"%d",slot);
+        snprintf(temprivi, 5000,"%d",slot);
         strcpy(tallennusrivi,"save/s");
         strcat(tallennusrivi,temprivi);
         strcat(tallennusrivi,".sav");
@@ -10419,21 +10425,21 @@ void game_engine::save_game(int slot){
 
 // 		//name
 // 		//itoa((int)(current_time.wDay),rivi,10);
-// 		sprintf(rivi,"%d",(int)(current_time.wDay));
+// 		snprintf(rivi,5000"%d",(int)(current_time.wDay));
 // 		strcat(rivi,".");
 // 		//itoa((int)(current_time.wMonth),temprivi,10);strcat(rivi,temprivi);
-// 		sprintf(temprivi,"%d",current_time.wMonth);strcat(rivi,temprivi);
+// 		snprintf(temprivi, 5000,"%d",current_time.wMonth);strcat(rivi,temprivi);
 // 		strcat(rivi,".");
 // 		//itoa((int)(current_time.wYear),temprivi,10);strcat(rivi,temprivi);
-// 		sprintf(temprivi,"%d",current_time.wYear);strcat(rivi,temprivi);
+// 		snprintf(temprivi, 5000,"%d",current_time.wYear);strcat(rivi,temprivi);
 // 		strcat(rivi," ");
 // 		if(current_time.wHour<10)strcat(rivi,"0");
 // 		//itoa((int)(current_time.wHour),temprivi,10);strcat(rivi,temprivi);
-// 		sprintf(temprivi,"%d",current_time.wHour);strcat(rivi,temprivi);
+// 		snprintf(temprivi, 5000,"%d",current_time.wHour);strcat(rivi,temprivi);
 // 		strcat(rivi,":");
 // 		if(current_time.wMinute<10)strcat(rivi,"0");
 // 		//itoa((int)(current_time.wMinute),temprivi,10);strcat(rivi,temprivi);
-// 		sprintf(temprivi,"%d",current_time.wMinute);strcat(rivi,temprivi);
+// 		snprintf(temprivi, 5000,"%d",current_time.wMinute);strcat(rivi,temprivi);
 
         time_t ltime;
         time(&ltime);
@@ -10455,7 +10461,7 @@ void game_engine::save_game(int slot){
 
         for(area=0;area<areas_x*areas_y;area++){*/
 
-        fprintf(fil, "%d\n", map_storage.size());
+        fprintf(fil, "%zu\n", map_storage.size());
         for(area=0;area<map_storage.size();area++){
 
 
@@ -10464,9 +10470,9 @@ void game_engine::save_game(int slot){
             //construction parameters
             fprintf(fil, "%d\n", map_storage[area]->sizex);
             fprintf(fil, "%d\n", map_storage[area]->sizey);
-            fprintf(fil, "%d\n", map_storage[area]->object.size());
-            fprintf(fil, "%d\n", map_storage[area]->creature.size());
-            fprintf(fil, "%d\n", map_storage[area]->items.size());
+            fprintf(fil, "%zu\n", map_storage[area]->object.size());
+            fprintf(fil, "%zu\n", map_storage[area]->creature.size());
+            fprintf(fil, "%zu\n", map_storage[area]->items.size());
             fprintf(fil, "%d\n", map_storage[area]->climate_number);
             fprintf(fil, "%d\n", map_storage[area]->area_type);
             fprintf(fil, "%d\n", (int)map_storage[area]->been_here_already);
@@ -10497,16 +10503,16 @@ void game_engine::save_game(int slot){
             }
             //creatures
             for(a=0;a<map_storage[area]->creature.size();a++){
-                fprintf(fil, "%d\n", sizeof(map_storage[area]->creature[a]));
+                fprintf(fil, "%zu\n", sizeof(map_storage[area]->creature[a]));
                 fwrite (&map_storage[area]->creature[a], 1, sizeof(map_storage[area]->creature[a]), fil);
             }
             //lights
-            fprintf(fil, "%d\n", map_storage[area]->lights.size());
+            fprintf(fil, "%zu\n", map_storage[area]->lights.size());
             for(a=0;a<map_storage[area]->lights.size();a++){
                 fwrite (&map_storage[area]->lights[a], 1, sizeof(map_storage[area]->lights[a]), fil);
             }
             //bullets
-            fprintf(fil, "%d\n", map_storage[area]->bullets.size());
+            fprintf(fil, "%zu\n", map_storage[area]->bullets.size());
             list<bullet>::iterator it;
             for(it=map_storage[area]->bullets.begin(); it!=map_storage[area]->bullets.end(); it++){
                 fwrite (&(*it), 1, sizeof((*it)), fil);
@@ -10520,10 +10526,10 @@ void game_engine::save_game(int slot){
 
 
         //player items
-        fprintf(fil, "%d\n", inventory.size());
+        fprintf(fil, "%zu\n", inventory.size());
         for(b=0;b<inventory.size();b++){
             //items
-            fprintf(fil, "%d\n", inventory[b].player_items.size());
+            fprintf(fil, "%zu\n", inventory[b].player_items.size());
             for(a=0;a<inventory[b].player_items.size();a++){
                 fprintf(fil, "%d\n", inventory[b].player_items[a].item);
                 fprintf(fil, "%f\n", inventory[b].player_items[a].time_stamp);
@@ -10532,7 +10538,7 @@ void game_engine::save_game(int slot){
             }
 
             //used slots
-            fprintf(fil, "%d\n", inventory[b].slot_used_by.size());
+            fprintf(fil, "%zu\n", inventory[b].slot_used_by.size());
             for(a=0;a<inventory[b].slot_used_by.size();a++){
                 fprintf(fil, "%d\n", inventory[b].slot_used_by[a]);
             }
@@ -10602,27 +10608,27 @@ void game_engine::save_game(int slot){
 
 
         //seen object texts
-        fprintf(fil, "%d\n", seen_item_text.size());
+        fprintf(fil, "%zu\n", seen_item_text.size());
         for(a=0;a<seen_item_text.size();a++){
             fprintf(fil, "%d\n", (int)seen_item_text[a]);
         }
-        fprintf(fil, "%d\n", seen_plot_object_text.size());
+        fprintf(fil, "%zu\n", seen_plot_object_text.size());
         for(a=0;a<seen_plot_object_text.size();a++){
             fprintf(fil, "%d\n", (int)seen_plot_object_text[a]);
         }
 
         //terrain timers
-        fprintf(fil, "%d\n", mod.terrain_types.size());
+        fprintf(fil, "%zu\n", mod.terrain_types.size());
         for(a=0;a<mod.terrain_types.size();a++){
-            fprintf(fil, "%d\n", mod.terrain_types[a].effects.size());
+            fprintf(fil, "%zu\n", mod.terrain_types[a].effects.size());
             for(b=0;b<mod.terrain_types[a].effects.size();b++){
                 fprintf(fil, "%f\n", terrain_timers[a].subtype[b]);
             }
         }
         //rain timers
-        fprintf(fil, "%d\n", rain_effect_timers.size());
+        fprintf(fil, "%zu\n", rain_effect_timers.size());
         for(a=0;a<rain_effect_timers.size();a++){
-            fprintf(fil, "%d\n", rain_effect_timers[a].subtype.size());
+            fprintf(fil, "%zu\n", rain_effect_timers[a].subtype.size());
             for(b=0;b<rain_effect_timers[a].subtype.size();b++){
                 fprintf(fil, "%f\n", rain_effect_timers[a].subtype[b]);
             }
@@ -10631,7 +10637,7 @@ void game_engine::save_game(int slot){
 
 
         //journal records
-        fprintf(fil, "%d\n", journal_records.size());
+        fprintf(fil, "%zu\n", journal_records.size());
         for(a=0;a<journal_records.size();a++){
             fprintf(fil, "%d\n", journal_records[a].record_type);
             fprintf(fil, "%d\n", journal_records[a].record_parameter0);
@@ -10639,7 +10645,7 @@ void game_engine::save_game(int slot){
         }
 
         //save scripts
-        fprintf(fil, "%d\n", script_info.size());
+        fprintf(fil, "%zu\n", script_info.size());
         for(a=0;a<script_info.size();a++){
             fprintf(fil, "%d\n", (int)script_info[a].dead);
             fprintf(fil, "%f\n", script_info[a].timer);
@@ -10647,7 +10653,7 @@ void game_engine::save_game(int slot){
         }
 
         //save bars
-        fprintf(fil, "%d\n", mod.general_bars.size());
+        fprintf(fil, "%zu\n", mod.general_bars.size());
         for(a=0;a<mod.general_bars.size();a++){
             fprintf(fil, "%d\n", (int)mod.general_bars[a].visible);
         }
@@ -10681,7 +10687,7 @@ void game_engine::load_game(int slot){
         char tallennusrivi[300];
 
         //itoa(slot,temprivi,10);
-        sprintf(temprivi,"%d",slot);
+        snprintf(temprivi, 5000,"%d",slot);
         strcpy(tallennusrivi,"save/s");
         strcat(tallennusrivi,temprivi);
         strcat(tallennusrivi,".sav");
@@ -11919,7 +11925,7 @@ void game_engine::read_saves(void){
         menu_system[2].item[i+d].effect=6;
         menu_system[2].item[i+d].effect_parameter=i;
 
-        sprintf (name, "save/s%i.sav", i);
+        snprintf (name,256, "save/s%i.sav", i);
         f = fopen (name, "r");
         //file not found
         if (!f){
@@ -11985,7 +11991,7 @@ void game_engine::create_menu_items(void){
                 //see if the slot exists
                 char	name[256];
                 FILE	*f;
-                sprintf (name, "save/s%i.sav", last_saved_game);
+                snprintf (name,256, "save/s%i.sav", last_saved_game);
                 f = fopen (name, "r");
                 //file found
                 if (f){
@@ -13807,7 +13813,7 @@ void game_engine::create_minimap(map *map_to_edit, int d){
 
     tempstring="map_texture ";
     //itoa(d,temprivi,10);
-    sprintf(temprivi,"%d",d);
+    snprintf(temprivi, 5000,"%d",d);
     tempstring+=temprivi;
     //texture one
     strcpy(temprivi,tempstring.c_str());
@@ -14127,7 +14133,6 @@ void game_engine::spawn_creature(int side, int tactic, int tactic2, float x, flo
         }
     }*/
 
-printf("SPAWN: Creating creature type %d at (%.1f, %.1f)\n", type, x, y);
 
 
     AI_initiate_behavior_parameters(&temp_creature);
@@ -14138,9 +14143,6 @@ printf("SPAWN: Creating creature type %d at (%.1f, %.1f)\n", type, x, y);
 
         // Run the Init Block ONCE
         auto& gen_creature = mod.general_creatures[type];
-        if (gen_creature.init_block.size() > 0) {
-            printf("SPAWN: Running %d init effects for %s\n", (int)gen_creature.init_block.size(), gen_creature.name.c_str());
-        }
         for (int i = 0; i < gen_creature.init_block.size(); i++) {
             auto& block = gen_creature.init_block[i];
 
@@ -14149,13 +14151,11 @@ printf("SPAWN: Creating creature type %d at (%.1f, %.1f)\n", type, x, y);
             for (int b = 0; b < block.conditions.size(); b++) {
                 if (!check_condition(block.conditions[b], &c_ref, new_creature_idx, c_ref.x, c_ref.y, false, -1)) {
                     OK = false;
-                    printf("SPAWN:  - Effect %d FAILED conditions.\n", gen_creature.init_block[i].effects[0].effect_number);
                     break;
                 }
             }
 
             if (OK) {
-                printf("SPAWN:  - Effect %d PASSED conditions and is running.\n", gen_creature.init_block[i].effects[0].effect_number);
                 // Run effects
                 for (int b = 0; b < block.effects.size(); b++) {
                     run_effect(block.effects[b], &c_ref, new_creature_idx, c_ref.x, c_ref.y, c_ref.rotation, false);
@@ -14621,10 +14621,10 @@ void game_engine::draw_slider(void){
     //numbers
     grim->Quads_SetColor(1,1,1,1);
     //itoa(slider_point,temprivi,10);
-    sprintf(temprivi,"%d", usernum);
+    snprintf(temprivi, 5000,"%d", usernum);
     text_manager.write_line(font,slider_x+slider_bar_x-66,slider_y+slider_bar_y+1,temprivi,2);
     //itoa(slider_maximum,temprivi,10);
-    sprintf(temprivi,"%d",slider_maximum);
+    snprintf(temprivi, 5000,"%d",slider_maximum);
     text_manager.write_line(font,slider_x+slider_bar_x+slider_length+2,slider_y+slider_bar_y+1,temprivi,2);
 
     //cancel
@@ -16234,7 +16234,7 @@ void game_engine::draw_bars(void){
         //draw number
         if(mod.general_bars[a].show_number){
             //itoa(map_main->creature[0].bars[a].value,temprivi,10)
-            sprintf(temprivi,"%d",(int)(map_main->creature[0].bars[a].value));
+            snprintf(temprivi, 5000,"%d",(int)(map_main->creature[0].bars[a].value));
             text_manager.write(font,temprivi,1.0f*x_multiplier,left_side, y ,0,0,1.0f,1.0f,1.0f,1);
         }
 

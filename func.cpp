@@ -188,7 +188,7 @@ string FloatToText(float n, int nNumberOfDecimalPlaces)
 {
     char s[200];
 
-    sprintf(s, "%f", n);
+    snprintf(s,200, "%f", n);
 
     string str(s);
 
