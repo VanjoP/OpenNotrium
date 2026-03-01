@@ -467,7 +467,7 @@ protected:
     bool run_effect(Mod::effect effect, creature_base *creature, int creature_number, float x, float y, float angle, bool undo);
     Key translate_key_KEY(char key);
     int translate_key_int(char key);
-    bool check_condition(const Mod::condition& condition, const creature_base *creature, int creature_number, float x, float y, bool show_message);
+    bool check_condition(const Mod::condition& condition, const creature_base *creature, int creature_number, float x, float y, bool show_message, int current_weapon);
     void draw_bars(void);
     void count_bars(void);
     //void debug_output(std::string rivi, int level);

@@ -2747,7 +2747,7 @@ bool game_engine::AI_eat_behavior(int creature){
                     //go throught all conditions
                     bool OK=true;
                     for(b=0;b<effect.conditions.size();b++){
-                        if(!check_condition(effect.conditions[b],&map_main->creature[creature],creature,creature_x,creature_y,false)){
+                        if(!check_condition(effect.conditions[b],&map_main->creature[creature],creature,creature_x,creature_y,false, -1)){
                             OK=false;
                             break;
                         }
@@ -3484,11 +3484,16 @@ bool game_engine::creature_actions(const int creature, const bool visible){//cal
         if(!thiscreature.killed){
             bool die_now=false;
 
-            //any bar too low, die
-            for(int meter=0;meter<maximum_bars;meter++){
-                if(!thiscreature.bars[meter].active)continue;
-                if(thiscreature.bars[meter].value<=thiscreature.bars[meter].minimum)
-                    die_now=true;
+            //specialty 0 bar too low, die
+            for(int meter = 0; meter < maximum_bars; meter++) {
+                if(!thiscreature.bars[meter].active) continue;
+                
+                // Only die if the bar is lethal AND reached the minimum
+                if(thiscreature.bars[meter].kills_creature) {
+                    if(thiscreature.bars[meter].value <= thiscreature.bars[meter].minimum) {
+                        die_now = true;
+                    }
+                }
             }
 
             //time is up
@@ -3505,7 +3510,7 @@ bool game_engine::creature_actions(const int creature, const bool visible){//cal
                         //go throught all conditions
                         bool OK=true;
                         for(b=0;b<effect.conditions.size();b++){
-                            if(!check_condition(effect.conditions[b],&thiscreature,creature,thiscreature.x+size*0.5f,thiscreature.y+size*0.5f,false)){
+                            if(!check_condition(effect.conditions[b],&thiscreature,creature,thiscreature.x+size*0.5f,thiscreature.y+size*0.5f,false, -1)){
                                 OK=false;
                                 break;
                             }
@@ -3535,7 +3540,7 @@ bool game_engine::creature_actions(const int creature, const bool visible){//cal
                         //go throught all conditions
                         bool OK=true;
                         for(b=0;b<effect.conditions.size();b++){
-                            if(!check_condition(effect.conditions[b],&thiscreature,creature,thiscreature.x+size*0.5f,thiscreature.y+size*0.5f,false)){
+                            if(!check_condition(effect.conditions[b],&thiscreature,creature,thiscreature.x+size*0.5f,thiscreature.y+size*0.5f,false, -1)){
                                 OK=false;
                                 break;
                             }
@@ -3611,7 +3616,7 @@ bool game_engine::creature_actions(const int creature, const bool visible){//cal
             //go throught all conditions
             bool OK=true;
             for(b=0;b<effect.conditions.size();b++){
-                if(!check_condition(effect.conditions[b],&thiscreature,creature,thiscreature.x+size*0.5f,thiscreature.y+size*0.5f,false)){
+                if(!check_condition(effect.conditions[b],&thiscreature,creature,thiscreature.x+size*0.5f,thiscreature.y+size*0.5f,false, -1)){
                     OK=false;
                     break;
                 }
@@ -3811,7 +3816,7 @@ bool game_engine::creature_actions(const int creature, const bool visible){//cal
                 //check conditions
                 bool OK=true;
                 for(b=0;b<effect.conditions.size();b++){
-                    if(!check_condition(effect.conditions[b],&thiscreature,creature,thiscreature.x+size*0.5f,thiscreature.y+size*0.5f,false)){
+                    if(!check_condition(effect.conditions[b],&thiscreature,creature,thiscreature.x+size*0.5f,thiscreature.y+size*0.5f,false, -1)){
                         OK=false;
                         break;
                     }
@@ -4779,7 +4784,7 @@ void game_engine::player_controls(int control_type){
             //for(c=0;c<mod.general_items[inventory[active_inventory].player_items[a].item].effects.size();c++){
             for(c=0;c<1;c++){
                 for(b=0;b<mod.general_items[inventory[active_inventory].player_items[a].item].effects[c].effect.conditions.size();b++){
-                    if(!check_condition(mod.general_items[inventory[active_inventory].player_items[a].item].effects[c].effect.conditions[b],&map_main->creature[0],0,player_middle_x,player_middle_y,false)){
+                    if(!check_condition(mod.general_items[inventory[active_inventory].player_items[a].item].effects[c].effect.conditions[b],&map_main->creature[0],0,player_middle_x,player_middle_y,false, -1)){
                         OK=false;
                         break;
                     }
@@ -4791,7 +4796,7 @@ void game_engine::player_controls(int control_type){
                 int script_number=mod.general_items[inventory[active_inventory].player_items[a].item].wielded_disabling_script;
 
                 for(b=0;b<mod.scripts[script_number].conditions.size();b++){
-                    if(!check_condition(mod.scripts[script_number].conditions[b],&map_main->creature[0],0,player_middle_x,player_middle_y,false)){
+                    if(!check_condition(mod.scripts[script_number].conditions[b],&map_main->creature[0],0,player_middle_x,player_middle_y,false, -1)){
                         OK=false;
                         break;
                     }
@@ -5146,7 +5151,7 @@ bullet game_engine::shoot(int from_creature, int side,int type, float startx,flo
             for(b=0;b<mod.general_weapons[type].wield_conditions.size();b++){
                 bool show_text=false;
                 if(from_creature==0)show_text=true;
-                if(!check_condition(mod.general_weapons[type].wield_conditions[b],&map_main->creature[from_creature],from_creature,startx,starty,show_text)){
+                if(!check_condition(mod.general_weapons[type].wield_conditions[b],&map_main->creature[from_creature],from_creature,startx,starty,show_text, -1)){
                     OK=false;
                     break;
                 }
@@ -5448,22 +5453,21 @@ void game_engine::calculate_bullets(void){
                     }
 
                     //run creature hit effects
-                    for(c=0;c<mod.general_creatures[map_main->creature[collisions[a].subtype].type].hit_block.size();c++){
-                        Mod::general_creatures_base::effect_block effect=mod.general_creatures[map_main->creature[collisions[a].subtype].type].hit_block[c];
+                    for(c = 0; c < mod.general_creatures[map_main->creature[collisions[a].subtype].type].hit_block.size(); c++) {
+                        Mod::general_creatures_base::effect_block effect = mod.general_creatures[map_main->creature[collisions[a].subtype].type].hit_block[c];
 
-                        //go throught all conditions
-                        bool OK=true;
-                        for(b=0;b<effect.conditions.size();b++){
-                            if(!check_condition(effect.conditions[b],&map_main->creature[collisions[a].subtype],collisions[a].subtype,collisions[a].x,collisions[a].y,false)){
-                                OK=false;
+                        bool OK = true;
+                        for(b = 0; b < effect.conditions.size(); b++) {
+                            // Pass (*it).type as the last argument
+                            if(!check_condition(effect.conditions[b], &map_main->creature[collisions[a].subtype], collisions[a].subtype, collisions[a].x, collisions[a].y, false, (*it).type)) {
+                                OK = false;
                                 break;
                             }
                         }
-                        if(!OK)continue;
+                        if(!OK) continue;
 
-                        //run effects
-                        for(b=0;b<effect.effects.size();b++){
-                            run_effect(effect.effects[b],&map_main->creature[collisions[a].subtype],collisions[a].subtype,collisions[a].x,collisions[a].y,map_main->creature[collisions[a].subtype].rotation,false);
+                        for(b = 0; b < effect.effects.size(); b++) {
+                            run_effect(effect.effects[b], &map_main->creature[collisions[a].subtype], collisions[a].subtype, collisions[a].x, collisions[a].y, map_main->creature[collisions[a].subtype].rotation, false);
                         }
                     }
 
@@ -7146,7 +7150,7 @@ bool game_engine::use_item(int general_item_number,int *item_number_in_list, Mod
     bool OK=true;
     if(!unuse)
     for(b=0;b<effect.conditions.size();b++){
-        if(!check_condition(effect.conditions[b],&map_main->creature[0],0,player_middle_x,player_middle_y,mod.general_items[general_item_number].show_condition_help)){
+        if(!check_condition(effect.conditions[b],&map_main->creature[0],0,player_middle_x,player_middle_y,mod.general_items[general_item_number].show_condition_help, -1)){
             OK=false;
             break;
         }
@@ -7167,7 +7171,7 @@ bool game_engine::use_item(int general_item_number,int *item_number_in_list, Mod
             //check wield conditions for the proposed weapon
             bool OK=true;
             for(int d=0;d<mod.general_weapons[weapon_wear_effect.parameter1].wield_conditions.size();d++){
-                if(!check_condition(mod.general_weapons[weapon_wear_effect.parameter1].wield_conditions[d],&map_main->creature[0],0,player_middle_x,player_middle_y,false)){
+                if(!check_condition(mod.general_weapons[weapon_wear_effect.parameter1].wield_conditions[d],&map_main->creature[0],0,player_middle_x,player_middle_y,false, -1)){
                     OK=false;
                     break;
                 }
@@ -7506,7 +7510,7 @@ bool game_engine::run_effect(Mod::effect effect, creature_base *creature, int cr
                 //check wield conditions
                 bool OK=true;
                 for(int b=0;b<mod.general_weapons[effect.parameter1].wield_conditions.size();b++){
-                    if(!check_condition(mod.general_weapons[effect.parameter1].wield_conditions[b],&map_main->creature[0],0,player_middle_x,player_middle_y,false)){
+                    if(!check_condition(mod.general_weapons[effect.parameter1].wield_conditions[b],&map_main->creature[0],0,player_middle_x,player_middle_y,false, -1)){
                         OK=false;
                         break;
                     }
@@ -9017,56 +9021,98 @@ bool game_engine::run_effect(Mod::effect effect, creature_base *creature, int cr
             }
             break;
         case 70:
-            // Effect 70: Modify Sector/Subsector Tag
-            // p1 = tag identifier
-            // p2 = action (0: Off, 1: On, 2: Toggle)
-            // p3 = layer target (0: Subsector only, 1: Sector only, 2: Sector First, 3: Subsector First)
+            {
+                // Effect 70: Modify Sector/Subsector Tag
+                // p1 = tag identifier
+                // p2 = action (0: Off, 1: On, 2: Toggle)
+                // p3 = layer target (0: Subsector only, 1: Sector only, 2: Sector First, 3: Subsector First)
 
-            auto& tile = map_main->at_real(x, y);
-            int tag_id = (int)effect.parameter1;
-            int action = (int)effect.parameter2;
-            int layer_mode = (int)effect.parameter3;
+                auto& tile = map_main->at_real(x, y);
+                int tag_id = (int)effect.parameter1;
+                int action = (int)effect.parameter2;
+                int layer_mode = (int)effect.parameter3;
 
-            // Identify which instances to look for
-            int target_inst_id = -1;
+                // Identify which instances to look for
+                int target_inst_id = -1;
 
-            if (layer_mode == 0) { // Subsector only
-                target_inst_id = tile.sector_id;
-            } 
-            else if (layer_mode == 1) { // Sector only
-                target_inst_id = tile.subsector_id;
-            } 
-            else if (layer_mode == 2) { // Sector First (fallback to sub)
-                target_inst_id = (tile.sector_id > 0) ? tile.sector_id : tile.subsector_id;
-            } 
-            else if (layer_mode == 3) { // Subsector First (fallback to sector)
-                target_inst_id = (tile.subsector_id > 0) ? tile.subsector_id : tile.sector_id;
-            }
+                if (layer_mode == 0) { // Subsector only
+                    target_inst_id = tile.sector_id;
+                } 
+                else if (layer_mode == 1) { // Sector only
+                    target_inst_id = tile.subsector_id;
+                } 
+                else if (layer_mode == 2) { // Sector First (fallback to sub)
+                    target_inst_id = (tile.sector_id > 0) ? tile.sector_id : tile.subsector_id;
+                } 
+                else if (layer_mode == 3) { // Subsector First (fallback to sector)
+                    target_inst_id = (tile.subsector_id > 0) ? tile.subsector_id : tile.sector_id;
+                }
 
-            // Apply the change if a valid instance is found
-            if (target_inst_id > 0) {
-                for (auto& inst : map_main->sector_instances) {
-                    if (inst.id == target_inst_id) {
-                        if (tag_id >= 0 && tag_id < (int)inst.active_tags.size()) {
-                            bool old_val = inst.active_tags[tag_id];
-                            
-                            if (action == 0)      inst.active_tags[tag_id] = false;
-                            else if (action == 1) inst.active_tags[tag_id] = true;
-                            else if (action == 2) inst.active_tags[tag_id] = !inst.active_tags[tag_id];
+                // Apply the change if a valid instance is found
+                if (target_inst_id > 0) {
+                    for (auto& inst : map_main->sector_instances) {
+                        if (inst.id == target_inst_id) {
+                            if (tag_id >= 0 && tag_id < (int)inst.active_tags.size()) {
+                                bool old_val = inst.active_tags[tag_id];
+                                
+                                if (action == 0)      inst.active_tags[tag_id] = false;
+                                else if (action == 1) inst.active_tags[tag_id] = true;
+                                else if (action == 2) inst.active_tags[tag_id] = !inst.active_tags[tag_id];
 
-                            // Debug log to confirm which specific room was changed
-                            if (debugging) {
-                                printf("[Effect 70] Room: %s | Tag %d: %d -> %d\n", 
-                                    inst.custom_name.c_str(), tag_id, old_val, (int)inst.active_tags[tag_id]);
+                                // Debug log to confirm which specific room was changed
+                                if (debugging) {
+                                    printf("[Effect 70] Room: %s | Tag %d: %d -> %d\n", 
+                                        inst.custom_name.c_str(), tag_id, old_val, (int)inst.active_tags[tag_id]);
+                                }
                             }
+                            break; // Unique ID found, exit loop
                         }
-                        break; // Unique ID found, exit loop
                     }
                 }
+                return_value = true;
             }
-            return_value = true;
             break;
+        case 71:
+            {
+
+            // 71 = Set weighted random integer value (between parameter1 and parameter2) to bar parameter3. 
+            // parameter4 = distribution (0.5 = uniform, >0.5 gravitates to max, <0.5 gravitates to min)
+            if (!undo) {
+                if (creature->bars[(int)effect.parameter3].active) {
+                    // 1. Generate a normalized random value (0.0 to 1.0)
+                    float r = randDouble(0.0f, 1.0f);
+
+                    // 2. Apply Power Distribution
+                    // A distribution value of 0.5 results in an exponent of 1.0 (linear/uniform).
+                    // Values > 0.5 result in exponents < 1.0 (square root-ish), pushing 'r' toward 1.0.
+                    // Values < 0.5 result in exponents > 1.0 (squared-ish), pushing 'r' toward 0.0.
+                    float distribution = effect.parameter4;
+                    if (distribution <= 0.0f) distribution = 0.01f; // Prevent division by zero
+                    
+                    float exponent = (1.0f - distribution) / distribution;
+                    float weighted_r = pow(r, exponent);
+
+                    // 3. Scale to range [param1, param2] and round to nearest integer
+                    float range_val = effect.parameter1 + weighted_r * (effect.parameter2 - effect.parameter1);
+                    int final_val = static_cast<int>(floor(range_val + 0.5f));
+
+                    // 4. Set the bar value
+                    set_bar(creature, (int)effect.parameter3, (float)final_val);
+
+                    // 5. Caps to ensure bar stays within its defined min/max 
+                    if (creature->bars[(int)effect.parameter3].value < creature->bars[(int)effect.parameter3].minimum)
+                        set_bar(creature, (int)effect.parameter3, creature->bars[(int)effect.parameter3].minimum);
+                    if (creature->bars[(int)effect.parameter3].value > creature->bars[(int)effect.parameter3].maximum)
+                        set_bar(creature, (int)effect.parameter3, creature->bars[(int)effect.parameter3].maximum);
+
+                    return_value = true;
+                }
+            } else {
+                return_value = true;
             }
+        }
+    break;
+    }
 
 
     //we've done something, best to rearrange the item list
@@ -13756,9 +13802,6 @@ void game_engine::create_maps(void){
 }
 
 void game_engine::create_minimap(map *map_to_edit, int d){
-
-
-
     map_size_x=256;
     map_size_y=256;
 
@@ -13837,7 +13880,7 @@ void game_engine::calculate_weather(void){
                 //check conditions
                 bool OK=true;
                 for(b=0;b<effect.conditions.size();b++){
-                    if(!check_condition(effect.conditions[b],&map_main->creature[0],0,player_middle_x,player_middle_y,false)){
+                    if(!check_condition(effect.conditions[b],&map_main->creature[0],0,player_middle_x,player_middle_y,false,-1)){
                         OK=false;
                         break;
                     }
@@ -14020,7 +14063,8 @@ void game_engine::load_mod_names(const string& StartingPath)
 }
 
 void game_engine::spawn_creature(int side, int tactic, int tactic2, float x, float y, float angle, int type, map *map){
-
+    class map *old_map_main = map_main;
+    map_main = map;
     creature_base temp_creature;
     memset(&temp_creature, 0, sizeof(temp_creature));
 
@@ -14083,12 +14127,42 @@ void game_engine::spawn_creature(int side, int tactic, int tactic2, float x, flo
         }
     }*/
 
+printf("SPAWN: Creating creature type %d at (%.1f, %.1f)\n", type, x, y);
 
 
     AI_initiate_behavior_parameters(&temp_creature);
     map->creature.push_back(temp_creature);
+    // init block
+    int new_creature_idx = map->creature.size() - 1;
+        auto& c_ref = map->creature[new_creature_idx];
 
+        // Run the Init Block ONCE
+        auto& gen_creature = mod.general_creatures[type];
+        if (gen_creature.init_block.size() > 0) {
+            printf("SPAWN: Running %d init effects for %s\n", (int)gen_creature.init_block.size(), gen_creature.name.c_str());
+        }
+        for (int i = 0; i < gen_creature.init_block.size(); i++) {
+            auto& block = gen_creature.init_block[i];
 
+            // Check conditions
+            bool OK = true;
+            for (int b = 0; b < block.conditions.size(); b++) {
+                if (!check_condition(block.conditions[b], &c_ref, new_creature_idx, c_ref.x, c_ref.y, false, -1)) {
+                    OK = false;
+                    printf("SPAWN:  - Effect %d FAILED conditions.\n", gen_creature.init_block[i].effects[0].effect_number);
+                    break;
+                }
+            }
+
+            if (OK) {
+                printf("SPAWN:  - Effect %d PASSED conditions and is running.\n", gen_creature.init_block[i].effects[0].effect_number);
+                // Run effects
+                for (int b = 0; b < block.effects.size(); b++) {
+                    run_effect(block.effects[b], &c_ref, new_creature_idx, c_ref.x, c_ref.y, c_ref.rotation, false);
+                }
+            }
+        }
+    map_main = old_map_main;
 }
 
 void game_engine::set_edges(void){
@@ -15014,7 +15088,7 @@ int game_engine::translate_key_int(char key){
     return 0;
 }
 
-bool game_engine::check_condition(const Mod::condition& condition, const creature_base *creature, int creature_number, float x, float y, bool show_message){
+bool game_engine::check_condition(const Mod::condition& condition, const creature_base *creature, int creature_number, float x, float y, bool show_message, int current_weapon = -1) {
 
     unsigned int a,b,c;
 
@@ -15983,7 +16057,24 @@ bool game_engine::check_condition(const Mod::condition& condition, const creatur
             // If no sector exists at this tile, we treat all tags as "Off" (0)
             return (required_state == 0);
         }
-    break;
+        break;
+    case 48:
+        // 48 = current weapon hitting the creature is type parameter0 (negative = weapon class)
+        {
+            if (current_weapon == -1) return false;
+
+            // weapon class check
+            if (condition.condition_parameter0 < 0) {
+                if (mod.general_weapons[current_weapon].weapon_class != -(int)condition.condition_parameter0)
+                    return false;
+            }
+            // weapon type check
+            else {
+                if (current_weapon != (int)condition.condition_parameter0)
+                    return false;
+            }
+            return true;
+        }
     }
 
     return true;
@@ -16567,7 +16658,7 @@ void game_engine::run_script(int script_number, bool check_conditions, bool chec
                 //go throught all conditions
                 bool OK=true;
                 for(unsigned int b=0;b<mod.scripts[script_number].conditions.size();b++){
-                    if(!check_condition(mod.scripts[script_number].conditions[b],&map_main->creature[caller],caller,call_x,call_y,false)){
+                    if(!check_condition(mod.scripts[script_number].conditions[b],&map_main->creature[caller],caller,call_x,call_y,false,-1)){
                         OK=false;
                         break;
                     }
@@ -16588,7 +16679,7 @@ void game_engine::run_script(int script_number, bool check_conditions, bool chec
             //go throught all conditions
             bool OK=true;
             for(unsigned int b=0;b<mod.scripts[script_number].conditions.size();b++){
-                if(!check_condition(mod.scripts[script_number].conditions[b],&map_main->creature[caller],caller,call_x,call_y,false)){
+                if(!check_condition(mod.scripts[script_number].conditions[b],&map_main->creature[caller],caller,call_x,call_y,false,-1)){
                     OK=false;
                     break;
                 }
@@ -16752,7 +16843,7 @@ bool game_engine::run_plot_object(int item){
         //go throught all conditions
         bool OK=true;
         for(b=0;b<mod.general_plot_objects[map_main->items[item].item_type].effects[a].conditions.size();b++){
-            if(!check_condition(mod.general_plot_objects[map_main->items[item].item_type].effects[a].conditions[b],&map_main->creature[0],0,map_main->items[item].x+size*0.5f,map_main->items[item].y+size*0.5f,mod.general_plot_objects[map_main->items[item].item_type].show_condition_help)){
+            if(!check_condition(mod.general_plot_objects[map_main->items[item].item_type].effects[a].conditions[b],&map_main->creature[0],0,map_main->items[item].x+size*0.5f,map_main->items[item].y+size*0.5f,mod.general_plot_objects[map_main->items[item].item_type].show_condition_help, -1)){
                 OK=false;
                 break;
             }
@@ -17400,10 +17491,12 @@ void game_engine::initialize_creature_specialties(creature_base *creature, map *
         //add bars for creatures
         if(reset_bars)
         if(mod.general_creatures[creature->type].specialties[specialty].number==0){
-            creature->bars[(int)mod.general_creatures[creature->type].specialties[specialty].parameter0].value=mod.general_creatures[creature->type].specialties[specialty].parameter3;
-            creature->bars[(int)mod.general_creatures[creature->type].specialties[specialty].parameter0].minimum=mod.general_creatures[creature->type].specialties[specialty].parameter1;
-            creature->bars[(int)mod.general_creatures[creature->type].specialties[specialty].parameter0].maximum=mod.general_creatures[creature->type].specialties[specialty].parameter2;
-            creature->bars[(int)mod.general_creatures[creature->type].specialties[specialty].parameter0].active=true;
+            int bar_idx = (int)mod.general_creatures[creature->type].specialties[specialty].parameter0;
+            creature->bars[bar_idx].active = true;
+            creature->bars[bar_idx].kills_creature = true; // original lethal behavior
+            creature->bars[bar_idx].minimum = mod.general_creatures[creature->type].specialties[specialty].parameter1;
+            creature->bars[bar_idx].maximum = mod.general_creatures[creature->type].specialties[specialty].parameter2;
+            creature->bars[bar_idx].value = mod.general_creatures[creature->type].specialties[specialty].parameter3;
         }
 
         //add carried lights
@@ -17419,6 +17512,16 @@ void game_engine::initialize_creature_specialties(creature_base *creature, map *
         //force AI
         if(mod.general_creatures[creature->type].specialties[specialty].number==3){
             creature->force_AI=true;
+        }
+
+        // Bars for creatures, but not leathal
+        if(mod.general_creatures[creature->type].specialties[specialty].number == 6) {
+            int bar_idx = (int)mod.general_creatures[creature->type].specialties[specialty].parameter0;
+            creature->bars[bar_idx].active = true;
+            creature->bars[bar_idx].kills_creature = false;
+            creature->bars[bar_idx].minimum = mod.general_creatures[creature->type].specialties[specialty].parameter1;
+            creature->bars[bar_idx].maximum = mod.general_creatures[creature->type].specialties[specialty].parameter2;
+            creature->bars[bar_idx].value = mod.general_creatures[creature->type].specialties[specialty].parameter3;
         }
     }
 }

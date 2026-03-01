@@ -136,6 +136,7 @@ public:
         };
         std::vector <effect_block> eat_block;
         std::vector <effect_block> hit_block;
+        std::vector <effect_block> init_block;
 
         struct death_effect_block{
             int death_type;

@@ -42,6 +42,8 @@ Player;//name---------------------------------------
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -96,6 +98,8 @@ Toilet;//name--------------------------------------- **BATHROOM**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -144,6 +148,8 @@ Sink;//name--------------------------------------- **BATHROOM**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -229,6 +235,8 @@ Plant A;//name--------------------------------------- **PLANTS**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -326,6 +334,8 @@ Plant B;//name--------------------------------------- **PLANTS**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -423,6 +433,8 @@ Plant C;//name--------------------------------------- **PLANTS**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -520,6 +532,8 @@ Plant D;//name--------------------------------------- **PLANTS**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -597,6 +611,8 @@ Bin;//name--------------------------------------- **FURNITURE**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -674,6 +690,8 @@ Plastic chair;//name--------------------------------------- **FURNITURE**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -751,6 +769,8 @@ LCD;//name--------------------------------------- **FURNITURE**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -1048,6 +1068,8 @@ Drinks vending machine;//name--------------------------------------- **FURNITURE
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -1287,6 +1309,8 @@ Food vending machine;//name--------------------------------------- **FURNITURE**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -1364,6 +1388,8 @@ Office chair;//name--------------------------------------- **FURNITURE**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -1460,6 +1486,8 @@ Sofa Long;//name--------------------------------------- **FURNITURE**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -1547,6 +1575,8 @@ PC;//name--------------------------------------- **FURNITURE**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -1633,6 +1663,8 @@ Filing cabinet;//name--------------------------------------- **FURNITURE**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -1718,6 +1750,8 @@ Cubicle wall;//name--------------------------------------- **FURNITURE**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -1891,6 +1925,44 @@ Water cooler;//name--------------------------------------- **FURNITURE**
 					0.000000;//parameter4
 			end_effects;
 	end_hit_block
+	begin_init_block
+		begin_conditions;
+			12;//condition------------------------------IF DIFFICULTY IS EASY
+				2.000000;//condition parameter0
+				0.000000;//condition parameter1
+		end_conditions;
+		begin_effects;
+			71;//effect number----------------------SET RANDOM WATER LEVEL
+				0.000000;//parameter1
+				40.000000;//parameter2
+				1.000000;//parameter3
+				0.800000;//parameter4
+		end_effects;
+		begin_conditions;
+			12;//condition------------------------------IF DIFFICULTY IS NORMAL
+				2.000000;//condition parameter0
+				1.000000;//condition parameter1
+		end_conditions;
+		begin_effects;
+			71;//effect number----------------------SET RANDOM WATER LEVEL
+				0.000000;//parameter1
+				40.00000;//parameter2
+				1.000000;//parameter3
+				0.500000;//parameter4
+		end_effects;
+		begin_conditions;
+			12;//condition------------------------------IF DIFFICULTY IS HARD
+				2.000000;//condition parameter0
+				2.000000;//condition parameter1
+		end_conditions;
+		begin_effects;
+			71;//effect number----------------------SET RANDOM WATER LEVEL
+				0.000000;//parameter1
+				40.00000;//parameter2
+				1.000000;//parameter3
+				0.200000;//parameter4
+		end_effects;
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -1901,11 +1973,11 @@ Water cooler;//name--------------------------------------- **FURNITURE**
 			0.000000;//parameter2
 			0.000000;//parameter3
 		Water level;//description------------------- 
-			0;//number
+			6;//number
 			1.000000;//parameter0
 			0.000000;//parameter1
-			2000.100000;//parameter2
-			2000.100000;//parameter3
+			40.000000;//parameter2 ----------20l
+			0.000000;//parameter3 
 		Health;//description------------------- 
 			0;//number
 			0.000000;//parameter0
@@ -1977,6 +2049,8 @@ Metal Table 1;//name--------------------------------------- **FURNITURE TABLES**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -2045,6 +2119,8 @@ Metal Table 2;//name--------------------------------------- **FURNITURE TABLES**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -2123,6 +2199,8 @@ Wood Table 1;//name--------------------------------------- **FURNITURE TABLES**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -2213,6 +2291,8 @@ Wood Table 2;//name--------------------------------------- **FURNITURE TABLES**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -2303,6 +2383,8 @@ Wood Table 3;//name--------------------------------------- **FURNITURE TABLES**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -2393,6 +2475,8 @@ Wood Table 5;//name--------------------------------------- **FURNITURE TABLES**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -2473,6 +2557,8 @@ Metal Table 3;//name--------------------------------------- **FURNITURE TABLES**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 	end_timed_block
 	begin_specialties
@@ -2521,6 +2607,8 @@ Light;//name--------------------------------------- **LIGHTS**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
 		1000;//interval in milliseconds  ****NORMAL LIGHTS****
 			begin_conditions;
@@ -2674,71 +2762,9 @@ Light;//name--------------------------------------- **LIGHTS**
 	end_death_block
 	begin_hit_block
 	end_hit_block
+	begin_init_block
+	end_init_block
 	begin_timed_block
-		1000;//interval in milliseconds
-			begin_conditions;
-				12;//condition------------------------------IF DIFFICULTY IS EASY
-					2.000000;//condition parameter0
-					0.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				63;//effect number----------------------SET RANDOM WATER LEVEL
-					0.100000;//parameter1
-					2000.100000;//parameter2
-					1.000000;//parameter3
-					0.000000;//parameter4
-				15;//effect number----------------------TURN INTO REGULAR WATER COOLER CREATURE
-					310.000000;//parameter1
-					-1.000000;//parameter2
-					-1.000000;//parameter3
-					1.000000;//parameter4
-			end_effects;
-		1000;//interval in milliseconds
-			begin_conditions;
-				12;//condition------------------------------IF DIFFICULTY IS NORMAL
-					2.000000;//condition parameter0
-					1.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				11;//effect number----------------------LOWER MAXIMUM WATER LEVEL
-					1.000000;//parameter1
-					-500.000000;//parameter2
-					0.000000;//parameter3
-					0.000000;//parameter4
-				63;//effect number----------------------SET RANDOM WATER LEVEL
-					0.100000;//parameter1
-					1500.100000;//parameter2
-					1.000000;//parameter3
-					0.000000;//parameter4
-				15;//effect number----------------------TURN INTO REGULAR WATER COOLER CREATURE
-					310.000000;//parameter1
-					-1.000000;//parameter2
-					-1.000000;//parameter3
-					1.000000;//parameter4
-			end_effects;
-		1000;//interval in milliseconds
-			begin_conditions;
-				12;//condition------------------------------IF DIFFICULTY IS NORMAL
-					2.000000;//condition parameter0
-					2.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				11;//effect number----------------------LOWER MAXIMUM WATER LEVEL
-					1.000000;//parameter1
-					-1000.000000;//parameter2
-					0.000000;//parameter3
-					0.000000;//parameter4
-				63;//effect number----------------------SET RANDOM WATER LEVEL
-					0.100000;//parameter1
-					1000.100000;//parameter2
-					1.000000;//parameter3
-					0.000000;//parameter4
-				15;//effect number----------------------TURN INTO REGULAR WATER COOLER CREATURE
-					310.000000;//parameter1
-					-1.000000;//parameter2
-					-1.000000;//parameter3
-					1.000000;//parameter4
-			end_effects;
 	end_timed_block
 	begin_specialties
 		No AI;//description-------------------
@@ -2775,7 +2801,7 @@ Specialities:
 3 = Force this creature's AI to be calculated always
 4 = Prevent collision detection for this creature, parameter0 (1=prevent plot_object collision detection), parameter1 (1=prevent creature collision detection), parameter2 (1=prevent bullet collision detection), parameter3 (1=prevent prop collision detection)
 5 = Force this creature's AI to be never calculated (prefer setting this as the first specialty, use this for every creature that doesn't need AI)
-
+6 = Has bar parameter0 from bars.dat with minimum parameter1 and maximum parameter2 and current value of parameter3 (Does not die if bar reaches minimum)
 
 Creature Block Templates
 

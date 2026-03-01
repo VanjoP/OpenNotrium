@@ -701,6 +701,42 @@ void Mod::load_creature_info(const string& filename){//loads object info from fi
                 temp_creature.hit_block.push_back(temp_effect);
             }
 
+            // --- init block ---
+            temp_creature.init_block.clear();
+            stripped_fgets(rivi, sizeof(rivi), fil); // Consumes "begin_init_block"
+
+            char* current_line;
+            // Read next line and check for "end_init_block"
+            while ((current_line = stripped_fgets(rivi, sizeof(rivi), fil)) != NULL && strcmp(current_line, "end_init_block") != 0) {
+                // If we are here, current_line is "begin_conditions"
+                general_creatures_base::effect_block temp_effect;
+
+                // 1. Parse Conditions
+                // We must call stripped_fgets again inside the while condition to get the first parameter
+                while ((current_line = stripped_fgets(rivi, sizeof(rivi), fil)) != NULL && strcmp(current_line, "end_conditions") != 0) {
+                    Mod::condition temp_cond;
+                    temp_cond.condition_number = atoi(current_line);
+                    temp_cond.condition_parameter0 = atof(stripped_fgets(rivi, sizeof(rivi), fil));
+                    temp_cond.condition_parameter1 = atof(stripped_fgets(rivi, sizeof(rivi), fil));
+                    temp_effect.conditions.push_back(temp_cond);
+                }
+
+                // 2. Parse Effects
+                stripped_fgets(rivi, sizeof(rivi), fil); // Consumes "begin_effects"
+                while ((current_line = stripped_fgets(rivi, sizeof(rivi), fil)) != NULL && strcmp(current_line, "end_effects") != 0) {
+                    Mod::effect temp_eff;
+                    temp_eff.effect_number = atoi(current_line);
+                    temp_eff.parameter1 = atof(stripped_fgets(rivi, sizeof(rivi), fil));
+                    temp_eff.parameter2 = atof(stripped_fgets(rivi, sizeof(rivi), fil));
+                    temp_eff.parameter3 = atof(stripped_fgets(rivi, sizeof(rivi), fil));
+                    temp_eff.parameter4 = atof(stripped_fgets(rivi, sizeof(rivi), fil));
+                    temp_effect.effects.push_back(temp_eff);
+                }
+                
+                // Add this completed Condition/Effect pair to the init list
+                temp_creature.init_block.push_back(temp_effect);
+            }
+
             //timed block
             temp_creature.timed_block.clear();
             stripped_fgets(rivi,sizeof(rivi),fil);

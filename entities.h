@@ -234,7 +234,7 @@ public:
         //int number;
         float value;
         float minimum,maximum;
-
+        bool kills_creature;
     };
     bar_base bars[maximum_bars];
 
