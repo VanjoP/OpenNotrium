@@ -771,3 +771,9 @@ end_of_file;
 
 maximum amount of bars is 100
 bar types 1 and 4 work both ways, if you change the amount of the bar with effect 4, the respective values change
+
+GENERIC BARS FOR CREATURES
+//WATER: 1
+//STOCK: 2
+//DO NOT USE: 90 // BREAKS THE GAME
+//DIALOG: 91

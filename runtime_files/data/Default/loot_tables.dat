@@ -1,0 +1,17 @@
+begin_table;
+    Vending_Snacks;//name
+    0;//ID
+    begin_items;
+        850;// Item ID ---- [CHOCOLATE BAR]
+			40;Weight
+		851;// Item ID ---- [PROTEIN BAR]
+			20;Weight
+		852;// Item ID ---- [ENERGY BAR]
+			10;Weight
+		853;// Item ID ---- [SALTY CHIPS]
+			40;Weight
+	    854;// Item ID ---- [SPICY CHIPS]
+			30;Weight
+    end_items;
+end_table;
+end_of_file;

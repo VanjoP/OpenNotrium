@@ -6,4 +6,60 @@ Player;//name-----------------------PLAYER ENGINEER START-----------------------
 	0.6;//text color r
 	1;//text color g
 	0;//text color b//}
+Vending Machine Food - Slogans;//name-----------------------VENDING MACHINE FOOD---------------------------
+	100;//identifier
+	Quick bites for a busy shift;//text
+	2500;//duration
+	-1;//next dialog line (-1=none)
+	0.6;//text color r
+	1;//text color g
+	0;//text color b
+Vending Machine Food - Slogans;//name
+	101;//identifier
+	Your break-room favorite, always ready!;//text
+	2500;//duration
+	-1;//next dialog line (-1=none)
+	0.6;//text color r
+	1;//text color g
+	0;//text color b
+Vending Machine Food - Slogans;//name
+	102;//identifier
+	Fresh snacks to fuel your workday!;//text
+	2500;//duration
+	-1;//next dialog line (-1=none)
+	0.6;//text color r
+	1;//text color g
+	0;//text color b
+Vending Machine Food - Slogans;//name
+	103;//identifier
+	Grab, go, and get back to it!;//text
+	2500;//duration
+	-1;//next dialog line (-1=none)
+	0.6;//text color r
+	1;//text color g
+	0;//text color b
+Vending Machine Food - Slogans;//name
+	104;//identifier
+	Dispensing complete. Thank you for your hard work and have a great day!;//text
+	4000;//duration
+	-1;//next dialog line (-1=none)
+	0.6;//text color r
+	1;//text color g
+	0;//text color b
+Vending Machine - No more stock;//name-----------------------VENDING MACHINE---------------------------
+	105;//identifier
+	Out of Stock!;//text
+	2000;//duration
+	106;//next dialog line (-1=none)
+	1;//text color r
+	0.3;//text color g
+	0.3;//text color b
+Vending Machine - No more stock;//name
+	106;//identifier
+	Quartermaster has been notified!;//text
+	4000;//duration
+	-1;//next dialog line (-1=none)
+	1;//text color r
+	0.3;//text color g
+	0.3;//text color b
 end_of_file;

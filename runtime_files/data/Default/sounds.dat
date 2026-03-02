@@ -16,4 +16,28 @@ Snore;//name------------
 Light switch;//name------------
   5;//identifier
   light_switch.wav;//filename 
+Error beep;//name------------
+  6;//identifier
+  error_0.wav;//filename 
+Button Press;//name------------
+  7;//identifier
+  button_press_0.wav;//filename 
+Vending machine Done;//name------------
+  600;//identifier
+  vending_machine_done.wav;//filename 
+Vending machine Food Slogan 1;//name------------
+  601;//identifier
+  vending_machine_food_0.wav;//filename 
+Vending machine Food Slogan 2;//name------------
+  602;//identifier
+  vending_machine_food_1.wav;//filename 
+Vending machine Food Slogan 3;//name------------
+  603;//identifier
+  vending_machine_food_2.wav;//filename 
+Vending machine Food Slogan 4;//name------------
+  604;//identifier
+  vending_machine_food_3.wav;//filename 
+Vending machine Food Done;//name------------
+  605;//identifier
+  vending_machine_food_done.wav;//filename 
 end_of_file;

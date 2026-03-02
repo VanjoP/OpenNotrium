@@ -25,6 +25,9 @@ eat_chips.wav (https://freesound.org/people/fresco/sounds/48933/) Attribution 4.
 wake_up_yawn.wav (https://freesound.org/people/Larakaa/sounds/503483/) Attribution 4.0
 snore.wav (https://freesound.org/people/passAirmangrace/sounds/340876/) Attribution 3.0
 announcement.wav (https://freesound.org/people/chimerical/sounds/105228/) Attribution NonCommercial 4.0
+vending_machine.wav by theplax -- https://freesound.org/s/547388/ -- License: Attribution 4.0
+button_press_0 by ccovi -- https://freesound.org/s/718693/ -- License: Creative Commons 0
+error_0.wav by Splashdust -- https://freesound.org/s/67454/ -- License: Creative Commons 0
 
 inventory.wav?
 

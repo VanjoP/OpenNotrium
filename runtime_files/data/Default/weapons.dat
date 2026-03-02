@@ -364,7 +364,7 @@ Metal rod;//name--------------------------------------- PRE-CHECK!
 			0.000000;//parameter3
 			0.000000;//parameter4
 	end_hit_effects;
-(HELPER) Drink water from source;//name---------------------------------------
+(HELPER) Use Object;//name---------------------------------------
 	1000;//identifier
 	40;//class
 	qliquid.png;//bullet texture

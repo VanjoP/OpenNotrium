@@ -271,6 +271,7 @@ Metal rod;//name--------------------------------------- **WEAPONS**
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 			end_conditions;
 			begin_effects;
@@ -446,6 +447,7 @@ Makeshift stun prod;//name--------------------------------------- **WEAPONS**
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 			end_conditions;
 			begin_effects;
@@ -623,6 +625,7 @@ Makeshift stun gun;//name---------------------------------------[WEAPONS]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 			end_conditions;
 			begin_effects;
@@ -663,6 +666,7 @@ Water;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not Thirsty
 					1.000000;//condition parameter0
@@ -719,6 +723,7 @@ Empty bottle;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 			end_conditions;
 			begin_effects;
@@ -789,6 +794,7 @@ Pow - soft drink;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not Thirsty
 					1.000000;//condition parameter0
@@ -845,6 +851,7 @@ SIP - soft drink;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not Thirsty
 					1.000000;//condition parameter0
@@ -901,6 +908,7 @@ Illusion - vitamin beverage;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not Thirsty
 					1.000000;//condition parameter0
@@ -957,6 +965,7 @@ Assassin - energy drink;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not Thirsty
 					1.000000;//condition parameter0
@@ -1013,6 +1022,7 @@ Xhaustion Xterminator - energy drink;//name-------------------------------------
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not Thirsty
 					1.000000;//condition parameter0
@@ -1069,6 +1079,7 @@ Apple juice;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not Thirsty
 					1.000000;//condition parameter0
@@ -1125,6 +1136,7 @@ Orange juice;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not Thirsty
 					1.000000;//condition parameter0
@@ -1181,6 +1193,7 @@ Chocolate bar;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not hungry
 					5.000000;//condition parameter0
@@ -1237,6 +1250,7 @@ Protein bar;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not hungry
 					5.000000;//condition parameter0
@@ -1293,6 +1307,7 @@ Energy bar;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not hungry
 					5.000000;//condition parameter0
@@ -1349,6 +1364,7 @@ Salty chips;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not hungry
 					5.000000;//condition parameter0
@@ -1405,6 +1421,7 @@ Spicy chips;//name---------------------------------------[FOOD]
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition------------------------------If Not hungry
 					5.000000;//condition parameter0
@@ -1462,6 +1479,7 @@ Punch;//name--------------------------------------- **WEAPONS**
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 			end_conditions;
 			begin_effects;
@@ -1474,7 +1492,7 @@ Punch;//name--------------------------------------- **WEAPONS**
 	end_effects_block;
 	begin_combinations;
 	end_combinations;
-(ACTION) Drink water from source;//name--------------------------------------- **HELPERS**
+(ACTION) Use Object;//name--------------------------------------- **HELPERS**
 	1000;//identifier
 	1;//item class
 	0.000000;//weight
@@ -1491,40 +1509,35 @@ Punch;//name--------------------------------------- **WEAPONS**
 	begin_wield_slots;
 	end_wield_slots;
 	begin_effects_block;
-		Trying to drink from water source...;//event text
-		You can't drink water at this time.;//event failure text
+		Trying to use something in front of you...;//event text
+		You are already doing something.;//event failure text
 		click1.wav;//sound, none for nothing
 		0;//vanishes after event, 0=no, 1=yes
 		-1;//use key
-		K;//quick key
+		E;//quick key
+		Use object in front of you;//Key description
 		begin_conditions;		
 			5;//condition number----------------------ACTIVITY MUST BE BELOW 0
 				2.000000;//condition parameter0
 				0.000000;//condition parameter1
-			43;//condition number----------------------FULLNESS MUST BE BELOW 100%
-				3.000000;//condition parameter0
-				100.000000;//condition parameter1
-			43;//condition number----------------------HYDRATION MUST BE BELOW 100%
-				1.000000;//condition parameter0
-				100.000000;//condition parameter1
 		end_conditions;
 		begin_effects;
-			4;//effect number------------------------------Set Activity
-				4.000000;//parameter1
-				0.00000;//parameter2
-				2.000000;//parameter3
-				0.000000;//parameter4
 			11;//effect number------------------------------Set Max Activity
 				2.000000;//parameter1
 				4.000000;//parameter2
 				0.000000;//parameter3
+				0.000000;//parameter4
+			4;//effect number------------------------------Set Activity
+				4.000000;//parameter1
+				0.00000;//parameter2
+				2.000000;//parameter3
 				0.000000;//parameter4
 			59;//effect number--------------------------------Use (HELPER) Item Consumption Item Script
 				1002.000000;//parameter1
 				0.000000;//parameter2
 				0.000000;//parameter3
 				0.000000;//parameter4
-			19;//effect number--------------------------------Drop "(SCRIPT) Use Item: (HELPER) Drink water from source" Plot object
+			19;//effect number--------------------------------Drop "(SCRIPT) Use Item: (HELPER) USE OBJECT" Plot object
 				802.000000;//parameter1
 				0.100000;//parameter2
 				0.000000;//parameter3
@@ -1555,7 +1568,8 @@ Punch;//name--------------------------------------- **WEAPONS**
     use.wav;//sound, none for nothing 
     0;//vanishes after event, 0=no, 1=yes 
     -1;//use key 
-    V;//quick key 
+    V;//quick key
+		;//Key description 
     begin_conditions; 
     end_conditions; 
     begin_effects; 
@@ -1591,6 +1605,7 @@ Punch;//name--------------------------------------- **WEAPONS**
 			0;//vanishes after event, 0=no, 1=yes
 			U;//use key
 			-1;//quick key
+		;//Key description
 			begin_conditions;
 			end_conditions;
 			begin_effects;
@@ -1646,6 +1661,7 @@ Punch;//name--------------------------------------- **WEAPONS**
     0;vanishes after event, 0=no, 1=yes
     U;//use key
     -1;//quick key
+		;//Key description
     begin_conditions;
     end_conditions;
     begin_effects;
@@ -1676,6 +1692,7 @@ Punch;//name--------------------------------------- **WEAPONS**
 		0;//vanishes after event, 0=no, 1=yes
 		-1;//use key
 		-1;//quick key
+		;//Key description
 		begin_conditions;		
 		end_conditions;
 		begin_effects;
@@ -1711,6 +1728,7 @@ Punch;//name--------------------------------------- **WEAPONS**
 		0;//vanishes after event, 0=no, 1=yes
 		-1;//use key
 		X;//quick key
+		;//Key description
 			begin_conditions;
 			end_conditions;
 			begin_effects;
@@ -1726,6 +1744,7 @@ Punch;//name--------------------------------------- **WEAPONS**
 		0;//vanishes after event, 0=no, 1=yes
 		-1;//use key
 		I;//quick key
+		;//Key description
 			begin_conditions;
 			end_conditions;
 			begin_effects;
@@ -1761,6 +1780,7 @@ Punch;//name--------------------------------------- **WEAPONS**
 		0;//vanishes after event, 0=no, 1=yes
 		-1;//use key
 		Z;//quick key
+		;//Key description
 			begin_conditions;
 				43;//condition number----------------------ENERGY MUST BE BELOW 25%
 					6.000000;//condition parameter0

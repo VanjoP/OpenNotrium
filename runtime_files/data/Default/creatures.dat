@@ -788,13 +788,13 @@ LCD;//name--------------------------------------- **FURNITURE**
 			120.000000;//parameter3
 		Screen Glow;//description
 			2;//number
-			4.000000;//parameter0
+			51.000000;//parameter0
 			0.300000;//parameter1
 			0.300000;//parameter2
 			0.000000;//parameter3
 	end_specialties
 Drinks vending machine;//name--------------------------------------- **FURNITURE**
-	303;//identifier//{
+	303;//identifier
 	1;//class
 	creature_vending_1.png;//texture
 	0;//draw layer
@@ -1087,7 +1087,7 @@ Drinks vending machine;//name--------------------------------------- **FURNITURE
 			200.000000;//parameter3	
 	end_specialties
 Food vending machine;//name--------------------------------------- **FURNITURE**
-	304;//identifier//{
+	304;//identifier
 	1;//class
 	creature_vending_0.png;//texture
 	0;//draw layer
@@ -1103,7 +1103,7 @@ Food vending machine;//name--------------------------------------- **FURNITURE**
 	1.200000;//creature size
 	50.000000;//creature weight (affects pushing)
 	0.000000;//maximum movement speed
-	0.000000;//$minimum movement speed
+	0.000000;//minimum movement speed
 	0.000000;//leg animation speed
 	0.000000;//turn speed
 	0.000000;//inertia level (acceleration/deceleration)
@@ -1112,7 +1112,7 @@ Food vending machine;//name--------------------------------------- **FURNITURE**
 	0.000000;//weapon_x
 	0.000000;//weapon_y
 	0;//blood particle
-	0;//bars visible when player hovers mouse on top
+	1;//bars visible when player hovers mouse on top
 	1.000000;//death animation speed
 	0;//creature can move from area to another
 	0.000000;//AI hear range
@@ -1178,140 +1178,205 @@ Food vending machine;//name--------------------------------------- **FURNITURE**
 			end_effects;
 		0;//death type, 0=any death, 1=timed death, 2=killed by player----------------------DROP CHOCOLATE BAR (RANDOM CHANCE)
 			begin_conditions;
-				8;//condition number----------------------RANDOM CHANCE
-					2.000000;//condition parameter0
-					0.000000;//condition parameter1
 			end_conditions;
 			begin_effects;
-				3;//effect number----------------------DROP ITEM (CHOCOLATE BAR)
-					850.000000;//parameter1
-					1.000000;//parameter2
-					25.000000;//parameter3
-					0.000000;//parameter4			
-			end_effects;
-		0;//death type, 0=any death, 1=timed death, 2=killed by player----------------------DROP CHOCOLATE BAR (RANDOM CHANCE)
-			begin_conditions;
-				8;//condition number----------------------RANDOM CHANCE
-					3.000000;//condition parameter0
-					0.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				3;//effect number----------------------DROP ITEM (CHOCOLATE BAR)
-					850.000000;//parameter1
-					1.000000;//parameter2
-					25.000000;//parameter3
-					0.000000;//parameter4			
-			end_effects;
-		0;//death type, 0=any death, 1=timed death, 2=killed by player----------------------DROP PROTEIN BAR (RANDOM CHANCE)
-			begin_conditions;
-				8;//condition number----------------------RANDOM CHANCE
-					2.000000;//condition parameter0
-					0.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				3;//effect number----------------------DROP ITEM (PROTEIN BAR)
-					851.000000;//parameter1
-					1.000000;//parameter2
-					25.000000;//parameter3
-					0.000000;//parameter4			
-			end_effects;
-		0;//death type, 0=any death, 1=timed death, 2=killed by player----------------------DROP PROTEIN BAR (RANDOM CHANCE)
-			begin_conditions;
-				8;//condition number----------------------RANDOM CHANCE
-					3.000000;//condition parameter0
-					0.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				3;//effect number----------------------DROP ITEM (PROTEIN BAR)
-					851.000000;//parameter1
-					1.000000;//parameter2
-					25.000000;//parameter3
-					0.000000;//parameter4			
-			end_effects;
-		0;//death type, 0=any death, 1=timed death, 2=killed by player----------------------DROP ENERGY BAR (RANDOM CHANCE)
-			begin_conditions;
-				8;//condition number----------------------RANDOM CHANCE
-					3.000000;//condition parameter0
-					0.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				3;//effect number----------------------DROP ITEM (ENERGY BAR)
-					852.000000;//parameter1
-					1.000000;//parameter2
-					25.000000;//parameter3
-					0.000000;//parameter4			
-			end_effects;
-		0;//death type, 0=any death, 1=timed death, 2=killed by player----------------------DROP ENERGY BAR (RANDOM CHANCE)
-			begin_conditions;
-				8;//condition number----------------------RANDOM CHANCE
-					4.000000;//condition parameter0
-					0.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				3;//effect number----------------------DROP ITEM (ENERGY BAR)
-					852.000000;//parameter1
-					1.000000;//parameter2
-					25.000000;//parameter3
-					0.000000;//parameter4			
-			end_effects;
-		0;//death type, 0=any death, 1=timed death, 2=killed by player----------------------DROP SALTY CHIPS (RANDOM CHANCE)
-			begin_conditions;
-				8;//condition number----------------------RANDOM CHANCE
-					2.000000;//condition parameter0
-					0.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				3;//effect number----------------------DROP ITEM (SALTY CHIPS)
-					853.000000;//parameter1
-					1.000000;//parameter2
-					25.000000;//parameter3
-					0.000000;//parameter4			
-			end_effects;
-		0;//death type, 0=any death, 1=timed death, 2=killed by player----------------------DROP SALTY CHIPS (RANDOM CHANCE)
-			begin_conditions;
-				8;//condition number----------------------RANDOM CHANCE
-					3.000000;//condition parameter0
-					0.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				3;//effect number----------------------DROP ITEM (SALTY CHIPS)
-					853.000000;//parameter1
-					1.000000;//parameter2
-					25.000000;//parameter3
-					0.000000;//parameter4			
-			end_effects;
-		0;//death type, 0=any death, 1=timed death, 2=killed by player----------------------DROP SPICY CHIPS (RANDOM CHANCE)
-			begin_conditions;
-				8;//condition number----------------------RANDOM CHANCE
-					2.000000;//condition parameter0
-					0.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				3;//effect number----------------------DROP ITEM (SPICY CHIPS)
-					854.000000;//parameter1
-					1.000000;//parameter2
-					25.000000;//parameter3
-					0.000000;//parameter4			
-			end_effects;
-		0;//death type, 0=any death, 1=timed death, 2=killed by player----------------------DROP SPICY CHIPS (RANDOM CHANCE)
-			begin_conditions;
-				8;//condition number----------------------RANDOM CHANCE
-					3.000000;//condition parameter0
-					0.000000;//condition parameter1
-			end_conditions;
-			begin_effects;
-				3;//effect number----------------------DROP ITEM (SPICY CHIPS)
-					854.000000;//parameter1
-					1.000000;//parameter2
+				72;//effect number----------------------DROP LOOT TABLE ITEMS (VENDING SNACKS GROUP)
+					0.000000;//parameter1
+					2.000000;//parameter2
 					25.000000;//parameter3
 					0.000000;//parameter4			
 			end_effects;
 	end_death_block
 	begin_hit_block
+		begin_conditions;
+			48;//condition number----------------------MUST BE HIT BY "USE OBJECT" WEAPON
+				1000.000000;//condition parameter0
+				0.000000;//condition parameter1
+			3;//condition number----------------------MUST HAVE AT LEAST SOME STOCK LEFT
+				2.000000;//condition parameter0
+				1.000000;//condition parameter1
+		end_conditions;
+		begin_effects;
+			14;//effect number----------------------PLAY SOUND "BUTTON PRESS"
+				7.000000;//parameter1
+				1.000000;//parameter2
+				0.000000;//parameter3
+				0.000000;//parameter4	
+			14;//effect number----------------------PLAY SOUND "VENDING MACHINE"
+				600.000000;//parameter1
+				1.000000;//parameter2
+				0.000000;//parameter3
+				0.000000;//parameter4	
+			4;//effect number----------------------DECREASE CREATURES STOCK LEVEL
+				-1.000000;//parameter1
+				1.000000;//parameter2
+				2.000000;//parameter3
+				0.000000;//parameter4
+		82;//effect number----------------------DROP BOUND PLOT OBJECT "(HELPER) Food Vending machine delayed item spawn"
+				2000.000000;//parameter1
+				0.000000;//parameter2
+				0.000000;//parameter3
+				-1.000000;//parameter4
+		end_effects;
+		begin_conditions;
+			38;//condition number----------------------IF STOCK IS EMPTY
+				2.000000;//condition parameter0
+				0.000000;//condition parameter1
+		end_conditions;
+		begin_effects;
+			14;//effect number----------------------PLAY SOUND "ERROR BEEP"
+				6.000000;//parameter1
+				1.000000;//parameter2
+				0.000000;//parameter3
+				0.000000;//parameter4	
+			47;//effect number----------------------PLAY DIALOG "VENDING MACHINE NO STOCK"
+				105.000000;//parameter1
+				0.000000;//parameter2
+				0.000000;//parameter3
+				0.000000;//parameter4	
+		end_effects;
 	end_hit_block
 	begin_init_block
+		begin_conditions;
+			12;//condition------------------------------IF DIFFICULTY IS EASY
+				2.000000;//condition parameter0
+				0.000000;//condition parameter1
+		end_conditions;
+		begin_effects;
+			71;//effect number----------------------SET RANDOM STOCK LEVEL
+				0.000000;//parameter1
+				20.000000;//parameter2
+				2.000000;//parameter3
+				0.800000;//parameter4
+		end_effects;
+		begin_conditions;
+			12;//condition------------------------------IF DIFFICULTY IS NORMAL
+				2.000000;//condition parameter0
+				1.000000;//condition parameter1
+		end_conditions;
+		begin_effects;
+			71;//effect number----------------------SET RANDOM STOCK LEVEL
+				0.000000;//parameter1
+				20.00000;//parameter2
+				2.000000;//parameter3
+				0.500000;//parameter4
+		end_effects;
+		begin_conditions;
+			12;//condition------------------------------IF DIFFICULTY IS HARD
+				2.000000;//condition parameter0
+				2.000000;//condition parameter1
+		end_conditions;
+		begin_effects;
+			71;//effect number----------------------SET RANDOM STOCK LEVEL
+				0.000000;//parameter1
+				20.00000;//parameter2
+				2.000000;//parameter3
+				0.100000;//parameter4
+		end_effects;
 	end_init_block
 	begin_timed_block
+	60000;//interval in milliseconds  ****CHOOSE VOICELINE****
+			begin_conditions;
+			end_conditions;
+			begin_effects;
+				63;//effect number----------------------CHOOSE RANDOM VOICE LINE
+					0.000000;//parameter1
+					10.000000;//parameter2
+					91.000000;//parameter3
+					0.000000;//parameter4
+			end_effects;
+	30000;//interval in milliseconds  ****CHOOSE VOICELINE****
+			begin_conditions;
+			38;//condition------------------------------IF VOICE LINE BAR IS 0
+				91.000000;//condition parameter0
+				0.000000;//condition parameter1
+			end_conditions;
+			begin_effects;
+				14;//effect number----------------------PLAY VENDING SLOGAN SOUND
+					601.000000;//parameter1
+					0.150000;//parameter2
+					0.000000;//parameter3
+					0.000000;//parameter4
+				47;//effect number----------------------PLAY VENDING SLOGAN SOUND
+					100.000000;//parameter1
+					0.000000;//parameter2
+					0.000000;//parameter3
+					0.000000;//parameter4
+				17;//effect number----------------------RESET VOICE LINE
+					10.000000;//parameter1
+					0.000000;//parameter2
+					91.000000;//parameter3
+					0.000000;//parameter4
+			end_effects;
+	30000;//interval in milliseconds  ****CHOOSE VOICELINE****
+			begin_conditions;
+			38;//condition------------------------------IF VOICE LINE BAR IS 1
+				91.000000;//condition parameter0
+				1.000000;//condition parameter1
+			end_conditions;
+			begin_effects;
+				14;//effect number----------------------PLAY VENDING SLOGAN SOUND
+					602.000000;//parameter1
+					0.150000;//parameter2
+					0.000000;//parameter3
+					0.000000;//parameter4
+				47;//effect number----------------------PLAY VENDING SLOGAN SOUND
+					101.000000;//parameter1
+					0.000000;//parameter2
+					0.000000;//parameter3
+					0.000000;//parameter4
+				17;//effect number----------------------RESET VOICE LINE
+					10.000000;//parameter1
+					0.000000;//parameter2
+					91.000000;//parameter3
+					0.000000;//parameter4
+			end_effects;
+	30000;//interval in milliseconds  ****CHOOSE VOICELINE****
+			begin_conditions;
+			38;//condition------------------------------IF VOICE LINE BAR IS 2
+				91.000000;//condition parameter0
+				2.000000;//condition parameter1
+			end_conditions;
+			begin_effects;
+				14;//effect number----------------------PLAY VENDING SLOGAN SOUND
+					603.000000;//parameter1
+					0.150000;//parameter2
+					0.000000;//parameter3
+					0.000000;//parameter4
+				47;//effect number----------------------PLAY VENDING SLOGAN SOUND
+					102.000000;//parameter1
+					0.000000;//parameter2
+					0.000000;//parameter3
+					0.000000;//parameter4
+				17;//effect number----------------------RESET VOICE LINE
+					10.000000;//parameter1
+					0.000000;//parameter2
+					91.000000;//parameter3
+					0.000000;//parameter4
+			end_effects;
+	30000;//interval in milliseconds  ****CHOOSE VOICELINE****
+			begin_conditions;
+			38;//condition------------------------------IF VOICE LINE BAR IS 3
+				91.000000;//condition parameter0
+				3.000000;//condition parameter1
+			end_conditions;
+			begin_effects;
+				14;//effect number----------------------PLAY VENDING SLOGAN SOUND
+					604.000000;//parameter1
+					0.150000;//parameter2
+					0.000000;//parameter3
+					0.000000;//parameter4
+				47;//effect number----------------------PLAY VENDING SLOGAN SOUND
+					103.000000;//parameter1
+					0.000000;//parameter2
+					0.000000;//parameter3
+					0.000000;//parameter4
+				17;//effect number----------------------RESET VOICE LINE
+					10.000000;//parameter1
+					0.000000;//parameter2
+					90.000000;//parameter3
+					0.000000;//parameter4
+			end_effects;
 	end_timed_block
 	begin_specialties
 		No AI;//description-------------------
@@ -1326,9 +1391,27 @@ Food vending machine;//name--------------------------------------- **FURNITURE**
 			0.000000;//parameter1
 			200.000000;//parameter2
 			200.000000;//parameter3	
+		Stock;//description------------------- 
+			6;//number
+			2.000000;//parameter0
+			0.000000;//parameter1
+			20.000000;//parameter2
+			0.000000;//parameter3	
+		Voice lines;//description------------------- 
+			6;//number
+			91.000000;//parameter0
+			0.000000;//parameter1
+			10.000000;//parameter2
+			10.000000;//parameter3	
+		Light glow;//description------------------- 
+			2;//number
+			50.000000;//parameter0
+			1.000000;//parameter1
+			1.000000;//parameter2
+			0.000000;//parameter3	
 	end_specialties
 Office chair;//name--------------------------------------- **FURNITURE**
-	305;//identifier//{
+	305;//identifier
 	1;//class
 	creature_chair_1.png;//texture
 	0;//draw layer
@@ -1860,12 +1943,18 @@ Water cooler;//name--------------------------------------- **FURNITURE**
 	end_death_block
 	begin_hit_block
 		begin_conditions;
-			48;//condition number----------------------MUST BE HIT BY "DRINK WATER FROM SOURCE" WEAPON
+			48;//condition number----------------------MUST BE HIT BY "USE OBJECT" WEAPON
 				1000.000000;//condition parameter0
 				0.000000;//condition parameter1
 			3;//condition number----------------------MUST HAVE AT LEAST SOME WATER LEFT
 				1.000000;//condition parameter0
 				1.000000;//condition parameter1
+			49;//condition number----------------------FULLNESS MUST BE BELOW 100%
+				3.000000;//condition parameter0
+				100.000000;//condition parameter1
+			49;//condition number----------------------HYDRATION MUST BE BELOW 100%
+				1.000000;//condition parameter0
+				100.000000;//condition parameter1
 		end_conditions;
 			begin_effects;
 				14;//effect number----------------------PLAY SOUND "DRINK"

@@ -49,8 +49,8 @@ Ceeling light low;//name-------
 	0.15;//green color component
 	0.45;//blue color component
 	0.4;//alpha color component
-	1;//light intensity
-	1;//light softness
+	1.2;//light intensity
+	0.8;//light softness
 	-1;//flash particle (-1=nothing)
 		0;//flashing speed
 		0;//particle life time   
@@ -82,6 +82,34 @@ Taser;//name-------
 	20;//flash particle (-1=nothing)
 		20;//flashing speed
 		150;//particle life time   
+Vending machine glow;//name-------
+	50;//identifier
+	light2.png;//texture
+	0;//type, 0=flashlight, 1=omni
+	0.1;//pulse speed
+	1;//red color component
+	0.85;//green color component
+	0.5;//blue color component
+	0.4;//alpha color component
+	2.0;//light intensity
+	0.5;//light softness
+	-1;//flash particle (-1=nothing)
+		0;//flashing speed
+		0;//particle life time   
+LCD glow;//name-------
+	51;//identifier
+	light2.png;//texture
+	0;//type, 0=flashlight, 1=omni
+	0.5;//pulse speed
+	0.25;//red color component
+	0.85;//green color component
+	1;//blue color component
+	0.4;//alpha color component
+	2.0;//light intensity
+	0.8;//light softness
+	-1;//flash particle (-1=nothing)
+		0;//flashing speed
+		0;//particle life time   
 Door Green Omni;//name-------
 	100;//identifier
 	light1.png;//texture
